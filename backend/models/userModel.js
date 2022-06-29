@@ -29,11 +29,11 @@ const User = db.define(
       type: Sequelize.ENUM('Project Lead', 'Project Manager', 'Team Member', 'None'),
       defaultValue: 'None',
     },
-    admin: {
+    isAdmin: {
       type: Sequelize.BOOLEAN,
       defaultValue: false,
     },
-    accActive: {
+    isActiveAcc: {
       type: Sequelize.BOOLEAN,
       defaultValue: true,
     },
@@ -83,7 +83,7 @@ User.sync().then(() => console.log('User table created.'));
       name: process.env.DEFAULT_ADMIN_NAME,
       email: process.env.DEFAULT_ADMIN_EMAIL,
       password: process.env.DEFAULT_ADMIN_PASSWORD,
-      admin: true,
+      isAdmin: true,
     });
 })();
 

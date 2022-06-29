@@ -36,6 +36,40 @@ const userReducer = (state, action) => {
       return { ...state, isLoading: false, message: action.payload.message };
     }
 
+    case 'LOGIN_USER_SUCCESS': {
+      const { id, name, isAdmin, accessToken } = action.payload;
+      return { ...state, isLoading: false, id, name, isAdmin, accessToken };
+    }
+
+    case 'LOGIN_USER_FAIL': {
+      return { ...state, isLoading: false, message: action.payload.message };
+    }
+
+    case 'GET_ALL_USER_SUCCESS': {
+      return { ...state, isLoading: false, users: action.payload };
+    }
+
+    case 'GET_ALL_USER_FAIL': {
+      return { ...state, isLoading: false, message: action.payload.message };
+    }
+
+    case 'UPDATE_USER_SUCCESS': {
+      const { name, userGroup, isAdmin, isActiveAcc, message } = action.payload;
+      return {
+        ...state,
+        isLoading: false,
+        name,
+        userGroup,
+        isAdmin,
+        isActiveAcc,
+        message,
+      };
+    }
+
+    case 'UPDATE_USER_FAIL': {
+      return { ...state, isLoading: false, message: action.payload.message };
+    }
+
     default:
       return initialState;
   }
@@ -54,22 +88,6 @@ const UserProvider = ({ children }) => {
     };
     localStorage.setItem('userData', JSON.stringify(updatedUserData));
   };
-
-  const checkRefreshToken = useCallback(async () => {
-    try {
-      const response = await fetch(`/api/users/refresh_token`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      const data = await response.json();
-      const { accessToken } = data;
-      if (!response.ok) throw new Error(data.message);
-
-      dispatch({ type: 'REFRESH_TOKEN_SUCCESS', payload: { accessToken } });
-    } catch (e) {}
-  }, []);
 
   const signup = async ({ name, email, password }) => {
     dispatch({ type: 'IS_LOADING' });
@@ -98,12 +116,103 @@ const UserProvider = ({ children }) => {
     }
   };
 
+  const login = async ({ email, password }) => {
+    dispatch({ type: 'IS_LOADING' });
+    try {
+      const response = await fetch(`/api/users/login`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+      const { id, name, isAdmin, accessToken } = data;
+      if (!response.ok) throw new Error(data.message);
+
+      dispatch({
+        type: 'LOGIN_USER_SUCCESS',
+        payload: { id, name, isAdmin, accessToken },
+      });
+
+      addUserDataToLocalStorage(id, name);
+      clearAlert();
+    } catch (e) {
+      dispatch({ type: 'LOGIN_USER_FAIL', payload: e });
+      clearAlert();
+    }
+  };
+
+  const checkRefreshToken = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/users/refresh_token`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      const data = await response.json();
+      const { accessToken } = data;
+
+      if (!response.ok) throw new Error(data.message);
+
+      dispatch({ type: 'REFRESH_TOKEN_SUCCESS', payload: { accessToken } });
+    } catch (e) {}
+  }, []);
+
+  const getAllUsers = async (accessToken) => {
+    dispatch({ type: 'IS_LOADING' });
+    try {
+      const response = await fetch(`/api/users/all`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+      dispatch({ type: 'GET_ALL_USER_SUCCESS', payload: data });
+
+      clearAlert();
+    } catch (e) {
+      dispatch({ type: 'GET_ALL_USER_FAIL', payload: e });
+      clearAlert();
+    }
+  };
+
+  const updateUser = async ({ id, name, userGroup, isAdmin, isActiveAcc, message }) => {
+    dispatch({ type: 'IS_LOADING' });
+    try {
+      const response = await fetch(`/api/users/all`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, name, userGroup, isAdmin, isActiveAcc, message }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+
+      dispatch({ type: 'UPDATE_USER_SUCCESS', payload: data });
+
+      clearAlert();
+    } catch (e) {
+      dispatch({ type: 'UPDATE_USER_FAIL', payload: e });
+      clearAlert();
+    }
+  };
+
   return (
     <UserContext.Provider
       value={{
         ...userState,
-        checkRefreshToken,
         signup,
+        login,
+        checkRefreshToken,
+        getAllUsers,
+        updateUser,
       }}
     >
       {children}

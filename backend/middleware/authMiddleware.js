@@ -1,12 +1,18 @@
 const { verify } = require('jsonwebtoken');
+const HttpError = require('../models/http-error');
 
-const authMiddleware = (req) => {
-  const authorization = req.headers['authorization'];
-  if (!authorization) throw new Error('You need to login');
-
-  const token = authorization.split(' ')[1];
-  const { userId } = verify(token, process.env.JWT_SECRET);
-  return userId;
+const authMiddleware = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return next(new HttpError('Please authenticate.', 401));
+  const token = authHeader.split(' ')[1];
+  try {
+    const { userId } = verify(token, process.env.JWT_SECRET);
+    req.user = { userId };
+    next();
+  } catch (e) {
+    console.log(e);
+    return next(new HttpError('Please refresh and login again.', 401));
+  }
 };
 
-module.exports = { authMiddleware };
+module.exports = authMiddleware;

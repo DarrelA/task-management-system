@@ -1,0 +1,40 @@
+@import '../index.css';
+
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 3rem;
+  margin: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  border-radius: 14px;
+  background-color: var(--primary-400);
+  justify-self: center;
+  align-self: center;
+}
+
+.list {
+  width: 48rem;
+  height: 48rem;
+}
+
+.card:first-letter {
+  text-transform: uppercase;
+}
+
+.card .content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+/************************/
+/* QUERIES */
+/************************/
+
+/* @media (max-width: 116em) {
+  .small {
+    width: 44rem;
+    height: 48rem;
+  }
+} */
