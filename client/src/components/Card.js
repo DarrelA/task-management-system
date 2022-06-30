@@ -1,12 +1,14 @@
 import classes from './Card.module.css';
 
-const Card = ({ children, type }) => {
+const Card = ({ children, options = ['card'] }) => {
   /*
   Card type : Page            : Component
   List      : UserManagement : UserFields
   */
 
-  return <div className={`${classes.card} ${classes[`${type}`]}`}>{children}</div>;
+  const classesOptions = options.map((option) => `${classes[`${option}`]}`);
+
+  return <div className={[...classesOptions].join(' ')}>{children}</div>;
 };
 
 export default Card;

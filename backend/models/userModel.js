@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const db = require('../config/db');
+const mockUsers = require('../config/mockUsers');
 
 const User = db.define(
   'user',
@@ -72,19 +73,29 @@ User.prototype.sendRefreshToken = function (res, refreshToken) {
   });
 };
 
-User.sync().then(() => console.log('User table created.'));
+User.sync().then(() => {
+  console.log('User table created.\n\n');
+  createData();
+});
 
-(async () => {
+const createData = async () => {
   const defaultAdmin = await User.findOne({
     where: { email: process.env.DEFAULT_ADMIN_EMAIL },
   });
+
   if (!defaultAdmin)
-    User.create({
-      name: process.env.DEFAULT_ADMIN_NAME,
-      email: process.env.DEFAULT_ADMIN_EMAIL,
-      password: process.env.DEFAULT_ADMIN_PASSWORD,
-      isAdmin: true,
-    });
-})();
+    User.bulkCreate(
+      [
+        {
+          name: process.env.DEFAULT_ADMIN_NAME,
+          email: process.env.DEFAULT_ADMIN_EMAIL,
+          password: process.env.DEFAULT_ADMIN_PASSWORD,
+          isAdmin: true,
+        },
+        ...mockUsers,
+      ],
+      { individualHooks: true }
+    );
+};
 
 module.exports = User;

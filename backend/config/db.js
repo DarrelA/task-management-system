@@ -10,6 +10,9 @@ module.exports = new Sequelize(
   {
     host: 'localhost',
     dialect: 'mysql',
+    dialectOptions: {
+      connectTimeout: 60000,
+    },
 
     pool: {
       max: 5,

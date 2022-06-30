@@ -160,7 +160,7 @@ const UserProvider = ({ children }) => {
     } catch (e) {}
   }, []);
 
-  const getAllUsers = async (accessToken) => {
+  const getAllUsers = useCallback(async (accessToken) => {
     dispatch({ type: 'IS_LOADING' });
     try {
       const response = await fetch(`/api/users/all`, {
@@ -180,7 +180,7 @@ const UserProvider = ({ children }) => {
       dispatch({ type: 'GET_ALL_USER_FAIL', payload: e });
       clearAlert();
     }
-  };
+  }, []);
 
   const updateUser = async ({ id, name, userGroup, isAdmin, isActiveAcc, message }) => {
     dispatch({ type: 'IS_LOADING' });
