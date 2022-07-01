@@ -1,134 +1,118 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import useUserContext from '../context/userContext';
+import { useGlobalFilter, useSortBy, useTable } from 'react-table';
 
 const UserManagement = () => {
   const userContext = useUserContext();
   const { accessToken, isLoading, message, getAllUsers, users } = userContext;
 
   const [usersList, setUsersList] = useState(null);
-  const [indexToEdit, setIndexToEdit] = useState(-1);
+  const [addFormData, setAddFormData] = useState({ name: '', email: '', usergroup: '' });
 
   useEffect(() => {
-    if (accessToken) getAllUsers(accessToken);
-    if (users) setUsersList(users);
-  }, [accessToken, getAllUsers, JSON.stringify(users)]);
+    accessToken && getAllUsers(accessToken);
+  }, [accessToken, getAllUsers]);
+
+  useMemo(() => {
+    users && setUsersList(users);
+  }, [users]);
+
+  const columns = useMemo(
+    () => [
+      { Header: '#', id: 'index', accessor: (_row, i) => i + 1 },
+      { Header: 'Name', accessor: 'name' },
+      { Header: 'Email', accessor: 'email' },
+      { Header: 'User Group', accessor: 'userGroup' },
+      { Header: 'Admin', accessor: (data) => data.isAdmin.toString() },
+      { Header: 'Active', accessor: (data) => data.isActiveAcc.toString() },
+      {
+        Header: 'Edit',
+        accessor: 'id',
+        Cell: ({ value }) => (
+          <div>
+            <button onClick={() => editHandler(value)}>Edit</button>
+          </div>
+        ),
+      },
+    ],
+    []
+  );
+
+  function editHandler(row) {
+    console.log(row);
+  }
+
+  const Table = () => {
+    // Use the state and functions returned from useTable to build your UI
+    const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable(
+      { columns, data: usersList }
+    );
+
+    // Render the UI for your table
+    return (
+      <table {...getTableProps()}>
+        <thead>
+          {headerGroups.map((headerGroup) => (
+            <tr {...headerGroup.getHeaderGroupProps()}>
+              {headerGroup.headers.map((column) => (
+                <th {...column.getHeaderProps()}>{column.render('Header')}</th>
+              ))}
+            </tr>
+          ))}
+        </thead>
+        <tbody {...getTableBodyProps()}>
+          {rows.map((row, i) => {
+            prepareRow(row);
+            return (
+              <tr {...row.getRowProps()}>
+                {row.cells.map((cell) => {
+                  return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>;
+                })}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    );
+  };
+
+  const formSubmitHandler = (e) => {
+    e.preventDefault();
+    console.log('@TODO: Take logic from SignupLogin.js');
+  };
 
   const inputHandler = (e) =>
-    setUsersList({ ...usersList, [e.target.id]: e.target.value.trim() });
-
-  const listAllUsers = usersList?.map((user, i) => {
-    return (
-      <tr key={user.id}>
-        <td>{i + 1}</td>
-        <td>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={user.name}
-            disabled={i !== indexToEdit}
-            onChange={(e) => {
-              let editedUsers = [...users];
-              console.log(editedUsers[indexToEdit].target);
-              editedUsers[indexToEdit].target.value = e.currentTarget;
-              setUsersList(editedUsers);
-            }}
-            onBlur={() => setIndexToEdit(-1)}
-          />
-        </td>
-        <td>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={user.email}
-            disabled={i !== indexToEdit}
-            onChange={(val) => {
-              let editedUsers = [...users];
-              editedUsers[indexToEdit] = val;
-              setUsersList(editedUsers);
-            }}
-            onBlur={() => setIndexToEdit(-1)}
-          />
-        </td>
-        <td>
-          <select
-            id="usergroup"
-            name="usergroup"
-            value={user.userGroup}
-            disabled={i !== indexToEdit}
-            onChange={(val) => {
-              let editedUsers = [...users];
-              editedUsers[indexToEdit] = val;
-              setUsersList(editedUsers);
-            }}
-            onBlur={() => setIndexToEdit(-1)}
-          >
-            <option value="Project Lead">Project Lead</option>
-            <option value="Project Manager">Project Manager</option>
-            <option value="Team Member">Team Member</option>
-            <option value="None">None</option>
-          </select>
-        </td>
-        <td>
-          <select
-            id="isadmin"
-            name="isadmin"
-            value={user.isAdmin}
-            disabled={i !== indexToEdit}
-            onChange={(val) => {
-              let editedUsers = [...users];
-              editedUsers[indexToEdit] = val;
-              setUsersList(editedUsers);
-            }}
-            onBlur={() => setIndexToEdit(-1)}
-          >
-            <option value="true">true</option>
-            <option value="false">false</option>
-          </select>
-        </td>
-        <td>
-          <select
-            id="isactiveacc"
-            name="isactiveacc"
-            value={user.isActiveAcc}
-            disabled={i !== indexToEdit}
-            onChange={(val) => {
-              let editedUsers = [...users];
-              editedUsers[indexToEdit] = val;
-              setUsersList(editedUsers);
-            }}
-            onBlur={() => setIndexToEdit(-1)}
-          >
-            <option value="true">true</option>
-            <option value="false">false</option>
-          </select>
-        </td>
-        <td>
-          <button onClick={() => setIndexToEdit(i)}>Edit</button>
-        </td>
-      </tr>
-    );
-  });
+    setAddFormData({ ...addFormData, [e.target.id]: e.target.value.trim() });
 
   if (isLoading) return <p>Loading...</p>;
 
   return (
-    <div className="container center">
-      <table>
-        <thead>
-          <tr>
-            <th>{'No'}</th>
-            <th>{'Name'}</th>
-            <th>{'Email'}</th>
-            <th>{'User Group'}</th>
-            <th>{'Admin'}</th>
-            <th>{'Active'}</th>
-          </tr>
-        </thead>
-        <tbody>{listAllUsers}</tbody>
-      </table>
-    </div>
+    <>
+      <form onSubmit={formSubmitHandler}>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          placeholder="Name"
+          onChange={inputHandler}
+        />
+        <input
+          type="email"
+          id="email"
+          name="email"
+          placeholder="Email"
+          onChange={inputHandler}
+        />
+        <input
+          type="text"
+          name="usergroup"
+          placeholder="User Group"
+          onChange={inputHandler}
+        />
+        <button type="submit">Create Account</button>
+      </form>
+      {usersList && <Table />}
+    </>
   );
 };
 
