@@ -79,7 +79,7 @@ const getAllUsers = async (req, res, next) => {
   try {
     const users = await User.findAll({
       attributes: {
-        exclude: ['password', 'refreshToken', 'createdAt', 'updatedAt'],
+        exclude: ['password', 'refreshToken', 'updatedAt'],
       },
     });
     res.send(users);

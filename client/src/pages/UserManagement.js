@@ -1,118 +1,115 @@
 import { useEffect, useMemo, useState } from 'react';
+import MaterialTable from 'material-table';
+import { ThemeProvider, createTheme } from '@mui/material';
+import { toast } from 'react-toastify';
+
 import useUserContext from '../context/userContext';
-import { useGlobalFilter, useSortBy, useTable } from 'react-table';
 
 const UserManagement = () => {
+  const defaultMaterialTheme = createTheme();
   const userContext = useUserContext();
   const { accessToken, isLoading, message, getAllUsers, users } = userContext;
-
   const [usersList, setUsersList] = useState(null);
-  const [addFormData, setAddFormData] = useState({ name: '', email: '', usergroup: '' });
+
+  const initialState = {
+    name: '',
+    email: '',
+    usergroup: '',
+    isActive: '',
+    isActiveAcc: '',
+  };
+  const [newRowData, setNewRowData] = useState(initialState);
+  const [updateOldRow, setUpdateOldRow] = useState(initialState);
 
   useEffect(() => {
+    if (!!message) toast.error(message);
     accessToken && getAllUsers(accessToken);
-  }, [accessToken, getAllUsers]);
+  }, [message, accessToken, getAllUsers]);
 
   useMemo(() => {
     users && setUsersList(users);
   }, [users]);
 
-  const columns = useMemo(
-    () => [
-      { Header: '#', id: 'index', accessor: (_row, i) => i + 1 },
-      { Header: 'Name', accessor: 'name' },
-      { Header: 'Email', accessor: 'email' },
-      { Header: 'User Group', accessor: 'userGroup' },
-      { Header: 'Admin', accessor: (data) => data.isAdmin.toString() },
-      { Header: 'Active', accessor: (data) => data.isActiveAcc.toString() },
-      {
-        Header: 'Edit',
-        accessor: 'id',
-        Cell: ({ value }) => (
-          <div>
-            <button onClick={() => editHandler(value)}>Edit</button>
-          </div>
-        ),
+  const columns = [
+    {
+      title: 'Created At',
+      field: 'createdAt',
+      defaultSort: 'desc',
+      filtering: false,
+      editable: 'never',
+      render: (rowData) => {
+        const options = {
+          weekday: 'short',
+          year: '2-digit',
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+        };
+        return new Date(rowData.createdAt).toLocaleString('en-US', options);
       },
-    ],
-    []
-  );
+    },
+    { title: 'Name', field: 'name' },
+    { title: 'Email', field: 'email', initialEditValue: '@company.com' },
+    { title: 'User Group', field: 'userGroup' },
+    {
+      title: 'Admin',
+      field: 'isAdmin',
+      lookup: { true: 'true', false: 'false' },
+      initialEditValue: false,
+    },
+    {
+      title: 'Active Account',
+      field: 'isActiveAcc',
+      lookup: { true: 'true', false: 'false' },
+      initialEditValue: true,
+    },
+  ];
 
-  function editHandler(row) {
-    console.log(row);
-  }
-
-  const Table = () => {
-    // Use the state and functions returned from useTable to build your UI
-    const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable(
-      { columns, data: usersList }
-    );
-
-    // Render the UI for your table
-    return (
-      <table {...getTableProps()}>
-        <thead>
-          {headerGroups.map((headerGroup) => (
-            <tr {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map((column) => (
-                <th {...column.getHeaderProps()}>{column.render('Header')}</th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody {...getTableBodyProps()}>
-          {rows.map((row, i) => {
-            prepareRow(row);
-            return (
-              <tr {...row.getRowProps()}>
-                {row.cells.map((cell) => {
-                  return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>;
-                })}
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    );
-  };
-
-  const formSubmitHandler = (e) => {
-    e.preventDefault();
+  const newRowHandler = (newRow) => {
+    setNewRowData({ ...newRow });
     console.log('@TODO: Take logic from SignupLogin.js');
   };
+  console.log(newRowData);
 
-  const inputHandler = (e) =>
-    setAddFormData({ ...addFormData, [e.target.id]: e.target.value.trim() });
+  const oldRowHandler = (oldRow) => {
+    setUpdateOldRow({ ...oldRow });
+    console.log('@TODO: Take logic from SignupLogin.js');
+  };
+  console.log(updateOldRow);
 
   if (isLoading) return <p>Loading...</p>;
 
   return (
-    <>
-      <form onSubmit={formSubmitHandler}>
-        <input
-          type="text"
-          id="name"
-          name="name"
-          placeholder="Name"
-          onChange={inputHandler}
+    <ThemeProvider theme={defaultMaterialTheme}>
+      {usersList && (
+        <MaterialTable
+          title="Update Users"
+          columns={columns}
+          data={usersList}
+          editable={{
+            onRowAdd: (newRow) =>
+              new Promise((resolve, reject) => {
+                newRowHandler(newRow);
+                resolve();
+              }),
+            onRowUpdate: (newRow, oldRow) =>
+              new Promise((resolve, reject) => {
+                oldRowHandler(oldRow);
+                resolve();
+              }),
+          }}
+          options={{
+            filtering: true,
+            pageSize: 10,
+            pageSizeOptions: [10, 25, 50],
+            emptyRowsWhenPaging: false,
+            addRowPosition: 'first',
+            actionsColumnIndex: -1,
+          }}
         />
-        <input
-          type="email"
-          id="email"
-          name="email"
-          placeholder="Email"
-          onChange={inputHandler}
-        />
-        <input
-          type="text"
-          name="usergroup"
-          placeholder="User Group"
-          onChange={inputHandler}
-        />
-        <button type="submit">Create Account</button>
-      </form>
-      {usersList && <Table />}
-    </>
+      )}
+    </ThemeProvider>
   );
 };
 
