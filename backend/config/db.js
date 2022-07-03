@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-module.exports = new Sequelize(
+const sequelize = new Sequelize(
   process.env.MYSQL_DB_NAME,
   process.env.MYSQL_USER,
   process.env.MYSQL_PASSWORD,
@@ -13,12 +13,7 @@ module.exports = new Sequelize(
     dialectOptions: {
       connectTimeout: 60000,
     },
-
-    pool: {
-      max: 5,
-      min: 0,
-      acquire: 30000,
-      idle: 10000,
-    },
   }
 );
+
+module.exports = sequelize;

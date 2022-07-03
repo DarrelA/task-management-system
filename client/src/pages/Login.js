@@ -10,56 +10,32 @@ const initialState = {
   confirmPassword: '',
 };
 
-const Signup = () => {
+const Login = () => {
   const userContext = useUserContext();
-  const { isLoading, id, message } = userContext;
+  const { isLoading, message, accessToken, isAdmin } = userContext;
   const [formData, setFormData] = useState(initialState);
-  const [registerPage, showRegisterPage] = useState(false);
+  const [updateProfilePage, setUpdateProfilePage] = useState(false);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isLoading && !!id) navigate('/');
+    if (!isLoading && !!accessToken && isAdmin) navigate('/usermanagement');
+    else if (!isLoading && !!accessToken) navigate('/');
     if (!!message) toast.error(message);
-  }, [isLoading, id, navigate, message]);
+  }, [isLoading, accessToken, isAdmin, navigate, message]);
 
   const inputHandler = (e) =>
     setFormData({ ...formData, [e.target.id]: e.target.value.trim() });
 
   const submitHandler = (e) => {
     e.preventDefault();
-
-    if (registerPage) {
-      // @TODO: Form input validation after checking backend validation
-      // if (formData.password.length <= 7)
-      //   return toast.error('Password needs to have at least 7 characters.');
-      // if (formData.password !== formData.confirmPassword)
-      //   return toast.error('Password does not match!');
-
-      userContext.signup(formData);
-    } else userContext.login(formData);
+    userContext.login(formData);
   };
-
-  const registerPageHandler = () => showRegisterPage((prevState) => !prevState);
 
   return (
     <section className="container center" id="cta">
       <form className="form" onSubmit={submitHandler}>
-        <h2>{registerPage ? 'Register' : 'Login'}</h2>
-        {registerPage && (
-          <div>
-            <label htmlFor="name">Full Name</label>
-            <input
-              type="text"
-              name="name"
-              id="name"
-              placeholder="Mong Kong"
-              required
-              onChange={inputHandler}
-            />
-          </div>
-        )}
-
+        <h2>{updateProfilePage ? 'Update' : 'Login'}</h2>
         <div>
           <label htmlFor="email">Email</label>
           <input
@@ -83,7 +59,7 @@ const Signup = () => {
           />
         </div>
 
-        {registerPage && (
+        {updateProfilePage && (
           <div>
             <label htmlFor="confirmPassword">Confirm Password</label>
             <input
@@ -96,19 +72,12 @@ const Signup = () => {
           </div>
         )}
 
-        <button className="btn btn--form">{registerPage ? 'Register' : 'Login'}</button>
-
-        <p>
-          {registerPage ? 'Already a member?' : 'Not a member yet?'}
-          <button
-            className="btn btn--form btn--small"
-            type="button"
-            onClick={registerPageHandler}
-          >{`${registerPage ? 'Go to Login' : 'Sign up now!'}`}</button>
-        </p>
+        <button className="btn btn--form">
+          {updateProfilePage ? 'Update' : 'Login'}
+        </button>
       </form>
     </section>
   );
 };
 
-export default Signup;
+export default Login;

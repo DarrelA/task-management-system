@@ -2,10 +2,11 @@ const Sequelize = require('sequelize');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-const db = require('../config/db');
+const sequelize = require('../config/db');
 const mockUsers = require('../config/mockUsers');
+const mockGroups = require('../config/mockGroups');
 
-const User = db.define(
+const User = sequelize.define(
   'user',
   {
     id: {
@@ -25,10 +26,6 @@ const User = db.define(
     password: {
       type: Sequelize.STRING,
       allowNull: false,
-    },
-    userGroup: {
-      type: Sequelize.ENUM('Project Lead', 'Project Manager', 'Team Member', 'None'),
-      defaultValue: 'None',
     },
     isAdmin: {
       type: Sequelize.BOOLEAN,
@@ -73,17 +70,37 @@ User.prototype.sendRefreshToken = function (res, refreshToken) {
   });
 };
 
-User.sync().then(() => {
-  console.log('User table created.\n\n');
-  createData();
+const Group = sequelize.define('group', {
+  name: {
+    type: Sequelize.STRING,
+    primaryKey: true,
+  },
 });
+
+const User_Group = sequelize.define('user_group', {
+  id: {
+    type: Sequelize.UUID,
+    defaultValue: Sequelize.UUIDV4,
+    primaryKey: true,
+  },
+  name: {
+    type: Sequelize.STRING,
+    allowNull: false,
+    primaryKey: true,
+  },
+});
+
+User.belongsToMany(Group, { through: User_Group });
+Group.belongsToMany(User, { through: User_Group });
+
+sequelize.sync().then(() => createData());
 
 const createData = async () => {
   const defaultAdmin = await User.findOne({
     where: { email: process.env.DEFAULT_ADMIN_EMAIL },
   });
 
-  if (!defaultAdmin)
+  if (!defaultAdmin) {
     User.bulkCreate(
       [
         {
@@ -96,6 +113,8 @@ const createData = async () => {
       ],
       { individualHooks: true }
     );
+    Group.bulkCreate([...mockGroups]);
+  }
 };
 
-module.exports = User;
+module.exports = { User, Group, User_Group };

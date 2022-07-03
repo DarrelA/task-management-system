@@ -1,4 +1,4 @@
-import SignupLogin from './SignupLogin.js';
+import Login from './Login.js';
 import UserManagement from './UserManagement.js';
 
-export { SignupLogin, UserManagement };
+export { Login, UserManagement };

@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import 'react-toastify/dist/ReactToastify.css';
 import useUserContext from './context/userContext';
-import { SignupLogin, UserManagement } from './pages/index.js';
+import { Login, UserManagement } from './pages/index.js';
 
 const App = () => {
   const { checkRefreshToken } = useUserContext();
@@ -14,7 +14,7 @@ const App = () => {
   return (
     <Routes>
       <Route path="/" element={<div>'Landing page</div>} />
-      <Route path="/signup" element={<SignupLogin />} />
+      <Route path="/login" element={<Login />} />
       <Route path="/usermanagement" element={<UserManagement />} />
       {/* <Route path="*" element={<NotFound />} /> */}
     </Routes>

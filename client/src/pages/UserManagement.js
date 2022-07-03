@@ -8,21 +8,13 @@ import useUserContext from '../context/userContext';
 const UserManagement = () => {
   const defaultMaterialTheme = createTheme();
   const userContext = useUserContext();
-  const { accessToken, isLoading, message, getAllUsers, users } = userContext;
+  const { accessToken, isLoading, message, getAllUsers, users, createUser, updateUser } =
+    userContext;
   const [usersList, setUsersList] = useState(null);
 
-  const initialState = {
-    name: '',
-    email: '',
-    usergroup: '',
-    isActive: '',
-    isActiveAcc: '',
-  };
-  const [newRowData, setNewRowData] = useState(initialState);
-  const [updateOldRow, setUpdateOldRow] = useState(initialState);
-
   useEffect(() => {
-    if (!!message) toast.error(message);
+    if (message === 'success') toast.success(message, { autoClose: 300 });
+    else if (!!message) toast.error(message);
     accessToken && getAllUsers(accessToken);
   }, [message, accessToken, getAllUsers]);
 
@@ -53,30 +45,12 @@ const UserManagement = () => {
     { title: 'Email', field: 'email', initialEditValue: '@company.com' },
     { title: 'User Group', field: 'userGroup' },
     {
-      title: 'Admin',
-      field: 'isAdmin',
-      lookup: { true: 'true', false: 'false' },
-      initialEditValue: false,
-    },
-    {
       title: 'Active Account',
       field: 'isActiveAcc',
       lookup: { true: 'true', false: 'false' },
       initialEditValue: true,
     },
   ];
-
-  const newRowHandler = (newRow) => {
-    setNewRowData({ ...newRow });
-    console.log('@TODO: Take logic from SignupLogin.js');
-  };
-  console.log(newRowData);
-
-  const oldRowHandler = (oldRow) => {
-    setUpdateOldRow({ ...oldRow });
-    console.log('@TODO: Take logic from SignupLogin.js');
-  };
-  console.log(updateOldRow);
 
   if (isLoading) return <p>Loading...</p>;
 
@@ -90,16 +64,18 @@ const UserManagement = () => {
           editable={{
             onRowAdd: (newRow) =>
               new Promise((resolve, reject) => {
-                newRowHandler(newRow);
+                createUser(newRow, accessToken);
                 resolve();
               }),
             onRowUpdate: (newRow, oldRow) =>
               new Promise((resolve, reject) => {
-                oldRowHandler(oldRow);
+                console.log(newRow);
+                updateUser(newRow, accessToken);
                 resolve();
               }),
           }}
           options={{
+            search: false,
             filtering: true,
             pageSize: 10,
             pageSizeOptions: [10, 25, 50],
