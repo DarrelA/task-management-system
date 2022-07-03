@@ -183,7 +183,7 @@ const UserProvider = ({ children }) => {
     }
   };
 
-  const updateUser = async ({ id, name, userGroup, isActiveAcc }, accessToken) => {
+  const updateUser = async ({ id, name, email, userGroup, isActiveAcc }, accessToken) => {
     dispatch({ type: 'IS_LOADING' });
     try {
       const response = await fetch(`/api/users/updateuser`, {
@@ -193,7 +193,7 @@ const UserProvider = ({ children }) => {
           'Content-Type': 'application/json',
           authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ id, name, userGroup, isActiveAcc }),
+        body: JSON.stringify({ id, name, email, userGroup, isActiveAcc }),
       });
 
       const data = await response.json();

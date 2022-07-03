@@ -62,17 +62,8 @@ const UserManagement = () => {
           columns={columns}
           data={usersList}
           editable={{
-            onRowAdd: (newRow) =>
-              new Promise((resolve, reject) => {
-                createUser(newRow, accessToken);
-                resolve();
-              }),
-            onRowUpdate: (newRow, oldRow) =>
-              new Promise((resolve, reject) => {
-                console.log(newRow);
-                updateUser(newRow, accessToken);
-                resolve();
-              }),
+            onRowAdd: async (newRow) => await createUser(newRow, accessToken),
+            onRowUpdate: async (newRow, oldRow) => await updateUser(newRow, accessToken),
           }}
           options={{
             search: false,

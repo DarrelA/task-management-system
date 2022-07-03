@@ -30,6 +30,12 @@ const login = async (req, res, next) => {
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ where: { email } });
+
+    if (user && user.isActiveAcc === false)
+      return next(
+        new HttpError('Account is disabled, please contact your administrator.', 404)
+      );
+
     if (user && (await user.comparePassword(password))) {
       const { id, name, isAdmin } = user;
       const accessToken = user.createAccessToken(user.id);
@@ -86,32 +92,29 @@ const createUser = async (req, res, next) => {
 };
 
 const updateUser = async (req, res, next) => {
-  const { userId, email, password } = req.body; // update fields for user
-  const { name, userGroup, isActiveAcc } = req.body;
+  const { id, name, email, userGroup, isActiveAcc } = req.body;
+  const user = await User.findByPk(id);
+  const adminAcc = await User.findByPk(req.user.userId);
 
-  if (await User.findOne({ where: { email } }))
+  if (email !== user.email && (await User.findOne({ where: { email } })))
     return next(new HttpError('Email is taken.', 400));
 
-  const user = await User.findByPk(userId);
-
   try {
-    res.send({ message: 'success' });
-    // // Account with admin rights
-    // if (user.admin === 1) {
-    //   if (name) user.name = name;
-    //   if (userGroup) user.userGroup = userGroup;
-    //   if (isActiveAcc) user.isActiveAcc = isActiveAcc;
-    // }
-    // if (email) user.email = email;
-    // if (password) user.password = password;
-    // await user.save();
-    // res.send({
-    //   name: user.name,
-    //   userGroup: user.userGroup,
-    //   isAdmin: user.isAdmin,
-    //   isActiveAcc: user.isActiveAcc,
-    //   message: 'success',
-    // });
+    // Account with admin rights
+    if (adminAcc.isAdmin === true) {
+      if (name) user.name = name;
+      if (email) user.email = email;
+      if (userGroup) user.userGroup = userGroup;
+      if (isActiveAcc && id !== req.user.userId) user.isActiveAcc = isActiveAcc;
+      if (isActiveAcc === 'false' && id === req.user.userId)
+        return next(
+          new HttpError('Cannot remove admin rights of your own admin account.', 404)
+        );
+      await user.save();
+      res.send({ message: 'success' });
+    }
+
+    return next(new HttpError('Insufficient access rights', 404));
   } catch (e) {
     console.error(e);
     return next(new HttpError('Something went wrong!', 500));
@@ -119,11 +122,28 @@ const updateUser = async (req, res, next) => {
 };
 
 const updateProfile = async (req, res, next) => {
+  const { id, email, password } = req.body;
+
+  const user = await User.findByPk(id);
+
+  if (email !== user.email && (await User.findOne({ where: { email } })))
+    return next(new HttpError('Email is taken.', 400));
+
   // Comprise of alphabets , numbers, and special character
   // Minimum 8 characters and maximum 10 characters
   const regex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,10}$/;
   if (!password.match(regex))
     return next(new HttpError('Please provide a valid password.', 400));
+
+  try {
+    if (email) user.email = email;
+    if (password) user.password = password;
+    await user.save();
+    res.send({ message: 'success' });
+  } catch (e) {
+    console.error(e);
+    return next(new HttpError('Something went wrong!', 500));
+  }
 };
 
 module.exports = { checkRefreshToken, login, getAllUsers, createUser, updateUser };
