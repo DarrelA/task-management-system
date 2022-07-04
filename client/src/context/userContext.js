@@ -45,7 +45,7 @@ const userReducer = (state, action) => {
     }
 
     case 'CREATE_USER_SUCCESS': {
-      return { ...state, isLoading: false, message: action.payload };
+      return { ...state, message: action.payload.message };
     }
 
     case 'CREATE_USER_FAIL': {
@@ -53,19 +53,18 @@ const userReducer = (state, action) => {
     }
 
     case 'UPDATE_USER_SUCCESS': {
-      const { name, userGroup, isAdmin, isActiveAcc, message } = action.payload;
-      return {
-        ...state,
-        isLoading: false,
-        name,
-        userGroup,
-        isAdmin,
-        isActiveAcc,
-        message,
-      };
+      return { ...state, message: action.payload.message };
     }
 
     case 'UPDATE_USER_FAIL': {
+      return { ...state, isLoading: false, message: action.payload.message };
+    }
+
+    case 'RESET_USER_PASSWORD_SUCCESS': {
+      return { ...state, message: action.payload.message };
+    }
+
+    case 'RESET_USER_PASSWORD_FAIL': {
       return { ...state, isLoading: false, message: action.payload.message };
     }
 
@@ -168,17 +167,44 @@ const UserProvider = ({ children }) => {
       });
 
       const data = await response.json();
-      const { message } = data;
       if (!response.ok) throw new Error(data.message);
 
       dispatch({
         type: 'CREATE_USER_SUCCESS',
-        payload: message,
+        payload: data,
       });
 
       clearAlert();
+      getAllUsers(accessToken);
+      return 'success';
     } catch (e) {
       dispatch({ type: 'CREATE_USER_FAIL', payload: e });
+      clearAlert();
+    }
+  };
+
+  const resetUserPassword = async (id, accessToken) => {
+    dispatch({ type: 'IS_LOADING' });
+    try {
+      const response = await fetch(`/api/users/resetuserpassword`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ id }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+
+      dispatch({ type: 'RESET_USER_PASSWORD_SUCCESS', payload: data });
+
+      clearAlert();
+      getAllUsers(accessToken);
+    } catch (e) {
+      dispatch({ type: 'RESET_USER_PASSWORD_FAIL', payload: e });
       clearAlert();
     }
   };
@@ -202,6 +228,7 @@ const UserProvider = ({ children }) => {
       dispatch({ type: 'UPDATE_USER_SUCCESS', payload: data });
 
       clearAlert();
+      getAllUsers(accessToken);
     } catch (e) {
       dispatch({ type: 'UPDATE_USER_FAIL', payload: e });
       clearAlert();
@@ -216,6 +243,7 @@ const UserProvider = ({ children }) => {
         login,
         createUser,
         getAllUsers,
+        resetUserPassword,
         updateUser,
       }}
     >

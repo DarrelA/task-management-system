@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect } from 'react';
 import MaterialTable from 'material-table';
 import { ThemeProvider, createTheme } from '@mui/material';
 import { toast } from 'react-toastify';
@@ -8,19 +8,25 @@ import useUserContext from '../context/userContext';
 const UserManagement = () => {
   const defaultMaterialTheme = createTheme();
   const userContext = useUserContext();
-  const { accessToken, isLoading, message, getAllUsers, users, createUser, updateUser } =
-    userContext;
-  const [usersList, setUsersList] = useState(null);
+  const {
+    accessToken,
+    isLoading,
+    message,
+    getAllUsers,
+    users,
+    createUser,
+    updateUser,
+    resetUserPassword,
+  } = userContext;
 
   useEffect(() => {
-    if (message === 'success') toast.success(message, { autoClose: 300 });
+    if (message === 'success') toast.success(message, { autoClose: 200 });
     else if (!!message) toast.error(message);
-    accessToken && getAllUsers(accessToken);
-  }, [message, accessToken, getAllUsers]);
+  }, [message]);
 
-  useMemo(() => {
-    users && setUsersList(users);
-  }, [users]);
+  useEffect(() => {
+    accessToken && getAllUsers(accessToken);
+  }, [accessToken, getAllUsers]);
 
   const columns = [
     {
@@ -56,26 +62,36 @@ const UserManagement = () => {
 
   return (
     <ThemeProvider theme={defaultMaterialTheme}>
-      {usersList && (
-        <MaterialTable
-          title="Update Users"
-          columns={columns}
-          data={usersList}
-          editable={{
-            onRowAdd: async (newRow) => await createUser(newRow, accessToken),
-            onRowUpdate: async (newRow, oldRow) => await updateUser(newRow, accessToken),
-          }}
-          options={{
-            search: false,
-            filtering: true,
-            pageSize: 10,
-            pageSizeOptions: [10, 25, 50],
-            emptyRowsWhenPaging: false,
-            addRowPosition: 'first',
-            actionsColumnIndex: -1,
-          }}
-        />
-      )}
+      <MaterialTable
+        title="Update Users"
+        columns={columns}
+        data={users}
+        editable={{
+          onRowAdd: (newRow) => createUser(newRow, accessToken),
+          onRowUpdate: (newRow, oldRow) => updateUser(newRow, accessToken),
+        }}
+        actions={[
+          {
+            icon: 'restart_alt',
+            tooltip: 'Reset Password',
+            onClick: (event, rowData) => {
+              // @TODO: Create modal to display confirmation box before reset
+              const confirmation = window.confirm(`Reset ${rowData.email}'s password?`);
+              if (confirmation) resetUserPassword(rowData.id, accessToken);
+            },
+          },
+        ]}
+        options={{
+          search: false,
+          filtering: true,
+          pageSize: 10,
+          pageSizeOptions: [10, 25, 50],
+          emptyRowsWhenPaging: false,
+          addRowPosition: 'first',
+          actionsColumnIndex: -1,
+        }}
+      />
+      )
     </ThemeProvider>
   );
 };

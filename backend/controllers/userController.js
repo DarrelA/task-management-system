@@ -121,6 +121,27 @@ const updateUser = async (req, res, next) => {
   }
 };
 
+const resetUserPassword = async (req, res, next) => {
+  if (req.body.id === req.user.userId)
+    return next(new HttpError('Please use update profile page to change password.', 404));
+  const user = await User.findByPk(req.body.id);
+  const adminAcc = await User.findByPk(req.user.userId);
+
+  try {
+    // Account with admin rights
+    if (adminAcc.isAdmin === true) {
+      user.password = process.env.DEFAULT_USER_PASSWORD;
+      await user.save();
+      res.send({ message: 'success' });
+    }
+
+    return next(new HttpError('Insufficient access rights', 404));
+  } catch (e) {
+    console.error(e);
+    return next(new HttpError('Something went wrong!', 500));
+  }
+};
+
 const updateProfile = async (req, res, next) => {
   const { id, email, password } = req.body;
 
@@ -146,4 +167,11 @@ const updateProfile = async (req, res, next) => {
   }
 };
 
-module.exports = { checkRefreshToken, login, getAllUsers, createUser, updateUser };
+module.exports = {
+  checkRefreshToken,
+  login,
+  getAllUsers,
+  createUser,
+  resetUserPassword,
+  updateUser,
+};

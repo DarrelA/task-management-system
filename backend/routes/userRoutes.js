@@ -8,6 +8,7 @@ const {
   login,
   getAllUsers,
   createUser,
+  resetUserPassword,
   updateUser,
 } = require('../controllers/userController');
 
@@ -18,5 +19,6 @@ router.post('/createuser', authMiddleware, createUser);
 router.get('/all', authMiddleware, getAllUsers);
 
 router.patch('/updateuser', authMiddleware, updateUser);
+router.patch('/resetuserpassword', authMiddleware, resetUserPassword);
 
 module.exports = router;
