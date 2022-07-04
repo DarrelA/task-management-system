@@ -1,12 +1,4 @@
-import {
-  AppBar,
-  Button,
-  makeStyles,
-  Menu,
-  MenuItem,
-  Toolbar,
-  Typography,
-} from '@material-ui/core';
+import { AppBar, Button, makeStyles, Toolbar, Typography } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 import useUserContext from '../context/userContext';
 
@@ -19,7 +11,7 @@ const NavBar = () => {
   const classes = useStyles();
 
   const userContext = useUserContext();
-  const { accessToken } = userContext;
+  const { isAdmin, accessToken, logout } = userContext;
 
   return (
     <AppBar position="static">
@@ -27,12 +19,18 @@ const NavBar = () => {
         <Typography variant="h6" className={classes.title}>
           Task Management System
         </Typography>
-        {accessToken && (
+
+        {isAdmin && (
           <Button component={Link} to={'/usermanagement'}>
             User Management
           </Button>
         )}
-        <Button color="inherit">Logout</Button>
+
+        {accessToken && (
+          <Button color="inherit" onClick={logout}>
+            Logout
+          </Button>
+        )}
       </Toolbar>
     </AppBar>
   );

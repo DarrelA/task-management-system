@@ -28,7 +28,7 @@ const Login = () => {
 
   useEffect(() => {
     if (!isLoading && !!accessToken && isAdmin) navigate('/usermanagement');
-    else if (!isLoading && !!accessToken) navigate('/');
+    else if (!isLoading && !!accessToken) navigate('/app');
     if (!!message) toast.error(message);
   }, [isLoading, accessToken, isAdmin, navigate, message]);
 

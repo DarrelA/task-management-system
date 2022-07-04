@@ -36,6 +36,17 @@ const userReducer = (state, action) => {
       return { ...state, isLoading: false, message: action.payload.message };
     }
 
+    case 'LOGOUT_USER': {
+      return {
+        isLoading: false,
+        id: '',
+        name: '',
+        isAdmin: false,
+        accessToken: '',
+        message: action.payload.message,
+      };
+    }
+
     case 'GET_ALL_USER_SUCCESS': {
       return { ...state, isLoading: false, users: action.payload };
     }
@@ -127,6 +138,25 @@ const UserProvider = ({ children }) => {
       clearAlert();
     } catch (e) {
       dispatch({ type: 'LOGIN_USER_FAIL', payload: e });
+      clearAlert();
+    }
+  };
+
+  const logout = async () => {
+    dispatch({ type: 'IS_LOADING' });
+    try {
+      const response = await fetch(`/api/users/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+
+      dispatch({ type: 'LOGOUT_USER', payload: data });
+      localStorage.removeItem('userData');
+      clearAlert();
+    } catch (e) {
       clearAlert();
     }
   };
@@ -241,6 +271,7 @@ const UserProvider = ({ children }) => {
         ...userState,
         checkRefreshToken,
         login,
+        logout,
         createUser,
         getAllUsers,
         resetUserPassword,

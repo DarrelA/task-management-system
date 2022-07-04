@@ -21,10 +21,10 @@ const App = () => {
     <ThemeProvider theme={theme}>
       <NavBar />
       <Routes>
-        <Route path="/" element={<div>'Landing page</div>} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Login />} />
         <Route path="/usermanagement" element={<UserManagement />} />
-        {/* <Route path="*" element={<NotFound />} /> */}
+        <Route path="/app" element={<div>app page</div>} />
+        <Route path="*" element={<div>Page 404! There's nothing here!</div>} />
       </Routes>
       <CssBaseline />
     </ThemeProvider>

@@ -53,6 +53,11 @@ const login = async (req, res, next) => {
   }
 };
 
+const logout = async (req, res, next) => {
+  res.clearCookie('refreshToken', { path: '/api/users/refresh_token' });
+  return res.send({ message: 'success' });
+};
+
 const getAllUsers = async (req, res, next) => {
   try {
     const users = await User.findAll({
@@ -170,6 +175,7 @@ const updateProfile = async (req, res, next) => {
 module.exports = {
   checkRefreshToken,
   login,
+  logout,
   getAllUsers,
   createUser,
   resetUserPassword,
