@@ -33,7 +33,7 @@ const login = async (req, res, next) => {
 
     if (user && user.isActiveAcc === false)
       return next(
-        new HttpError('Account is disabled, please contact your administrator.', 404)
+        new HttpError('Something went wrong, please contact your administrator.', 404)
       );
 
     if (user && (await user.comparePassword(password))) {

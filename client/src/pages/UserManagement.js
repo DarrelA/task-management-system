@@ -1,11 +1,13 @@
-import { useEffect } from 'react';
+import { createTheme, ThemeProvider } from '@mui/material';
 import MaterialTable from 'material-table';
-
 import { toast } from 'react-toastify';
+
+import { useEffect, useState } from 'react';
 
 import useUserContext from '../context/userContext';
 
 const UserManagement = () => {
+  const theme = createTheme({ palette: { mode: 'dark' } });
   const userContext = useUserContext();
   const {
     accessToken,
@@ -17,6 +19,8 @@ const UserManagement = () => {
     updateUser,
     resetUserPassword,
   } = userContext;
+
+  const [selectedRow, setSelectedRow] = useState(null);
 
   useEffect(() => {
     if (message === 'success') toast.success(message, { autoClose: 200 });
@@ -34,6 +38,9 @@ const UserManagement = () => {
       defaultSort: 'desc',
       filtering: false,
       editable: 'never',
+      align: 'center',
+      width: null,
+      cellStyle: { width: 220 },
       render: (rowData) => {
         const options = {
           weekday: 'short',
@@ -46,49 +53,75 @@ const UserManagement = () => {
         return new Date(rowData.createdAt).toLocaleString('en-US', options);
       },
     },
-    { title: 'Name', field: 'name' },
-    { title: 'Email', field: 'email', initialEditValue: '@company.com' },
-    { title: 'User Group', field: 'userGroup' },
+    {
+      title: 'Name',
+      field: 'name',
+      align: 'center',
+      width: null,
+      cellStyle: { width: 220 },
+    },
+    {
+      title: 'Email',
+      field: 'email',
+      initialEditValue: '@company.com',
+      align: 'center',
+      width: null,
+      cellStyle: { width: 250 },
+    },
+    {
+      title: 'User Group',
+      field: 'userGroup',
+      align: 'center',
+    },
     {
       title: 'Active Account',
       field: 'isActiveAcc',
       lookup: { true: 'true', false: 'false' },
       initialEditValue: true,
+      align: 'center',
+      width: null,
+      cellStyle: { width: 10 },
     },
   ];
 
   if (isLoading) return <p>Loading...</p>;
 
   return (
-    <MaterialTable
-      title="Update Users"
-      columns={columns}
-      data={users}
-      editable={{
-        onRowAdd: (newRow) => createUser(newRow, accessToken),
-        onRowUpdate: (newRow, oldRow) => updateUser(newRow, accessToken),
-      }}
-      actions={[
-        {
-          icon: 'restart_alt',
-          tooltip: 'Reset Password',
-          onClick: (event, rowData) => {
-            // @TODO: Create modal to display confirmation box before reset
-            const confirmation = window.confirm(`Reset ${rowData.email}'s password?`);
-            if (confirmation) resetUserPassword(rowData.id, accessToken);
+    <ThemeProvider theme={theme}>
+      <MaterialTable
+        title="User Management"
+        columns={columns}
+        data={users}
+        editable={{
+          onRowAdd: (newRow) => createUser(newRow, accessToken),
+          onRowUpdate: (newRow, oldRow) => updateUser(newRow, accessToken),
+        }}
+        actions={[
+          {
+            icon: 'restart_alt',
+            tooltip: 'Reset Password',
+            onClick: (event, rowData) => {
+              // @TODO: Create modal to display confirmation box before reset
+              const confirmation = window.confirm(`Reset ${rowData.email}'s password?`);
+              if (confirmation) resetUserPassword(rowData.id, accessToken);
+            },
           },
-        },
-      ]}
-      options={{
-        search: false,
-        filtering: true,
-        pageSize: 10,
-        pageSizeOptions: [10, 25, 50],
-        emptyRowsWhenPaging: false,
-        addRowPosition: 'first',
-        actionsColumnIndex: -1,
-      }}
-    />
+        ]}
+        onRowClick={(event, selectedRow) => setSelectedRow(selectedRow.tableData.id)}
+        options={{
+          search: false,
+          filtering: false,
+          pageSize: 10,
+          pageSizeOptions: [10, 25, 50],
+          emptyRowsWhenPaging: false,
+          addRowPosition: 'first',
+          actionsColumnIndex: -1,
+          rowStyle: (rowData) => ({
+            backgroundColor: selectedRow === rowData.tableData.id ? '#1976d2' : '#303030',
+          }),
+        }}
+      />
+    </ThemeProvider>
   );
 };
 
