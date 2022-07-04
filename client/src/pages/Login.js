@@ -2,6 +2,14 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import useUserContext from '../context/userContext';
+import {
+  Button,
+  Card,
+  CardContent,
+  Grid,
+  Typography,
+  TextField,
+} from '@material-ui/core';
 
 const initialState = {
   name: '',
@@ -32,51 +40,57 @@ const Login = () => {
     userContext.login(formData);
   };
 
+  if (isLoading) return <p>Loading...</p>;
+
   return (
-    <section className="container center" id="cta">
-      <form className="form" onSubmit={submitHandler}>
-        <h2>{updateProfilePage ? 'Update' : 'Login'}</h2>
-        <div>
-          <label htmlFor="email">Email</label>
-          <input
-            type="email"
-            name="email"
-            id="email"
-            placeholder="mongkong@gmail.com"
-            required
-            onChange={inputHandler}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            name="password"
-            id="password"
-            required
-            onChange={inputHandler}
-          />
-        </div>
-
-        {updateProfilePage && (
-          <div>
-            <label htmlFor="confirmPassword">Confirm Password</label>
-            <input
-              type="password"
-              name="confirmPassword"
-              id="confirmPassword"
+    <Card style={{ maxWidth: 400, margin: '100px auto', padding: '20px 5px' }}>
+      <CardContent>
+        <Grid container spacing={1}>
+          <form onSubmit={submitHandler}>
+            <Typography variant="h5">{updateProfilePage ? 'Update' : 'Login'}</Typography>
+            <TextField
+              type="email"
+              label="email"
+              id="email"
+              placeholder="mongkong@gmail.com"
               required
-              onChange={inputHandler}
+              onInput={inputHandler}
+              fullWidth
             />
-          </div>
-        )}
 
-        <button className="btn btn--form">
-          {updateProfilePage ? 'Update' : 'Login'}
-        </button>
-      </form>
-    </section>
+            <TextField
+              type="password"
+              label="password"
+              id="password"
+              required
+              onInput={inputHandler}
+              fullWidth
+            />
+
+            {updateProfilePage && (
+              <TextField
+                type="password"
+                label="confirmPassword"
+                id="confirmPassword"
+                required
+                onInput={inputHandler}
+                fullWidth
+              />
+            )}
+
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              fullWidth
+              style={{ margin: '16px 0' }}
+            >
+              {updateProfilePage ? 'Update' : 'Login'}
+            </Button>
+          </form>
+        </Grid>
+      </CardContent>
+    </Card>
   );
 };
 

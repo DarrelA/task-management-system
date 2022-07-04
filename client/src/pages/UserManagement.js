@@ -1,12 +1,11 @@
 import { useEffect } from 'react';
 import MaterialTable from 'material-table';
-import { ThemeProvider, createTheme } from '@mui/material';
+
 import { toast } from 'react-toastify';
 
 import useUserContext from '../context/userContext';
 
 const UserManagement = () => {
-  const defaultMaterialTheme = createTheme();
   const userContext = useUserContext();
   const {
     accessToken,
@@ -61,38 +60,35 @@ const UserManagement = () => {
   if (isLoading) return <p>Loading...</p>;
 
   return (
-    <ThemeProvider theme={defaultMaterialTheme}>
-      <MaterialTable
-        title="Update Users"
-        columns={columns}
-        data={users}
-        editable={{
-          onRowAdd: (newRow) => createUser(newRow, accessToken),
-          onRowUpdate: (newRow, oldRow) => updateUser(newRow, accessToken),
-        }}
-        actions={[
-          {
-            icon: 'restart_alt',
-            tooltip: 'Reset Password',
-            onClick: (event, rowData) => {
-              // @TODO: Create modal to display confirmation box before reset
-              const confirmation = window.confirm(`Reset ${rowData.email}'s password?`);
-              if (confirmation) resetUserPassword(rowData.id, accessToken);
-            },
+    <MaterialTable
+      title="Update Users"
+      columns={columns}
+      data={users}
+      editable={{
+        onRowAdd: (newRow) => createUser(newRow, accessToken),
+        onRowUpdate: (newRow, oldRow) => updateUser(newRow, accessToken),
+      }}
+      actions={[
+        {
+          icon: 'restart_alt',
+          tooltip: 'Reset Password',
+          onClick: (event, rowData) => {
+            // @TODO: Create modal to display confirmation box before reset
+            const confirmation = window.confirm(`Reset ${rowData.email}'s password?`);
+            if (confirmation) resetUserPassword(rowData.id, accessToken);
           },
-        ]}
-        options={{
-          search: false,
-          filtering: true,
-          pageSize: 10,
-          pageSizeOptions: [10, 25, 50],
-          emptyRowsWhenPaging: false,
-          addRowPosition: 'first',
-          actionsColumnIndex: -1,
-        }}
-      />
-      )
-    </ThemeProvider>
+        },
+      ]}
+      options={{
+        search: false,
+        filtering: true,
+        pageSize: 10,
+        pageSizeOptions: [10, 25, 50],
+        emptyRowsWhenPaging: false,
+        addRowPosition: 'first',
+        actionsColumnIndex: -1,
+      }}
+    />
   );
 };
 
