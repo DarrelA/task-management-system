@@ -5,9 +5,9 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useEffect } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
+import { NavBar, ProtectedRoute } from './components';
 import useUserContext from './context/userContext';
 import { LoginUpdate, UserManagement } from './pages/';
-import { NavBar } from './components';
 
 const App = () => {
   const theme = createTheme({ palette: { type: 'dark' } });
@@ -22,9 +22,30 @@ const App = () => {
       <NavBar />
       <Routes>
         <Route path="/" element={<LoginUpdate />} />
-        <Route path="/updateprofile" element={<LoginUpdate />} />
-        <Route path="/usermanagement" element={<UserManagement />} />
-        <Route path="/apps" element={<div>apps page</div>} />
+        <Route
+          path="/updateprofile"
+          element={
+            <ProtectedRoute>
+              <LoginUpdate />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/usermanagement"
+          element={
+            <ProtectedRoute>
+              <UserManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/apps"
+          element={
+            <ProtectedRoute>
+              <div>apps page</div>
+            </ProtectedRoute>
+          }
+        />
         <Route path="*" element={<div>Page 404! There's nothing here!</div>} />
       </Routes>
       <CssBaseline />

@@ -107,13 +107,19 @@ const Login = () => {
               {updateProfilePage ? 'Update' : 'Login'}
             </Button>
           </form>
-          <Typography variant="overline" color="inherit">
-            Password requirement:
-          </Typography>
-          <Typography variant="caption" color="inherit">
-            Comprise of alphabets , numbers, and special character. Minimum 8
-            charactersand maximum 10 characters.
-          </Typography>
+
+          {updateProfilePage && (
+            <>
+              <Typography variant="overline" color="inherit">
+                Password requirement:
+              </Typography>
+
+              <Typography variant="caption" color="inherit">
+                Comprise of alphabets , numbers, and special character. Minimum 8
+                charactersand maximum 10 characters.
+              </Typography>
+            </>
+          )}
         </Grid>
       </CardContent>
     </Card>

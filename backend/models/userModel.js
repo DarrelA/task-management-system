@@ -4,7 +4,6 @@ const jwt = require('jsonwebtoken');
 
 const sequelize = require('../config/db');
 const mockUsers = require('../config/mockUsers');
-const mockGroups = require('../config/mockGroups');
 
 const User = sequelize.define(
   'user',
@@ -77,22 +76,6 @@ const Group = sequelize.define('group', {
   },
 });
 
-const User_Group = sequelize.define('user_group', {
-  id: {
-    type: Sequelize.UUID,
-    defaultValue: Sequelize.UUIDV4,
-    primaryKey: true,
-  },
-  name: {
-    type: Sequelize.STRING,
-    allowNull: false,
-    primaryKey: true,
-  },
-});
-
-User.belongsToMany(Group, { through: User_Group });
-Group.belongsToMany(User, { through: User_Group });
-
 sequelize.sync().then(() => createData());
 
 const createData = async () => {
@@ -113,8 +96,7 @@ const createData = async () => {
       ],
       { individualHooks: true }
     );
-    Group.bulkCreate([...mockGroups]);
   }
 };
 
-module.exports = { User, Group, User_Group };
+module.exports = { User, Group };
