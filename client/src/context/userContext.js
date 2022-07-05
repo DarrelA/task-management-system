@@ -164,7 +164,7 @@ const UserProvider = ({ children }) => {
   const getAllUsers = useCallback(async (accessToken) => {
     dispatch({ type: 'IS_LOADING' });
     try {
-      const response = await fetch(`/api/users/all`, {
+      const response = await fetch(`/api/users/um/all`, {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
@@ -186,7 +186,7 @@ const UserProvider = ({ children }) => {
   const createUser = async ({ name, email, userGroup, isActiveAcc }, accessToken) => {
     dispatch({ type: 'IS_LOADING' });
     try {
-      const response = await fetch(`/api/users/createuser`, {
+      const response = await fetch(`/api/users/um/createuser`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -216,7 +216,7 @@ const UserProvider = ({ children }) => {
   const resetUserPassword = async (id, accessToken) => {
     dispatch({ type: 'IS_LOADING' });
     try {
-      const response = await fetch(`/api/users/resetuserpassword`, {
+      const response = await fetch(`/api/users/um/resetuserpassword`, {
         method: 'PATCH',
         credentials: 'include',
         headers: {
@@ -242,7 +242,7 @@ const UserProvider = ({ children }) => {
   const updateUser = async ({ id, name, email, userGroup, isActiveAcc }, accessToken) => {
     dispatch({ type: 'IS_LOADING' });
     try {
-      const response = await fetch(`/api/users/updateuser`, {
+      const response = await fetch(`/api/users/um/updateuser`, {
         method: 'PATCH',
         credentials: 'include',
         headers: {
@@ -250,6 +250,37 @@ const UserProvider = ({ children }) => {
           authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({ id, name, email, userGroup, isActiveAcc }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+
+      dispatch({ type: 'UPDATE_USER_SUCCESS', payload: data });
+
+      clearAlert();
+      getAllUsers(accessToken);
+    } catch (e) {
+      dispatch({ type: 'UPDATE_USER_FAIL', payload: e });
+      clearAlert();
+    }
+  };
+
+  const updateProfile = async (
+    { name, email, password, confirmPassword },
+    id,
+    accessToken
+  ) => {
+    dispatch({ type: 'IS_LOADING' });
+
+    try {
+      const response = await fetch(`/api/users/updateprofile`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ name, email, password, confirmPassword, id }),
       });
 
       const data = await response.json();
@@ -276,6 +307,7 @@ const UserProvider = ({ children }) => {
         getAllUsers,
         resetUserPassword,
         updateUser,
+        updateProfile,
       }}
     >
       {children}

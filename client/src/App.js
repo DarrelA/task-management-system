@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 import useUserContext from './context/userContext';
-import { Login, UserManagement } from './pages/';
+import { LoginUpdate, UserManagement } from './pages/';
 import { NavBar } from './components';
 
 const App = () => {
@@ -21,9 +21,10 @@ const App = () => {
     <ThemeProvider theme={theme}>
       <NavBar />
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<LoginUpdate />} />
+        <Route path="/updateprofile" element={<LoginUpdate />} />
         <Route path="/usermanagement" element={<UserManagement />} />
-        <Route path="/app" element={<div>app page</div>} />
+        <Route path="/apps" element={<div>apps page</div>} />
         <Route path="*" element={<div>Page 404! There's nothing here!</div>} />
       </Routes>
       <CssBaseline />

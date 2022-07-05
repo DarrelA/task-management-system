@@ -96,6 +96,27 @@ const createUser = async (req, res, next) => {
   }
 };
 
+const resetUserPassword = async (req, res, next) => {
+  if (req.body.id === req.user.userId)
+    return next(new HttpError('Please use update profile page to change password.', 404));
+  const user = await User.findByPk(req.body.id);
+  const adminAcc = await User.findByPk(req.user.userId);
+
+  try {
+    // Account with admin rights
+    if (adminAcc.isAdmin === true) {
+      user.password = process.env.DEFAULT_USER_PASSWORD;
+      await user.save();
+      res.send({ message: 'success' });
+    }
+
+    return next(new HttpError('Insufficient access rights', 404));
+  } catch (e) {
+    console.error(e);
+    return next(new HttpError('Something went wrong!', 500));
+  }
+};
+
 const updateUser = async (req, res, next) => {
   const { id, name, email, userGroup, isActiveAcc } = req.body;
   const user = await User.findByPk(id);
@@ -126,40 +147,23 @@ const updateUser = async (req, res, next) => {
   }
 };
 
-const resetUserPassword = async (req, res, next) => {
-  if (req.body.id === req.user.userId)
-    return next(new HttpError('Please use update profile page to change password.', 404));
-  const user = await User.findByPk(req.body.id);
-  const adminAcc = await User.findByPk(req.user.userId);
-
-  try {
-    // Account with admin rights
-    if (adminAcc.isAdmin === true) {
-      user.password = process.env.DEFAULT_USER_PASSWORD;
-      await user.save();
-      res.send({ message: 'success' });
-    }
-
-    return next(new HttpError('Insufficient access rights', 404));
-  } catch (e) {
-    console.error(e);
-    return next(new HttpError('Something went wrong!', 500));
-  }
-};
-
 const updateProfile = async (req, res, next) => {
-  const { id, email, password } = req.body;
-
+  const { id, email, password, confirmPassword } = req.body;
   const user = await User.findByPk(id);
 
-  if (email !== user.email && (await User.findOne({ where: { email } })))
+  if (email && email !== user.email && (await User.findOne({ where: { email } })))
     return next(new HttpError('Email is taken.', 400));
 
-  // Comprise of alphabets , numbers, and special character
-  // Minimum 8 characters and maximum 10 characters
-  const regex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,10}$/;
-  if (!password.match(regex))
-    return next(new HttpError('Please provide a valid password.', 400));
+  if (password) {
+    if (password !== confirmPassword)
+      return next(new HttpError('Password is different from Confirm Password.', 400));
+
+    // Comprise of alphabets , numbers, and special character
+    // Minimum 8 characters and maximum 10 characters
+    const regex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,10}$/;
+    if (!password.match(regex))
+      return next(new HttpError('Please provide a valid password.', 400));
+  }
 
   try {
     if (email) user.email = email;
@@ -180,4 +184,5 @@ module.exports = {
   createUser,
   resetUserPassword,
   updateUser,
+  updateProfile,
 };
