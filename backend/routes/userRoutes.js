@@ -11,6 +11,8 @@ const {
   createUser,
   resetUserPassword,
   updateUser,
+  createGroup,
+  addRemoveUserGroup,
   updateProfile,
 } = require('../controllers/userController');
 
@@ -20,6 +22,8 @@ router.post('/refresh_token', checkRefreshToken);
 router.post('/login', login);
 router.post('/logout', logout);
 router.post('/um/createuser', authMiddleware, createUser);
+router.post('/um/creategroup', authMiddleware, createGroup);
+router.post('/um/addremoveusergroup', authMiddleware, addRemoveUserGroup);
 
 router.get('/um/all', authMiddleware, getAllUsers);
 

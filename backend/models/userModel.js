@@ -76,7 +76,22 @@ const Group = sequelize.define('group', {
   },
 });
 
-sequelize.sync().then(() => createData());
+const UserGroup = sequelize.define('usergroups', {
+  id: {
+    type: Sequelize.UUID,
+    defaultValue: Sequelize.UUIDV4,
+    primaryKey: true,
+  },
+});
+
+User.belongsToMany(Group, { through: UserGroup });
+Group.belongsToMany(User, { through: UserGroup });
+
+let user, group;
+sequelize
+  .sync()
+  .then(() => createData())
+  .catch((e) => console.error(e));
 
 const createData = async () => {
   const defaultAdmin = await User.findOne({
@@ -99,4 +114,4 @@ const createData = async () => {
   }
 };
 
-module.exports = { User, Group };
+module.exports = { User, Group, UserGroup };

@@ -47,35 +47,11 @@ const userReducer = (state, action) => {
       };
     }
 
-    case 'GET_ALL_USER_SUCCESS': {
+    case 'RESPONSE_SUCCESS': {
       return { ...state, isLoading: false, users: action.payload };
     }
 
-    case 'GET_ALL_USER_FAIL': {
-      return { ...state, isLoading: false, message: action.payload.message };
-    }
-
-    case 'CREATE_USER_SUCCESS': {
-      return { ...state, message: action.payload.message };
-    }
-
-    case 'CREATE_USER_FAIL': {
-      return { ...state, isLoading: false, message: action.payload.message };
-    }
-
-    case 'UPDATE_USER_SUCCESS': {
-      return { ...state, message: action.payload.message };
-    }
-
-    case 'UPDATE_USER_FAIL': {
-      return { ...state, isLoading: false, message: action.payload.message };
-    }
-
-    case 'RESET_USER_PASSWORD_SUCCESS': {
-      return { ...state, message: action.payload.message };
-    }
-
-    case 'RESET_USER_PASSWORD_FAIL': {
+    case 'RESPONSE_FAIL': {
       return { ...state, isLoading: false, message: action.payload.message };
     }
 
@@ -174,11 +150,11 @@ const UserProvider = ({ children }) => {
 
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
-      dispatch({ type: 'GET_ALL_USER_SUCCESS', payload: data });
+      dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
 
       clearAlert();
     } catch (e) {
-      dispatch({ type: 'GET_ALL_USER_FAIL', payload: e });
+      dispatch({ type: 'RESPONSE_FAIL', payload: e });
       clearAlert();
     }
   }, []);
@@ -200,7 +176,7 @@ const UserProvider = ({ children }) => {
       if (!response.ok) throw new Error(data.message);
 
       dispatch({
-        type: 'CREATE_USER_SUCCESS',
+        type: 'RESPONSE_SUCCESS',
         payload: data,
       });
 
@@ -208,7 +184,7 @@ const UserProvider = ({ children }) => {
       getAllUsers(accessToken);
       return 'success';
     } catch (e) {
-      dispatch({ type: 'CREATE_USER_FAIL', payload: e });
+      dispatch({ type: 'RESPONSE_FAIL', payload: e });
       clearAlert();
     }
   };
@@ -229,12 +205,12 @@ const UserProvider = ({ children }) => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
 
-      dispatch({ type: 'RESET_USER_PASSWORD_SUCCESS', payload: data });
+      dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
 
       clearAlert();
       getAllUsers(accessToken);
     } catch (e) {
-      dispatch({ type: 'RESET_USER_PASSWORD_FAIL', payload: e });
+      dispatch({ type: 'RESPONSE_FAIL', payload: e });
       clearAlert();
     }
   };
@@ -255,15 +231,43 @@ const UserProvider = ({ children }) => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
 
-      dispatch({ type: 'UPDATE_USER_SUCCESS', payload: data });
+      dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
 
       clearAlert();
       getAllUsers(accessToken);
     } catch (e) {
-      dispatch({ type: 'UPDATE_USER_FAIL', payload: e });
+      dispatch({ type: 'RESPONSE_FAIL', payload: e });
       clearAlert();
     }
   };
+
+  const createGroup = async ({ userGroup }, accessToken) => {
+    dispatch({ type: 'IS_LOADING' });
+    try {
+      const response = await fetch(`/api/users/um/updateuser`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ userGroup }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+
+      dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
+
+      clearAlert();
+      getAllUsers(accessToken);
+    } catch (e) {
+      dispatch({ type: 'RESPONSE_FAIL', payload: e });
+      clearAlert();
+    }
+  };
+
+  const addUserToGroup = async ({ id, userGroup }, accessToken) => {};
 
   const updateProfile = async (
     { name, email, password, confirmPassword },
@@ -286,12 +290,12 @@ const UserProvider = ({ children }) => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
 
-      dispatch({ type: 'UPDATE_USER_SUCCESS', payload: data });
+      dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
 
       clearAlert();
       getAllUsers(accessToken);
     } catch (e) {
-      dispatch({ type: 'UPDATE_USER_FAIL', payload: e });
+      dispatch({ type: 'RESPONSE_FAIL', payload: e });
       clearAlert();
     }
   };
@@ -307,6 +311,8 @@ const UserProvider = ({ children }) => {
         getAllUsers,
         resetUserPassword,
         updateUser,
+        createGroup,
+        addUserToGroup,
         updateProfile,
       }}
     >

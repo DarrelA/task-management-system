@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import { useEffect, useState } from 'react';
 
 import useUserContext from '../context/userContext';
+import InputModal from '../components/InputModal';
 
 const UserManagement = () => {
   const theme = createTheme({ palette: { mode: 'dark' } });
@@ -105,6 +106,12 @@ const UserManagement = () => {
               const confirmation = window.confirm(`Reset ${rowData.email}'s password?`);
               if (confirmation) resetUserPassword(rowData.id, accessToken);
             },
+          },
+          {
+            icon: 'group_add',
+            tooltip: 'Add Group',
+            isFreeAction: true,
+            onClick: (e) => <InputModal />,
           },
         ]}
         onRowClick={(event, selectedRow) => setSelectedRow(selectedRow.tableData.id)}

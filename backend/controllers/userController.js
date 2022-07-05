@@ -1,4 +1,4 @@
-const { User, Group } = require('../models/userModel');
+const { User, Group, UserGroup } = require('../models/userModel');
 const jwt = require('jsonwebtoken');
 const HttpError = require('../models/http-error');
 
@@ -147,8 +147,31 @@ const updateUser = async (req, res, next) => {
   }
 };
 
+const createGroup = async (req, res, next) => {
+  const { userGroup } = req.body;
+  const group = await User.findByPk(userGroup);
+
+  if (!group) {
+    const newGroup = await Group.create({ name: userGroup });
+    await newGroup.save();
+    res.send({ message: 'success' });
+  } else return next(new HttpError('Group name is taken.', 400));
+};
+
+const addRemoveUserGroup = async (req, res, next) => {
+  const { id, userGroup } = req.body;
+  const user = await User.findByPk(id);
+  const group = await User.findByPk(userGroup);
+
+  if (!group) return next(new HttpError('Kindly create the group.', 400));
+  res.send('hello');
+};
+
 const updateProfile = async (req, res, next) => {
   const { id, email, password, confirmPassword } = req.body;
+
+  //@TODO: Verify that req.user.userId === id
+
   const user = await User.findByPk(id);
 
   if (email && email !== user.email && (await User.findOne({ where: { email } })))
@@ -184,5 +207,7 @@ module.exports = {
   createUser,
   resetUserPassword,
   updateUser,
+  createGroup,
+  addRemoveUserGroup,
   updateProfile,
 };
