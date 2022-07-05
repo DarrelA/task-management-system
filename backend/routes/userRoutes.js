@@ -25,6 +25,8 @@ router.post('/um/createuser', authMiddleware, createUser);
 router.post('/um/creategroup', authMiddleware, createGroup);
 router.post('/um/addremoveusergroup', authMiddleware, addRemoveUserGroup);
 
+// Exception for this /um/... route:
+// Non admin account (user account) can use this route to get email
 router.get('/um/all', authMiddleware, getAllUsers);
 
 router.patch('/um/resetuserpassword', authMiddleware, resetUserPassword);

@@ -60,10 +60,16 @@ const logout = async (req, res, next) => {
 
 const getAllUsers = async (req, res, next) => {
   try {
-    const users = await User.findAll({
-      attributes: { exclude: ['password', 'isAdmin', 'refreshToken', 'updatedAt'] },
-    });
-    res.send(users);
+    const user = await User.findByPk(req.user.userId);
+    // Account with admin rights
+    if (user.isAdmin === true) {
+      const users = await User.findAll({
+        attributes: { exclude: ['password', 'isAdmin', 'refreshToken', 'updatedAt'] },
+      });
+      res.send(users);
+    } else res.send(user.email);
+
+    return next(new HttpError('Something went wrong!', 400));
   } catch (e) {
     console.error(e);
     return next(new HttpError('Something went wrong!', 500));
@@ -171,7 +177,8 @@ const addRemoveUserGroup = async (req, res, next) => {
 const updateProfile = async (req, res, next) => {
   const { id, email, password, confirmPassword } = req.body;
 
-  //@TODO: Verify that req.user.userId === id
+  // user can only update their own account
+  if (req.user.userId !== id) return next(new HttpError('Something went wrong!', 400));
 
   const user = await User.findByPk(id);
 
