@@ -2,8 +2,9 @@ import { makeStyles } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
 
 import { useState } from 'react';
+import { Button, TextField } from '@material-ui/core';
 
-const InputModal = () => {
+const InputModal = ({ open, onClose, newGroupHandler }) => {
   const getModalStyle = () => {
     const top = 50;
     const left = 50;
@@ -27,37 +28,41 @@ const InputModal = () => {
   }));
 
   const classes = useStyles();
-
-  // getModalStyle is not a pure function, we roll the style only on the first render
   const [modalStyle] = useState(getModalStyle);
-  const [open, setOpen] = useState(false);
+  const [inputData, setInputData] = useState('');
 
-  const handleOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
+  const inputHandler = (e) => setInputData(e.target.value);
+  const createGroupHandler = () => {
+    onClose();
+    newGroupHandler(inputData);
   };
 
   const body = (
     <div style={modalStyle} className={classes.paper}>
-      <h2 id="simple-modal-title">Text in a modal</h2>
-      <p id="simple-modal-description">
-        Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-      </p>
+      <TextField
+        label="User Group"
+        type="text"
+        id="usergroup"
+        placeholder="Group 1"
+        onInput={inputHandler}
+        fullWidth
+      />
+      <Button
+        type="submit"
+        variant="contained"
+        color="primary"
+        fullWidth
+        style={{ margin: '16px 0' }}
+        onClick={createGroupHandler}
+      >
+        Create
+      </Button>
     </div>
   );
-
   return (
-    <div>
-      <button type="button" onClick={handleOpen}>
-        Open Modal
-      </button>
-      <Modal open={open} onClose={handleClose}>
-        {body}
-      </Modal>
-    </div>
+    <Modal open={open} onClose={onClose}>
+      {body}
+    </Modal>
   );
 };
 

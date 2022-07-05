@@ -4,8 +4,8 @@ import { toast } from 'react-toastify';
 
 import { useEffect, useState } from 'react';
 
-import useUserContext from '../context/userContext';
 import InputModal from '../components/InputModal';
+import useUserContext from '../context/userContext';
 
 const UserManagement = () => {
   const theme = createTheme({ palette: { mode: 'dark' } });
@@ -19,9 +19,11 @@ const UserManagement = () => {
     createUser,
     updateUser,
     resetUserPassword,
+    createGroup,
   } = userContext;
 
   const [selectedRow, setSelectedRow] = useState(null);
+  const [openModal, setOpenModal] = useState(false);
 
   useEffect(() => {
     if (message === 'success') toast.success(message, { autoClose: 200 });
@@ -31,6 +33,10 @@ const UserManagement = () => {
   useEffect(() => {
     accessToken && getAllUsers(accessToken);
   }, [accessToken, getAllUsers]);
+
+  const toggleModalHandler = () => setOpenModal((prevState) => !prevState);
+  const newGroupHandler = (inputData) =>
+    createGroup({ userGroup: inputData }, accessToken);
 
   const columns = [
     {
@@ -89,6 +95,13 @@ const UserManagement = () => {
 
   return (
     <ThemeProvider theme={theme}>
+      {openModal && (
+        <InputModal
+          open={openModal}
+          onClose={toggleModalHandler}
+          newGroupHandler={newGroupHandler}
+        />
+      )}
       <MaterialTable
         title="User Management"
         columns={columns}
@@ -111,7 +124,7 @@ const UserManagement = () => {
             icon: 'group_add',
             tooltip: 'Add Group',
             isFreeAction: true,
-            onClick: (e) => <InputModal />,
+            onClick: toggleModalHandler,
           },
         ]}
         onRowClick={(event, selectedRow) => setSelectedRow(selectedRow.tableData.id)}

@@ -43,12 +43,20 @@ const userReducer = (state, action) => {
         name: '',
         isAdmin: false,
         accessToken: '',
-        message: action.payload.message,
+        message: '',
       };
     }
 
-    case 'RESPONSE_SUCCESS': {
+    case 'GET_ALL_USER_SUCCESS': {
       return { ...state, isLoading: false, users: action.payload };
+    }
+
+    case 'GET_ALL_USER_FAIL': {
+      return { ...state, isLoading: false, message: action.payload.message };
+    }
+
+    case 'RESPONSE_SUCCESS': {
+      return { ...state, isLoading: false, message: action.payload.message };
     }
 
     case 'RESPONSE_FAIL': {
@@ -150,11 +158,11 @@ const UserProvider = ({ children }) => {
 
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
-      dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
+      dispatch({ type: 'GET_ALL_USER_SUCCESS', payload: data });
 
       clearAlert();
     } catch (e) {
-      dispatch({ type: 'RESPONSE_FAIL', payload: e });
+      dispatch({ type: 'GET_ALL_USER_FAIL', payload: e });
       clearAlert();
     }
   }, []);
@@ -244,7 +252,7 @@ const UserProvider = ({ children }) => {
   const createGroup = async ({ userGroup }, accessToken) => {
     dispatch({ type: 'IS_LOADING' });
     try {
-      const response = await fetch(`/api/users/um/updateuser`, {
+      const response = await fetch(`/api/users/um/creategroup`, {
         method: 'POST',
         credentials: 'include',
         headers: {

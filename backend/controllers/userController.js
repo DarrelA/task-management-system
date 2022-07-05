@@ -107,10 +107,8 @@ const resetUserPassword = async (req, res, next) => {
     if (adminAcc.isAdmin === true) {
       user.password = process.env.DEFAULT_USER_PASSWORD;
       await user.save();
-      res.send({ message: 'success' });
-    }
-
-    return next(new HttpError('Insufficient access rights', 404));
+      return res.send({ message: 'success' });
+    } else return next(new HttpError('Insufficient access rights', 404));
   } catch (e) {
     console.error(e);
     return next(new HttpError('Something went wrong!', 500));
@@ -137,10 +135,8 @@ const updateUser = async (req, res, next) => {
           new HttpError('Cannot remove admin rights of your own admin account.', 404)
         );
       await user.save();
-      res.send({ message: 'success' });
-    }
-
-    return next(new HttpError('Insufficient access rights', 404));
+      return res.send({ message: 'success' });
+    } else return next(new HttpError('Insufficient access rights', 404));
   } catch (e) {
     console.error(e);
     return next(new HttpError('Something went wrong!', 500));
@@ -149,13 +145,18 @@ const updateUser = async (req, res, next) => {
 
 const createGroup = async (req, res, next) => {
   const { userGroup } = req.body;
-  const group = await User.findByPk(userGroup);
+  try {
+    const group = await Group.findByPk(userGroup);
 
-  if (!group) {
-    const newGroup = await Group.create({ name: userGroup });
-    await newGroup.save();
-    res.send({ message: 'success' });
-  } else return next(new HttpError('Group name is taken.', 400));
+    if (!group) {
+      const newGroup = await Group.create({ name: userGroup });
+      await newGroup.save();
+      res.send({ message: 'success' });
+    } else return next(new HttpError('Group name is taken.', 400));
+  } catch (e) {
+    console.error(e);
+    return next(new HttpError('Something went wrong!', 500));
+  }
 };
 
 const addRemoveUserGroup = async (req, res, next) => {
