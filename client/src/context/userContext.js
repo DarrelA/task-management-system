@@ -103,7 +103,8 @@ const UserProvider = ({ children }) => {
       const data = await response.json();
       const { accessToken, isAdmin } = data;
 
-      if (!response.ok) throw new Error(data.message);
+      // Refer to backend log
+      // if (!response.ok) throw new Error(data.message);
 
       dispatch({ type: 'REFRESH_TOKEN_SUCCESS', payload: { accessToken, isAdmin } });
     } catch (e) {}
@@ -177,7 +178,7 @@ const UserProvider = ({ children }) => {
     }
   }, []);
 
-  const createUser = async ({ name, email, userGroup, isActiveAcc }, accessToken) => {
+  const createUser = async ({ name, email, isActiveAcc }, accessToken) => {
     dispatch({ type: 'IS_LOADING' });
     try {
       const response = await fetch(`/api/users/um/user`, {
@@ -187,7 +188,7 @@ const UserProvider = ({ children }) => {
           'Content-Type': 'application/json',
           authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ name, email, userGroup, isActiveAcc }),
+        body: JSON.stringify({ name, email, isActiveAcc }),
       });
 
       const data = await response.json();
@@ -285,7 +286,31 @@ const UserProvider = ({ children }) => {
     }
   };
 
-  const addRemoveUserGroup = async ({ id, userGroup }, accessToken) => {};
+  const addRemoveUserGroup = async ({ id, userGroup }, accessToken) => {
+    dispatch({ type: 'IS_LOADING' });
+    try {
+      const response = await fetch(`/api/users/um/addremoveusergroup`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ id, userGroup }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+
+      dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
+
+      clearAlert();
+      getUsersData(accessToken);
+    } catch (e) {
+      dispatch({ type: 'RESPONSE_FAIL', payload: e });
+      clearAlert();
+    }
+  };
 
   const updateProfile = async ({ email, password, confirmPassword }, accessToken) => {
     dispatch({ type: 'IS_LOADING' });

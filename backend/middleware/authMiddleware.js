@@ -10,8 +10,8 @@ const authMiddleware = async (req, res, next) => {
     req.user = { userId };
     next();
   } catch (e) {
-    console.log(e);
-    return next(new HttpError('Please refresh and login again.', 401));
+    console.error(e);
+    return next(new HttpError('Refresh page', 401));
   }
 };
 

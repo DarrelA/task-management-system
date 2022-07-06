@@ -65,8 +65,10 @@ const getUsersData = async (req, res, next) => {
     // Account with admin rights
     if (user.isAdmin === true) {
       const users = await User.findAll({
+        include: Group,
         attributes: { exclude: ['password', 'isAdmin', 'refreshToken', 'updatedAt'] },
       });
+
       return res.send({ users });
     } else return next(new HttpError('Something went wrong!', 400));
   } catch (e) {
@@ -76,7 +78,7 @@ const getUsersData = async (req, res, next) => {
 };
 
 const createUser = async (req, res, next) => {
-  const { name, email, userGroup, isActiveAcc } = req.body;
+  const { name, email, isActiveAcc } = req.body;
   if (!name || !email) return next(new HttpError('Please provide name and email.', 400));
 
   if (await User.findOne({ where: { email } }))
@@ -90,10 +92,7 @@ const createUser = async (req, res, next) => {
       password: process.env.DEFAULT_USER_PASSWORD,
     });
 
-    const group = await Group.create({ name: userGroup });
-
     await user.save();
-    await group.save();
     return res.status(201).send({ message: 'success' });
   } catch (e) {
     console.error(e);
@@ -165,12 +164,21 @@ const createGroup = async (req, res, next) => {
 };
 
 const addRemoveUserGroup = async (req, res, next) => {
-  const { id, userGroup } = req.body;
-  const user = await User.findByPk(id);
-  const group = await User.findByPk(userGroup);
+  try {
+    const { id, userGroup } = req.body;
+    const user = await User.findByPk(id);
+    const group = await Group.findByPk(userGroup);
 
-  if (!group) return next(new HttpError('Kindly create the group.', 400));
-  res.send('hello');
+    const data = await UserGroup.findOne({ where: { userId: id, groupName: userGroup } });
+    JSON.stringify(data) === 'null'
+      ? await user.addGroup(group)
+      : await user.removeGroup(group);
+
+    res.send({ message: 'success' });
+  } catch (e) {
+    console.error(e);
+    return next(new HttpError('Something went wrong!', 500));
+  }
 };
 
 const getProfile = async (req, res, next) => {

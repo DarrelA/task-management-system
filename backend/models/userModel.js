@@ -87,7 +87,6 @@ const UserGroup = sequelize.define('usergroups', {
 User.belongsToMany(Group, { through: UserGroup });
 Group.belongsToMany(User, { through: UserGroup });
 
-let user, group;
 sequelize
   .sync()
   .then(() => createData())

@@ -26,15 +26,12 @@ const Login = () => {
     else {
       if (!isLoading && !!accessToken) {
         if (isAdmin) navigate('/usermanagement');
-        else navigate('/app');
+        else navigate('/apps');
       }
       setUpdateProfilePage(false);
     }
 
-    if (message === 'success') {
-      toast.success(message, { autoClose: 200 });
-      navigate('/app');
-    }
+    if (message === 'success') toast.success(message, { autoClose: 200 });
     if (!!message && !message.includes('success')) toast.error(message);
   }, [isLoading, accessToken, isAdmin, navigate, pathname, message]);
 

@@ -20,6 +20,7 @@ const UserManagement = () => {
     updateUser,
     resetUserPassword,
     createGroup,
+    addRemoveUserGroup,
   } = userContext;
 
   const [selectedRow, setSelectedRow] = useState(null);
@@ -60,6 +61,7 @@ const UserManagement = () => {
         return new Date(rowData.createdAt).toLocaleString('en-US', options);
       },
     },
+
     {
       title: 'Name',
       field: 'name',
@@ -79,12 +81,14 @@ const UserManagement = () => {
       title: 'User Group',
       field: 'userGroup',
       align: 'center',
+      editable: 'onUpdate',
     },
     {
       title: 'Active Account',
       field: 'isActiveAcc',
       lookup: { true: 'true', false: 'false' },
       initialEditValue: true,
+      editable: 'onUpdate',
       align: 'center',
       width: null,
       cellStyle: { width: 10 },
@@ -125,6 +129,16 @@ const UserManagement = () => {
             tooltip: 'Add Group',
             isFreeAction: true,
             onClick: toggleModalHandler,
+          },
+          {
+            icon: 'storm',
+            tooltip: 'temp button',
+            isFreeAction: true,
+            onClick: () =>
+              addRemoveUserGroup(
+                { id: '63b7f3d6-ea68-46ea-9758-ec5dbf013df3', userGroup: 'kiwi' },
+                accessToken
+              ),
           },
         ]}
         onRowClick={(event, selectedRow) => setSelectedRow(selectedRow.tableData.id)}
