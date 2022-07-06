@@ -1,6 +1,6 @@
 const express = require('express');
 
-const authMiddleware = require('../middleware/authMiddleware');
+const { authMiddleware, adminMiddleware } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 const {
@@ -24,15 +24,20 @@ router.post('/logout', logout);
 
 router
   .route('/um/user')
-  .post(authMiddleware, createUser)
-  .patch(authMiddleware, updateUser);
+  .post(authMiddleware, adminMiddleware, createUser)
+  .patch(authMiddleware, adminMiddleware, updateUser);
 
-router.post('/um/creategroup', authMiddleware, createGroup);
-router.post('/um/addremoveusergroup', authMiddleware, addRemoveUserGroup);
+router.post('/um/creategroup', authMiddleware, adminMiddleware, createGroup);
+router.post(
+  '/um/addremoveusergroup',
+  authMiddleware,
+  adminMiddleware,
+  addRemoveUserGroup
+);
 
-router.get('/um/all', authMiddleware, getUsersData);
+router.get('/um/all', authMiddleware, adminMiddleware, getUsersData);
 
-router.patch('/um/resetuserpassword', authMiddleware, resetUserPassword);
+router.patch('/um/resetuserpassword', authMiddleware, adminMiddleware, resetUserPassword);
 router.patch('/updateprofile', authMiddleware, updateProfile);
 
 module.exports = router;

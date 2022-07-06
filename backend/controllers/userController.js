@@ -60,17 +60,12 @@ const logout = async (req, res, next) => {
 
 const getUsersData = async (req, res, next) => {
   try {
-    const user = await User.findByPk(req.user.userId);
+    const users = await User.findAll({
+      include: [{ model: Group, attributes: ['name'] }],
+      attributes: { exclude: ['password', 'isAdmin', 'refreshToken', 'updatedAt'] },
+    });
 
-    // Account with admin rights
-    if (user.isAdmin === true) {
-      const users = await User.findAll({
-        include: Group,
-        attributes: { exclude: ['password', 'isAdmin', 'refreshToken', 'updatedAt'] },
-      });
-
-      return res.send({ users });
-    } else return next(new HttpError('Something went wrong!', 400));
+    return res.send({ users });
   } catch (e) {
     console.error(e);
     return next(new HttpError('Something went wrong!', 500));
