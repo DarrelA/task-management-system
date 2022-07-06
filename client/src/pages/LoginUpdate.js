@@ -1,27 +1,21 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import useUserContext from '../context/userContext';
 import {
   Button,
   Card,
   CardContent,
   Grid,
-  Typography,
   TextField,
+  Typography,
 } from '@material-ui/core';
-
-const initialState = {
-  name: '',
-  email: '',
-  password: '',
-  confirmPassword: '',
-};
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import useUserContext from '../context/userContext';
 
 const Login = () => {
   const userContext = useUserContext();
-  const { isLoading, message, accessToken, isAdmin, id } = userContext;
-  const [formData, setFormData] = useState(initialState);
+  const { isLoading, message, accessToken, isAdmin, email } = userContext;
+
+  const [formData, setFormData] = useState({ email, password: '', confirmPassword: '' });
   const [updateProfilePage, setUpdateProfilePage] = useState(false);
 
   const navigate = useNavigate();
@@ -30,16 +24,18 @@ const Login = () => {
   useEffect(() => {
     if (pathname === '/updateprofile') setUpdateProfilePage(true);
     else {
+      if (!isLoading && !!accessToken) {
+        if (isAdmin) navigate('/usermanagement');
+        else navigate('/app');
+      }
       setUpdateProfilePage(false);
-      if (!isLoading && !!accessToken && isAdmin) navigate('/usermanagement');
-      else if (!isLoading && !!accessToken) navigate('/app');
     }
 
     if (message === 'success') {
       toast.success(message, { autoClose: 200 });
       navigate('/app');
     }
-    if (!!message && message !== 'success') toast.error(message);
+    if (!!message && !message.includes('success')) toast.error(message);
   }, [isLoading, accessToken, isAdmin, navigate, pathname, message]);
 
   const inputHandler = (e) =>
@@ -58,7 +54,7 @@ const Login = () => {
         if (!formData.password.match(regex))
           return toast.error('Please provide a valid password.');
       }
-      userContext.updateProfile(formData, id, accessToken);
+      userContext.updateProfile(formData, accessToken);
     } else userContext.login(formData);
   };
 
@@ -77,6 +73,7 @@ const Login = () => {
               placeholder="lane@company.com"
               onInput={inputHandler}
               fullWidth
+              value={formData.email}
             />
 
             <TextField

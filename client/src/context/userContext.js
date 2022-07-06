@@ -1,12 +1,12 @@
 import React, { useCallback, useContext, useReducer } from 'react';
 
 const UserContext = React.createContext();
-const { id, name } = JSON.parse(localStorage.getItem('userData')) || {};
+const { name, email } = JSON.parse(localStorage.getItem('userData')) || {};
 
 const initialState = {
   isLoading: false,
-  id: id || '',
   name: name || '',
+  email: email || '',
   isAdmin: false,
   message: '',
   accessToken: '',
@@ -28,8 +28,8 @@ const userReducer = (state, action) => {
     }
 
     case 'LOGIN_USER_SUCCESS': {
-      const { id, name, isAdmin, accessToken } = action.payload;
-      return { ...state, isLoading: false, id, name, isAdmin, accessToken };
+      const { name, email, isAdmin, accessToken, message } = action.payload;
+      return { ...state, isLoading: false, name, email, isAdmin, accessToken, message };
     }
 
     case 'LOGIN_USER_FAIL': {
@@ -39,8 +39,8 @@ const userReducer = (state, action) => {
     case 'LOGOUT_USER': {
       return {
         isLoading: false,
-        id: '',
         name: '',
+        email: '',
         isAdmin: false,
         accessToken: '',
         message: '',
@@ -48,10 +48,20 @@ const userReducer = (state, action) => {
     }
 
     case 'GET_ALL_USER_SUCCESS': {
-      return { ...state, isLoading: false, users: action.payload };
+      const { users } = action.payload;
+      return { ...state, isLoading: false, users };
     }
 
     case 'GET_ALL_USER_FAIL': {
+      return { ...state, isLoading: false, message: action.payload.message };
+    }
+
+    case 'UPDATE_PROFILE_SUCCESS': {
+      const { email, message } = action.payload;
+      return { ...state, isLoading: false, email, message };
+    }
+
+    case 'UPDATE_PROFILE_FAIL': {
       return { ...state, isLoading: false, message: action.payload.message };
     }
 
@@ -73,11 +83,11 @@ const UserProvider = ({ children }) => {
 
   const clearAlert = () => setTimeout(() => dispatch({ type: 'CLEAR_MESSAGE' }, 500));
 
-  const addUserDataToLocalStorage = async (id, name) => {
+  const addUserDataToLocalStorage = async (name, email) => {
     const userData = JSON.parse(localStorage.getItem('userData')) || {};
     const updatedUserData = {
-      id: id || userData.id,
       name: name || userData.name,
+      email: email || userData.email,
     };
     localStorage.setItem('userData', JSON.stringify(updatedUserData));
   };
@@ -110,15 +120,15 @@ const UserProvider = ({ children }) => {
       });
 
       const data = await response.json();
-      const { id, name, isAdmin, accessToken } = data;
+      const { name, isAdmin, accessToken } = data;
       if (!response.ok) throw new Error(data.message);
 
       dispatch({
         type: 'LOGIN_USER_SUCCESS',
-        payload: { id, name, isAdmin, accessToken },
+        payload: { name, email, isAdmin, accessToken },
       });
 
-      addUserDataToLocalStorage(id, name);
+      addUserDataToLocalStorage(name, email);
       clearAlert();
     } catch (e) {
       dispatch({ type: 'LOGIN_USER_FAIL', payload: e });
@@ -145,7 +155,7 @@ const UserProvider = ({ children }) => {
     }
   };
 
-  const getAllUsers = useCallback(async (accessToken) => {
+  const getUsersData = useCallback(async (accessToken) => {
     dispatch({ type: 'IS_LOADING' });
     try {
       const response = await fetch(`/api/users/um/all`, {
@@ -170,7 +180,7 @@ const UserProvider = ({ children }) => {
   const createUser = async ({ name, email, userGroup, isActiveAcc }, accessToken) => {
     dispatch({ type: 'IS_LOADING' });
     try {
-      const response = await fetch(`/api/users/um/createuser`, {
+      const response = await fetch(`/api/users/um/user`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -189,7 +199,7 @@ const UserProvider = ({ children }) => {
       });
 
       clearAlert();
-      getAllUsers(accessToken);
+      getUsersData(accessToken);
       return 'success';
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });
@@ -216,7 +226,7 @@ const UserProvider = ({ children }) => {
       dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
 
       clearAlert();
-      getAllUsers(accessToken);
+      getUsersData(accessToken);
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });
       clearAlert();
@@ -226,7 +236,7 @@ const UserProvider = ({ children }) => {
   const updateUser = async ({ id, name, email, userGroup, isActiveAcc }, accessToken) => {
     dispatch({ type: 'IS_LOADING' });
     try {
-      const response = await fetch(`/api/users/um/updateuser`, {
+      const response = await fetch(`/api/users/um/user`, {
         method: 'PATCH',
         credentials: 'include',
         headers: {
@@ -242,7 +252,7 @@ const UserProvider = ({ children }) => {
       dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
 
       clearAlert();
-      getAllUsers(accessToken);
+      getUsersData(accessToken);
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });
       clearAlert();
@@ -268,20 +278,16 @@ const UserProvider = ({ children }) => {
       dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
 
       clearAlert();
-      getAllUsers(accessToken);
+      getUsersData(accessToken);
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });
       clearAlert();
     }
   };
 
-  const addUserToGroup = async ({ id, userGroup }, accessToken) => {};
+  const addRemoveUserGroup = async ({ id, userGroup }, accessToken) => {};
 
-  const updateProfile = async (
-    { name, email, password, confirmPassword },
-    id,
-    accessToken
-  ) => {
+  const updateProfile = async ({ email, password, confirmPassword }, accessToken) => {
     dispatch({ type: 'IS_LOADING' });
 
     try {
@@ -292,18 +298,16 @@ const UserProvider = ({ children }) => {
           'Content-Type': 'application/json',
           authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ name, email, password, confirmPassword, id }),
+        body: JSON.stringify({ email, password, confirmPassword }),
       });
 
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
-
-      dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
-
+      dispatch({ type: 'UPDATE_PROFILE_SUCCESS', payload: { ...data, email } });
+      addUserDataToLocalStorage(name, email);
       clearAlert();
-      getAllUsers(accessToken);
     } catch (e) {
-      dispatch({ type: 'RESPONSE_FAIL', payload: e });
+      dispatch({ type: 'UPDATE_PROFILE_FAIL', payload: e });
       clearAlert();
     }
   };
@@ -316,11 +320,11 @@ const UserProvider = ({ children }) => {
         login,
         logout,
         createUser,
-        getAllUsers,
+        getUsersData,
         resetUserPassword,
         updateUser,
         createGroup,
-        addUserToGroup,
+        addRemoveUserGroup,
         updateProfile,
       }}
     >

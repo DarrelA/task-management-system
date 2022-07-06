@@ -14,7 +14,7 @@ const UserManagement = () => {
     accessToken,
     isLoading,
     message,
-    getAllUsers,
+    getUsersData,
     users,
     createUser,
     updateUser,
@@ -31,8 +31,8 @@ const UserManagement = () => {
   }, [message]);
 
   useEffect(() => {
-    accessToken && getAllUsers(accessToken);
-  }, [accessToken, getAllUsers]);
+    accessToken && getUsersData(accessToken);
+  }, [accessToken, getUsersData]);
 
   const toggleModalHandler = () => setOpenModal((prevState) => !prevState);
   const newGroupHandler = (inputData) =>

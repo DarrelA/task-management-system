@@ -7,7 +7,7 @@ const {
   checkRefreshToken,
   login,
   logout,
-  getAllUsers,
+  getUsersData,
   createUser,
   resetUserPassword,
   updateUser,
@@ -21,16 +21,18 @@ const {
 router.post('/refresh_token', checkRefreshToken);
 router.post('/login', login);
 router.post('/logout', logout);
-router.post('/um/createuser', authMiddleware, createUser);
+
+router
+  .route('/um/user')
+  .post(authMiddleware, createUser)
+  .patch(authMiddleware, updateUser);
+
 router.post('/um/creategroup', authMiddleware, createGroup);
 router.post('/um/addremoveusergroup', authMiddleware, addRemoveUserGroup);
 
-// Exception for this /um/... route:
-// Non admin account (user account) can use this route to get email
-router.get('/um/all', authMiddleware, getAllUsers);
+router.get('/um/all', authMiddleware, getUsersData);
 
 router.patch('/um/resetuserpassword', authMiddleware, resetUserPassword);
-router.patch('/um/updateuser', authMiddleware, updateUser);
 router.patch('/updateprofile', authMiddleware, updateProfile);
 
 module.exports = router;

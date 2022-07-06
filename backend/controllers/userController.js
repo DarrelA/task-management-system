@@ -37,13 +37,13 @@ const login = async (req, res, next) => {
       );
 
     if (user && (await user.comparePassword(password))) {
-      const { id, name, isAdmin } = user;
+      const { name, isAdmin } = user;
       const accessToken = user.createAccessToken(user.id);
       const refreshToken = user.createRefreshToken(user.id);
       user.refreshToken = refreshToken;
       await user.save();
       user.sendRefreshToken(res, refreshToken);
-      return res.send({ id, name, isAdmin, accessToken });
+      return res.send({ name, isAdmin, accessToken, message: 'success' });
     }
 
     return next(new HttpError('Invalid credentials.', 401));
@@ -58,18 +58,17 @@ const logout = async (req, res, next) => {
   return res.send({ message: 'success' });
 };
 
-const getAllUsers = async (req, res, next) => {
+const getUsersData = async (req, res, next) => {
   try {
     const user = await User.findByPk(req.user.userId);
+
     // Account with admin rights
     if (user.isAdmin === true) {
       const users = await User.findAll({
         attributes: { exclude: ['password', 'isAdmin', 'refreshToken', 'updatedAt'] },
       });
-      res.send(users);
-    } else res.send(user.email);
-
-    return next(new HttpError('Something went wrong!', 400));
+      return res.send({ users });
+    } else return next(new HttpError('Something went wrong!', 400));
   } catch (e) {
     console.error(e);
     return next(new HttpError('Something went wrong!', 500));
@@ -174,13 +173,21 @@ const addRemoveUserGroup = async (req, res, next) => {
   res.send('hello');
 };
 
+const getProfile = async (req, res, next) => {
+  try {
+    const user = await User.findByPk(req.user.userId);
+    if (user) return res.send({ email: user.email });
+    return next(new HttpError('Something went wrong!', 400));
+  } catch (e) {
+    console.error(e);
+    return next(new HttpError('Something went wrong!', 500));
+  }
+};
+
 const updateProfile = async (req, res, next) => {
-  const { id, email, password, confirmPassword } = req.body;
+  const { email, password, confirmPassword } = req.body;
 
-  // user can only update their own account
-  if (req.user.userId !== id) return next(new HttpError('Something went wrong!', 400));
-
-  const user = await User.findByPk(id);
+  const user = await User.findByPk(req.user.userId);
 
   if (email && email !== user.email && (await User.findOne({ where: { email } })))
     return next(new HttpError('Email is taken.', 400));
@@ -211,11 +218,12 @@ module.exports = {
   checkRefreshToken,
   login,
   logout,
-  getAllUsers,
+  getUsersData,
   createUser,
   resetUserPassword,
   updateUser,
   createGroup,
   addRemoveUserGroup,
+  getProfile,
   updateProfile,
 };
