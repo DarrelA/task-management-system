@@ -1,4 +1,3 @@
-import { createTheme, ThemeProvider } from '@mui/material';
 import MaterialTable from 'material-table';
 import { toast } from 'react-toastify';
 
@@ -8,7 +7,6 @@ import InputModal from '../components/InputModal';
 import useUserContext from '../context/userContext';
 
 const UserManagement = () => {
-  const theme = createTheme({ palette: { mode: 'dark' } });
   const userContext = useUserContext();
   const {
     accessToken,
@@ -98,7 +96,7 @@ const UserManagement = () => {
   if (isLoading) return <p>Loading...</p>;
 
   return (
-    <ThemeProvider theme={theme}>
+    <>
       {openModal && (
         <InputModal
           open={openModal}
@@ -136,7 +134,7 @@ const UserManagement = () => {
             isFreeAction: true,
             onClick: () =>
               addRemoveUserGroup(
-                { id: '63b7f3d6-ea68-46ea-9758-ec5dbf013df3', userGroup: 'kiwi' },
+                { id: '00d189e4-5e4e-4c64-b9bc-9410bde4f256', userGroup: 'kiwi' },
                 accessToken
               ),
           },
@@ -155,7 +153,7 @@ const UserManagement = () => {
           }),
         }}
       />
-    </ThemeProvider>
+    </>
   );
 };
 

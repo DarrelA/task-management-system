@@ -11,35 +11,35 @@ const NavBar = () => {
   const classes = useStyles();
 
   const userContext = useUserContext();
-  const { name, isAdmin, accessToken, logout } = userContext;
+  const { isLoading, name, isAdmin, logout } = userContext;
+
+  if (isLoading) return <p></p>;
 
   return (
-    accessToken && (
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" className={classes.title}>
-            Task Management System
-          </Typography>
+    <AppBar position="static">
+      <Toolbar>
+        <Typography variant="h6" className={classes.title}>
+          Task Management System
+        </Typography>
 
-          <Button component={Link} to={'/apps'}>
-            Apps
-          </Button>
-          <Button component={Link} to={'/updateprofile'}>
-            {name}
-          </Button>
+        <Button component={Link} to={'/apps'}>
+          Apps
+        </Button>
+        <Button component={Link} to={'/updateprofile'}>
+          {name}
+        </Button>
 
-          {isAdmin && (
-            <Button component={Link} to={'/usermanagement'}>
-              User Management
-            </Button>
-          )}
-
-          <Button color="inherit" onClick={logout}>
-            Logout
+        {isAdmin && (
+          <Button component={Link} to={'/usermanagement'}>
+            User Management
           </Button>
-        </Toolbar>
-      </AppBar>
-    )
+        )}
+
+        <Button color="inherit" onClick={logout}>
+          Logout
+        </Button>
+      </Toolbar>
+    </AppBar>
   );
 };
 export default NavBar;

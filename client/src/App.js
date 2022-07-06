@@ -11,7 +11,7 @@ import { LoginUpdate, UserManagement } from './pages/';
 
 const App = () => {
   const theme = createTheme({ palette: { type: 'dark' } });
-  const { checkRefreshToken } = useUserContext();
+  const { checkRefreshToken, accessToken } = useUserContext();
 
   useEffect(() => {
     checkRefreshToken();
@@ -19,7 +19,7 @@ const App = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <NavBar />
+      {accessToken && <NavBar />}
       <Routes>
         <Route path="/" element={<LoginUpdate />} />
         <Route

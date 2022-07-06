@@ -10,9 +10,8 @@ const sequelize = new Sequelize(
   {
     host: 'localhost',
     dialect: 'mysql',
-    dialectOptions: {
-      connectTimeout: 60000,
-    },
+    dialectOptions: { connectTimeout: 60000 },
+    logging: false,
   }
 );
 
