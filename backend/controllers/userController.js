@@ -65,7 +65,11 @@ const getUsersData = async (req, res, next) => {
       attributes: { exclude: ['password', 'isAdmin', 'refreshToken', 'updatedAt'] },
     });
 
-    return res.send({ users });
+    const data = await Group.findAll({ attributes: ['name'] });
+    const groups = [];
+    data.forEach((group) => groups.push(group.name));
+
+    return res.send({ users, groups });
   } catch (e) {
     console.error(e);
     return next(new HttpError('Something went wrong!', 500));
@@ -176,17 +180,6 @@ const addRemoveUserGroup = async (req, res, next) => {
   }
 };
 
-const getProfile = async (req, res, next) => {
-  try {
-    const user = await User.findByPk(req.user.userId);
-    if (user) return res.send({ email: user.email });
-    return next(new HttpError('Something went wrong!', 400));
-  } catch (e) {
-    console.error(e);
-    return next(new HttpError('Something went wrong!', 500));
-  }
-};
-
 const updateProfile = async (req, res, next) => {
   const { email, password, confirmPassword } = req.body;
 
@@ -227,6 +220,5 @@ module.exports = {
   updateUser,
   createGroup,
   addRemoveUserGroup,
-  getProfile,
   updateProfile,
 };

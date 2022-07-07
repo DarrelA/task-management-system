@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 
 import InputModal from '../components/InputModal';
 import useUserContext from '../context/userContext';
+import { Checkbox, FormControlLabel } from '@material-ui/core';
 
 const UserManagement = () => {
   const userContext = useUserContext();
@@ -14,6 +15,7 @@ const UserManagement = () => {
     message,
     getUsersData,
     users,
+    allGroups,
     createUser,
     updateUser,
     resetUserPassword,
@@ -77,9 +79,45 @@ const UserManagement = () => {
     },
     {
       title: 'User Group',
-      field: 'userGroup',
       align: 'center',
       editable: 'onUpdate',
+      render: (rowData) =>
+        rowData.groups.map((group) => {
+          return allGroups.includes(group.name) ? (
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size="small"
+                  color="default"
+                  checked={!!group.name}
+                  onClick={() =>
+                    addRemoveUserGroup(
+                      { id: rowData.id, userGroup: group.name },
+                      accessToken
+                    )
+                  }
+                />
+              }
+              label={group.name}
+            />
+          ) : (
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size="small"
+                  color="default"
+                  onClick={() =>
+                    addRemoveUserGroup(
+                      { id: rowData.id, userGroup: group.name },
+                      accessToken
+                    )
+                  }
+                />
+              }
+              label="hi"
+            />
+          );
+        }),
     },
     {
       title: 'Active Account',
@@ -134,7 +172,7 @@ const UserManagement = () => {
             isFreeAction: true,
             onClick: () =>
               addRemoveUserGroup(
-                { id: '00d189e4-5e4e-4c64-b9bc-9410bde4f256', userGroup: 'kiwi' },
+                { id: '0661812f-6f90-4fa1-baa2-ca2482452c49', userGroup: 'orange' },
                 accessToken
               ),
           },
