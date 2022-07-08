@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 
 const sequelize = require('../config/db');
 const mockUsers = require('../config/mockUsers');
+const mockGroups = require('../config/mockGroups');
 
 const User = sequelize.define(
   'user',
@@ -110,6 +111,8 @@ const createData = async () => {
       ],
       { individualHooks: true }
     );
+
+    Group.bulkCreate([...mockGroups]);
   }
 };
 

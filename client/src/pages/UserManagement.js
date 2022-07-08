@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 
 import InputModal from '../components/InputModal';
 import useUserContext from '../context/userContext';
-import { Checkbox, FormControlLabel } from '@material-ui/core';
+import { Checkbox, FormControlLabel, Grid } from '@material-ui/core';
 
 const UserManagement = () => {
   const userContext = useUserContext();
@@ -84,7 +84,7 @@ const UserManagement = () => {
       render: (rowData) => {
         return (
           <>
-            <div>
+            <Grid container justifyContent="center" alignItems="center">
               {rowData.inGroups.map((group) => (
                 <FormControlLabel
                   control={
@@ -103,8 +103,8 @@ const UserManagement = () => {
                   label={group}
                 />
               ))}
-            </div>
-            <div>
+            </Grid>
+            <Grid container justifyContent="center" alignItems="center">
               {rowData.notInGroups.map((group) => (
                 <FormControlLabel
                   control={
@@ -122,7 +122,7 @@ const UserManagement = () => {
                   label={group}
                 />
               ))}
-            </div>
+            </Grid>
           </>
         );
       },
@@ -174,20 +174,10 @@ const UserManagement = () => {
             isFreeAction: true,
             onClick: toggleModalHandler,
           },
-          {
-            icon: 'storm',
-            tooltip: 'temp button',
-            isFreeAction: true,
-            onClick: () =>
-              addRemoveUserGroup(
-                { id: '0661812f-6f90-4fa1-baa2-ca2482452c49', userGroup: 'orange' },
-                accessToken
-              ),
-          },
         ]}
         onRowClick={(event, selectedRow) => setSelectedRow(selectedRow.tableData.id)}
         options={{
-          search: false,
+          search: true,
           filtering: false,
           pageSize: 10,
           pageSizeOptions: [10, 25, 50],
