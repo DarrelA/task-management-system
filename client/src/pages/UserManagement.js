@@ -81,43 +81,51 @@ const UserManagement = () => {
       title: 'User Group',
       align: 'center',
       editable: 'onUpdate',
-      render: (rowData) =>
-        rowData.groups.map((group) => {
-          return allGroups.includes(group.name) ? (
-            <FormControlLabel
-              control={
-                <Checkbox
-                  size="small"
-                  color="default"
-                  checked={!!group.name}
-                  onClick={() =>
-                    addRemoveUserGroup(
-                      { id: rowData.id, userGroup: group.name },
-                      accessToken
-                    )
+      render: (rowData) => {
+        return (
+          <>
+            <div>
+              {rowData.inGroups.map((group) => (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      size="small"
+                      color="default"
+                      checked={!!group}
+                      onClick={() =>
+                        addRemoveUserGroup(
+                          { id: rowData.id, userGroup: group },
+                          accessToken
+                        )
+                      }
+                    />
                   }
+                  label={group}
                 />
-              }
-              label={group.name}
-            />
-          ) : (
-            <FormControlLabel
-              control={
-                <Checkbox
-                  size="small"
-                  color="default"
-                  onClick={() =>
-                    addRemoveUserGroup(
-                      { id: rowData.id, userGroup: group.name },
-                      accessToken
-                    )
+              ))}
+            </div>
+            <div>
+              {rowData.notInGroups.map((group) => (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      size="small"
+                      color="default"
+                      onClick={() =>
+                        addRemoveUserGroup(
+                          { id: rowData.id, userGroup: group },
+                          accessToken
+                        )
+                      }
+                    />
                   }
+                  label={group}
                 />
-              }
-              label="hi"
-            />
-          );
-        }),
+              ))}
+            </div>
+          </>
+        );
+      },
     },
     {
       title: 'Active Account',

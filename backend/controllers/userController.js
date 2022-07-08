@@ -60,14 +60,39 @@ const logout = async (req, res, next) => {
 
 const getUsersData = async (req, res, next) => {
   try {
-    const users = await User.findAll({
-      include: [{ model: Group, attributes: ['name'] }],
-      attributes: { exclude: ['password', 'isAdmin', 'refreshToken', 'updatedAt'] },
-    });
-
     const data = await Group.findAll({ attributes: ['name'] });
     const groups = [];
     data.forEach((group) => groups.push(group.name));
+
+    let users = await User.findAll({
+      include: [
+        {
+          model: Group,
+          through: { attributes: [] },
+          attributes: { exclude: ['createdAt', 'updatedAt'] },
+        },
+      ],
+      attributes: { exclude: ['password', 'isAdmin', 'refreshToken', 'updatedAt'] },
+    });
+
+    users = JSON.stringify(users);
+    users = JSON.parse(users);
+
+    users.forEach((user, i) => {
+      user.inGroups = [];
+      user.groups.forEach((group) => {
+        users[i].inGroups.push(group.name);
+      });
+      user.inGroups.sort();
+      delete users[i].groups;
+    });
+
+    users.forEach((user) => {
+      user.notInGroups = [...groups];
+      user.notInGroups = user.notInGroups
+        .filter((group) => !user.inGroups.includes(group))
+        .sort();
+    });
 
     return res.send({ users, groups });
   } catch (e) {
