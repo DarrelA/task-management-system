@@ -15,7 +15,6 @@ const UserManagement = () => {
     message,
     getUsersData,
     users,
-    allGroups,
     createUser,
     updateUser,
     resetUserPassword,
@@ -41,14 +40,14 @@ const UserManagement = () => {
 
   const columns = [
     {
-      title: 'Created At',
-      field: 'createdAt',
+      title: 'Updated At',
+      field: 'updatedAt',
       defaultSort: 'desc',
       filtering: false,
       editable: 'never',
       align: 'center',
       width: null,
-      cellStyle: { width: 220 },
+      cellStyle: { width: 151 },
       render: (rowData) => {
         const options = {
           weekday: 'short',
@@ -58,10 +57,9 @@ const UserManagement = () => {
           hour: 'numeric',
           minute: '2-digit',
         };
-        return new Date(rowData.createdAt).toLocaleString('en-US', options);
+        return new Date(rowData.updatedAt).toLocaleString('en-US', options);
       },
     },
-
     {
       title: 'Name',
       field: 'name',
@@ -76,56 +74,67 @@ const UserManagement = () => {
       align: 'center',
       width: null,
       cellStyle: { width: 250 },
+      removable: false,
     },
     {
-      title: 'User Group',
+      title: 'In User Group',
+      field: 'inGroups',
       align: 'center',
-      editable: 'onUpdate',
+      editable: 'never',
+      disableClick: true,
       render: (rowData) => {
         return (
-          <>
-            <Grid container justifyContent="center" alignItems="center">
-              {rowData.inGroups.map((group) => (
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      size="small"
-                      color="default"
-                      checked={!!group}
-                      onClick={() =>
-                        addRemoveUserGroup(
-                          { id: rowData.id, userGroup: group },
-                          accessToken
-                        )
-                      }
-                    />
-                  }
-                  label={group}
-                />
-              ))}
-            </Grid>
-            <Grid container justifyContent="center" alignItems="center">
-              {rowData.notInGroups.map((group) => (
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      size="small"
-                      color="default"
-                      onClick={() =>
-                        addRemoveUserGroup(
-                          { id: rowData.id, userGroup: group },
-                          accessToken
-                        )
-                      }
-                    />
-                  }
-                  label={group}
-                />
-              ))}
-            </Grid>
-          </>
+          <Grid container justifyContent="center" alignItems="center">
+            {rowData.inGroups.map((group, i) => (
+              <FormControlLabel
+                key={rowData.id + i}
+                control={
+                  <Checkbox
+                    size="small"
+                    color="default"
+                    checked={!!group}
+                    onClick={() =>
+                      addRemoveUserGroup(
+                        { id: rowData.id, userGroup: group },
+                        accessToken
+                      )
+                    }
+                  />
+                }
+                label={group}
+              />
+            ))}
+          </Grid>
         );
       },
+    },
+    {
+      title: 'Not In User Group',
+      field: 'notInGroups',
+      align: 'center',
+      editable: 'never',
+      disableClick: true,
+      hidde: true,
+      hiddenByColumnsButton: true,
+      render: (rowData) => (
+        <Grid container justifyContent="center" alignItems="center">
+          {rowData.notInGroups.map((group, i) => (
+            <FormControlLabel
+              key={rowData.id + i}
+              control={
+                <Checkbox
+                  size="small"
+                  color="default"
+                  onClick={() =>
+                    addRemoveUserGroup({ id: rowData.id, userGroup: group }, accessToken)
+                  }
+                />
+              }
+              label={group}
+            />
+          ))}
+        </Grid>
+      ),
     },
     {
       title: 'Active Account',
@@ -184,6 +193,7 @@ const UserManagement = () => {
           emptyRowsWhenPaging: false,
           addRowPosition: 'first',
           actionsColumnIndex: -1,
+          columnsButton: true,
           rowStyle: (rowData) => ({
             backgroundColor: selectedRow === rowData.tableData.id ? '#1976d2' : '#303030',
           }),

@@ -48,8 +48,8 @@ const userReducer = (state, action) => {
     }
 
     case 'GET_ALL_USER_SUCCESS': {
-      const { users, groups } = action.payload;
-      return { ...state, isLoading: false, users, allGroups: groups };
+      const { users } = action.payload;
+      return { ...state, isLoading: false, users };
     }
 
     case 'GET_ALL_USER_FAIL': {

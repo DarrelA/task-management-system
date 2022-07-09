@@ -72,7 +72,7 @@ const getUsersData = async (req, res, next) => {
           attributes: { exclude: ['createdAt', 'updatedAt'] },
         },
       ],
-      attributes: { exclude: ['password', 'isAdmin', 'refreshToken', 'updatedAt'] },
+      attributes: { exclude: ['password', 'isAdmin', 'refreshToken', 'createdAt'] },
     });
 
     users = JSON.stringify(users);
@@ -94,7 +94,7 @@ const getUsersData = async (req, res, next) => {
         .sort();
     });
 
-    return res.send({ users, groups });
+    return res.send({ users });
   } catch (e) {
     console.error(e);
     return next(new HttpError('Something went wrong!', 500));
@@ -197,6 +197,10 @@ const addRemoveUserGroup = async (req, res, next) => {
     JSON.stringify(data) === 'null'
       ? await user.addGroup(group)
       : await user.removeGroup(group);
+
+    user.changed('updatedAt', true);
+    user.updatedAt = new Date();
+    await user.save();
 
     res.send({ message: 'success' });
   } catch (e) {
