@@ -1,11 +1,11 @@
-import MaterialTable from 'material-table';
+import MaterialTable, { MTableEditRow } from '@material-table/core';
 import { toast } from 'react-toastify';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { Checkbox, FormControlLabel, Grid } from '@material-ui/core';
 import InputModal from '../components/InputModal';
 import useUserContext from '../context/userContext';
-import { Checkbox, FormControlLabel, Grid } from '@material-ui/core';
 
 const UserManagement = () => {
   const userContext = useUserContext();
@@ -38,93 +38,30 @@ const UserManagement = () => {
   const newGroupHandler = (inputData) =>
     createGroup({ userGroup: inputData }, accessToken);
 
-  const columns = [
-    {
-      title: 'Updated At',
-      field: 'updatedAt',
-      defaultSort: 'desc',
-      filtering: false,
-      editable: 'never',
-      align: 'center',
-      width: null,
-      cellStyle: { width: 151 },
-      render: (rowData) => {
-        const options = {
-          weekday: 'short',
-          year: '2-digit',
-          month: 'short',
-          day: 'numeric',
-          hour: 'numeric',
-          minute: '2-digit',
-        };
-        return new Date(rowData.updatedAt).toLocaleString('en-US', options);
-      },
-    },
-    {
-      title: 'Name',
-      field: 'name',
-      align: 'center',
-      width: null,
-      cellStyle: { width: 220 },
-    },
-    {
-      title: 'Email',
-      field: 'email',
-      initialEditValue: '@company.com',
-      align: 'center',
-      width: null,
-      cellStyle: { width: 250 },
-      removable: false,
-    },
-    {
-      title: 'In User Group',
-      field: 'inGroups',
-      align: 'center',
-      editable: 'never',
-      disableClick: true,
-      render: (rowData) => {
-        return (
-          <Grid container justifyContent="center" alignItems="center">
-            {rowData.inGroups.map((group, i) => (
-              <FormControlLabel
-                key={rowData.id + i}
-                control={
-                  <Checkbox
-                    size="small"
-                    color="default"
-                    checked={!!group}
-                    onClick={() =>
-                      addRemoveUserGroup(
-                        { id: rowData.id, userGroup: group },
-                        accessToken
-                      )
-                    }
-                  />
-                }
-                label={group}
-              />
-            ))}
-          </Grid>
-        );
-      },
-    },
-    {
-      title: 'Not In User Group',
-      field: 'notInGroups',
-      align: 'center',
-      editable: 'never',
-      disableClick: true,
-      hidde: true,
-      hiddenByColumnsButton: true,
-      render: (rowData) => (
-        <Grid container justifyContent="center" alignItems="center">
-          {rowData.notInGroups.map((group, i) => (
+  const renderUpdatedAt = useCallback((rowData) => {
+    const options = {
+      weekday: 'short',
+      year: '2-digit',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    };
+    return new Date(rowData.updatedAt).toLocaleString('en-US', options);
+  }, []);
+
+  const renderInUserGroup = useCallback(
+    (rowData) => {
+      return (
+        <Grid container alignItems="center">
+          {rowData.inGroups.map((group, i) => (
             <FormControlLabel
               key={rowData.id + i}
               control={
                 <Checkbox
                   size="small"
                   color="default"
+                  checked={!!group}
                   onClick={() =>
                     addRemoveUserGroup({ id: rowData.id, userGroup: group }, accessToken)
                   }
@@ -134,19 +71,88 @@ const UserManagement = () => {
             />
           ))}
         </Grid>
-      ),
+      );
     },
-    {
-      title: 'Active Account',
-      field: 'isActiveAcc',
-      lookup: { true: 'true', false: 'false' },
-      initialEditValue: true,
-      editable: 'onUpdate',
-      align: 'center',
-      width: null,
-      cellStyle: { width: 10 },
-    },
-  ];
+    [accessToken, addRemoveUserGroup]
+  );
+
+  const renderNotInUserGroup = useCallback(
+    (rowData) => (
+      <Grid container alignItems="center">
+        {rowData.notInGroups.map((group, i) => (
+          <FormControlLabel
+            key={rowData.id + i}
+            control={
+              <Checkbox
+                size="small"
+                color="default"
+                onClick={() =>
+                  addRemoveUserGroup({ id: rowData.id, userGroup: group }, accessToken)
+                }
+              />
+            }
+            label={group}
+          />
+        ))}
+      </Grid>
+    ),
+    [accessToken, addRemoveUserGroup]
+  );
+
+  const columns = useMemo(
+    () => [
+      {
+        title: 'Updated At',
+        field: 'updatedAt',
+        defaultSort: 'desc',
+        filtering: false,
+        editable: 'never',
+        align: 'center',
+        width: 150,
+        render: renderUpdatedAt,
+      },
+      {
+        title: 'Name',
+        field: 'name',
+        align: 'center',
+        width: 220,
+      },
+      {
+        title: 'Email',
+        field: 'email',
+        initialEditValue: '@company.com',
+        align: 'center',
+        width: 220,
+        hiddenByColumnsButton: true,
+      },
+      {
+        title: 'In User Group',
+        field: 'inGroups',
+        align: 'center',
+        editable: 'onUpdate',
+        disableClick: true,
+        render: renderInUserGroup,
+      },
+      {
+        title: 'Not In User Group',
+        field: 'notInGroups',
+        align: 'center',
+        editable: 'onUpdate',
+        disableClick: true,
+        render: renderNotInUserGroup,
+      },
+      {
+        title: 'Active Account',
+        field: 'isActiveAcc',
+        lookup: { true: 'true', false: 'false' },
+        initialEditValue: true,
+        editable: 'onUpdate',
+        align: 'center',
+        width: 10,
+      },
+    ],
+    [renderUpdatedAt, renderInUserGroup, renderNotInUserGroup]
+  );
 
   if (isLoading) return <p>Loading...</p>;
 
@@ -188,8 +194,8 @@ const UserManagement = () => {
         options={{
           search: true,
           filtering: false,
-          pageSize: 10,
           pageSizeOptions: [10, 25, 50],
+          pageSize: 10,
           emptyRowsWhenPaging: false,
           addRowPosition: 'first',
           actionsColumnIndex: -1,
