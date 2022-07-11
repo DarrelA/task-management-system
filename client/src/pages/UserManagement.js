@@ -1,9 +1,9 @@
-import MaterialTable, { MTableEditRow } from '@material-table/core';
+import MaterialTable from '@material-table/core';
 import { toast } from 'react-toastify';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Checkbox, FormControlLabel, Grid } from '@material-ui/core';
+import { Chip, Grid } from '@material-ui/core';
 import InputModal from '../components/InputModal';
 import useUserContext from '../context/userContext';
 
@@ -19,10 +19,8 @@ const UserManagement = () => {
     updateUser,
     resetUserPassword,
     createGroup,
-    addRemoveUserGroup,
   } = userContext;
 
-  const [selectedRow, setSelectedRow] = useState(null);
   const [openModal, setOpenModal] = useState(false);
 
   useEffect(() => {
@@ -50,53 +48,68 @@ const UserManagement = () => {
     return new Date(rowData.updatedAt).toLocaleString('en-US', options);
   }, []);
 
-  const renderInUserGroup = useCallback(
-    (rowData) => {
-      return (
-        <Grid container alignItems="center">
-          {rowData.inGroups.map((group, i) => (
-            <FormControlLabel
-              key={rowData.id + i}
-              control={
-                <Checkbox
-                  size="small"
-                  color="default"
-                  checked={!!group}
-                  onClick={() =>
-                    addRemoveUserGroup({ id: rowData.id, userGroup: group }, accessToken)
-                  }
-                />
-              }
-              label={group}
-            />
+  const EditComponentUserGroups = ({ rowData }) => {
+    const [inGroups, setInGroups] = useState([...rowData.inGroups]);
+    const [notInGroups, setNotInGroups] = useState([...rowData.notInGroups]);
+
+    return (
+      <>
+        <Grid container spacing={1} justifyContent="center">
+          {inGroups.map((group, i) => (
+            <Grid item key={rowData.id + i}>
+              <Chip
+                label={group}
+                size="medium"
+                variant="default"
+                color="default"
+                clickable
+                onClick={() => {
+                  setInGroups(inGroups.filter((grp) => grp !== group));
+                  setNotInGroups([group, ...notInGroups].sort());
+                  rowData.inGroups = rowData.inGroups.filter((grp) => grp !== group);
+                  rowData.notInGroups = [group, ...notInGroups];
+                }}
+              />
+            </Grid>
           ))}
         </Grid>
-      );
-    },
-    [accessToken, addRemoveUserGroup]
-  );
 
-  const renderNotInUserGroup = useCallback(
-    (rowData) => (
-      <Grid container alignItems="center">
-        {rowData.notInGroups.map((group, i) => (
-          <FormControlLabel
-            key={rowData.id + i}
-            control={
-              <Checkbox
+        <Grid container spacing={1} justifyContent="center">
+          {notInGroups.map((group, i) => (
+            <Grid item key={rowData.id + i}>
+              <Chip
+                label={group}
                 size="small"
-                color="default"
-                onClick={() =>
-                  addRemoveUserGroup({ id: rowData.id, userGroup: group }, accessToken)
-                }
+                variant="default"
+                color="secondary"
+                clickable
+                onClick={() => {
+                  setNotInGroups(notInGroups.filter((grp) => grp !== group));
+                  setInGroups([group, ...inGroups]);
+                  rowData.notInGroups = rowData.notInGroups.filter(
+                    (grp) => grp !== group
+                  );
+                  rowData.inGroups = [group, ...inGroups];
+                }}
               />
-            }
-            label={group}
-          />
+            </Grid>
+          ))}
+        </Grid>
+      </>
+    );
+  };
+
+  const renderUserGroups = useCallback(
+    (rowData) => (
+      <Grid container spacing={1} justifyContent="center">
+        {rowData.inGroups.map((group, i) => (
+          <Grid item key={rowData.id + i}>
+            <Chip label={group} size="small" variant="default" />
+          </Grid>
         ))}
       </Grid>
     ),
-    [accessToken, addRemoveUserGroup]
+    []
   );
 
   const columns = useMemo(
@@ -126,20 +139,13 @@ const UserManagement = () => {
         hiddenByColumnsButton: true,
       },
       {
-        title: 'In User Group',
+        title: 'User Groups',
         field: 'inGroups',
         align: 'center',
+        headerStyle: { justifyContent: 'center' },
         editable: 'onUpdate',
-        disableClick: true,
-        render: renderInUserGroup,
-      },
-      {
-        title: 'Not In User Group',
-        field: 'notInGroups',
-        align: 'center',
-        editable: 'onUpdate',
-        disableClick: true,
-        render: renderNotInUserGroup,
+        editComponent: EditComponentUserGroups,
+        render: renderUserGroups,
       },
       {
         title: 'Active Account',
@@ -151,7 +157,7 @@ const UserManagement = () => {
         width: 10,
       },
     ],
-    [renderUpdatedAt, renderInUserGroup, renderNotInUserGroup]
+    [renderUpdatedAt, renderUserGroups]
   );
 
   if (isLoading) return <p>Loading...</p>;
@@ -190,19 +196,14 @@ const UserManagement = () => {
             onClick: toggleModalHandler,
           },
         ]}
-        onRowClick={(event, selectedRow) => setSelectedRow(selectedRow.tableData.id)}
         options={{
           search: true,
           filtering: false,
-          pageSizeOptions: [10, 25, 50],
           pageSize: 10,
           emptyRowsWhenPaging: false,
           addRowPosition: 'first',
           actionsColumnIndex: -1,
           columnsButton: true,
-          rowStyle: (rowData) => ({
-            backgroundColor: selectedRow === rowData.tableData.id ? '#1976d2' : '#303030',
-          }),
         }}
       />
     </>

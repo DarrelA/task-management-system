@@ -234,7 +234,10 @@ const UserProvider = ({ children }) => {
     }
   };
 
-  const updateUser = async ({ id, name, email, userGroup, isActiveAcc }, accessToken) => {
+  const updateUser = async (
+    { id, name, email, inGroups, notInGroups, isActiveAcc },
+    accessToken
+  ) => {
     dispatch({ type: 'IS_LOADING' });
     try {
       const response = await fetch(`/api/users/um/user`, {
@@ -244,7 +247,7 @@ const UserProvider = ({ children }) => {
           'Content-Type': 'application/json',
           authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ id, name, email, userGroup, isActiveAcc }),
+        body: JSON.stringify({ id, name, email, inGroups, notInGroups, isActiveAcc }),
       });
 
       const data = await response.json();
@@ -271,32 +274,6 @@ const UserProvider = ({ children }) => {
           authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({ userGroup }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message);
-
-      dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
-
-      clearAlert();
-      getUsersData(accessToken);
-    } catch (e) {
-      dispatch({ type: 'RESPONSE_FAIL', payload: e });
-      clearAlert();
-    }
-  };
-
-  const addRemoveUserGroup = async ({ id, userGroup }, accessToken) => {
-    dispatch({ type: 'IS_LOADING' });
-    try {
-      const response = await fetch(`/api/users/um/addremoveusergroup`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({ id, userGroup }),
       });
 
       const data = await response.json();
@@ -349,7 +326,6 @@ const UserProvider = ({ children }) => {
         resetUserPassword,
         updateUser,
         createGroup,
-        addRemoveUserGroup,
         updateProfile,
       }}
     >

@@ -128,15 +128,11 @@ const resetUserPassword = async (req, res, next) => {
   if (req.body.id === req.user.userId)
     return next(new HttpError('Please use update profile page to change password.', 404));
   const user = await User.findByPk(req.body.id);
-  const adminAcc = await User.findByPk(req.user.userId);
 
   try {
-    // Account with admin rights
-    if (adminAcc.isAdmin === true) {
-      user.password = process.env.DEFAULT_USER_PASSWORD;
-      await user.save();
-      return res.send({ message: 'success' });
-    } else return next(new HttpError('Insufficient access rights', 404));
+    user.password = process.env.DEFAULT_USER_PASSWORD;
+    await user.save();
+    return res.send({ message: 'success' });
   } catch (e) {
     console.error(e);
     return next(new HttpError('Something went wrong!', 500));
@@ -144,27 +140,42 @@ const resetUserPassword = async (req, res, next) => {
 };
 
 const updateUser = async (req, res, next) => {
-  const { id, name, email, userGroup, isActiveAcc } = req.body;
+  const { id, name, email, isActiveAcc } = req.body;
   const user = await User.findByPk(id);
-  const adminAcc = await User.findByPk(req.user.userId);
 
   if (email !== user.email && (await User.findOne({ where: { email } })))
     return next(new HttpError('Email is taken.', 400));
 
   try {
-    // Account with admin rights
-    if (adminAcc.isAdmin === true) {
-      if (name) user.name = name;
-      if (email) user.email = email;
-      if (userGroup) user.userGroup = userGroup;
-      if (isActiveAcc && id !== req.user.userId) user.isActiveAcc = isActiveAcc;
-      if (isActiveAcc === 'false' && id === req.user.userId)
-        return next(
-          new HttpError('Cannot remove admin rights of your own admin account.', 404)
-        );
-      await user.save();
-      return res.send({ message: 'success' });
-    } else return next(new HttpError('Insufficient access rights', 404));
+    if (name) user.name = name;
+    if (email) user.email = email;
+
+    // admin cannot deactivate their own account
+    if (isActiveAcc && id !== req.user.userId) user.isActiveAcc = isActiveAcc;
+    if (isActiveAcc === 'false' && id === req.user.userId)
+      return next(
+        new HttpError('Cannot remove admin rights of your own admin account.', 404)
+      );
+
+    await user.save();
+
+    // Usergroups management
+    const { inGroups, notInGroups } = req.body;
+    console.log(inGroups);
+    inGroups.forEach(async (group) => {
+      const groupInSQL = await Group.findByPk(group);
+      if (!groupInSQL) return next(new HttpError('Something went wrong!', 400));
+    });
+
+    const count = await UserGroup.destroy({ where: { userId: id } });
+    console.log(`${count} usergroup(s) are removed under userId: ${id}.`);
+    inGroups.forEach(async (group) => await user.addGroup(group));
+
+    user.changed('updatedAt', true);
+    user.updatedAt = new Date();
+    await user.save();
+
+    return res.send({ message: 'success' });
   } catch (e) {
     console.error(e);
     return next(new HttpError('Something went wrong!', 500));
@@ -181,28 +192,6 @@ const createGroup = async (req, res, next) => {
       await newGroup.save();
       res.send({ message: 'success' });
     } else return next(new HttpError('Group name is taken.', 400));
-  } catch (e) {
-    console.error(e);
-    return next(new HttpError('Something went wrong!', 500));
-  }
-};
-
-const addRemoveUserGroup = async (req, res, next) => {
-  try {
-    const { id, userGroup } = req.body;
-    const user = await User.findByPk(id);
-    const group = await Group.findByPk(userGroup);
-
-    const data = await UserGroup.findOne({ where: { userId: id, groupName: userGroup } });
-    JSON.stringify(data) === 'null'
-      ? await user.addGroup(group)
-      : await user.removeGroup(group);
-
-    user.changed('updatedAt', true);
-    user.updatedAt = new Date();
-    await user.save();
-
-    res.send({ message: 'success' });
   } catch (e) {
     console.error(e);
     return next(new HttpError('Something went wrong!', 500));
@@ -248,6 +237,5 @@ module.exports = {
   resetUserPassword,
   updateUser,
   createGroup,
-  addRemoveUserGroup,
   updateProfile,
 };
