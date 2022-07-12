@@ -1,4 +1,4 @@
-import MaterialTable from '@material-table/core';
+import MaterialTable, { MTableEditRow } from '@material-table/core';
 import { toast } from 'react-toastify';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -142,7 +142,6 @@ const UserManagement = () => {
         title: 'User Groups',
         field: 'inGroups',
         align: 'center',
-        headerStyle: { justifyContent: 'center' },
         editable: 'onUpdate',
         editComponent: EditComponentUserGroups,
         render: renderUserGroups,
@@ -177,7 +176,7 @@ const UserManagement = () => {
         data={users}
         editable={{
           onRowAdd: (newRow) => createUser(newRow, accessToken),
-          onRowUpdate: (newRow, oldRow) => updateUser(newRow, accessToken),
+          onRowUpdate: (newData, oldData) => updateUser(newData, accessToken),
         }}
         actions={[
           {
@@ -196,6 +195,12 @@ const UserManagement = () => {
             onClick: toggleModalHandler,
           },
         ]}
+        components={{
+          EditRow: (props) => {
+            console.log(props);
+            return <MTableEditRow {...props} />;
+          },
+        }}
         options={{
           search: true,
           filtering: false,
