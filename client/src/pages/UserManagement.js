@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Chip, Grid } from '@material-ui/core';
-import InputModal from '../components/InputModal';
+import { InputModal, LoadingSpinner } from '../components/';
 import useUserContext from '../context/userContext';
 
 const UserManagement = () => {
@@ -160,7 +160,7 @@ const UserManagement = () => {
     [renderUpdatedAt, renderUserGroups]
   );
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading) return <LoadingSpinner />;
 
   return (
     <>

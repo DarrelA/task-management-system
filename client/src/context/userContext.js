@@ -48,8 +48,8 @@ const userReducer = (state, action) => {
     }
 
     case 'GET_ALL_USER_SUCCESS': {
-      const { users } = action.payload;
-      return { ...state, isLoading: false, users };
+      const { users, name, email } = action.payload;
+      return { ...state, isLoading: false, users, name, email };
     }
 
     case 'GET_ALL_USER_FAIL': {
@@ -170,6 +170,7 @@ const UserProvider = ({ children }) => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
       dispatch({ type: 'GET_ALL_USER_SUCCESS', payload: data });
+      addUserDataToLocalStorage(data.name, data.email);
 
       clearAlert();
     } catch (e) {

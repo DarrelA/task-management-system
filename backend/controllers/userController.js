@@ -94,7 +94,7 @@ const getUsersData = async (req, res, next) => {
         .sort();
     });
 
-    return res.send({ users });
+    return res.send({ users, name: req.admin.name, email: req.admin.email });
   } catch (e) {
     console.error(e);
     return next(new HttpError('Something went wrong!', 500));
@@ -143,12 +143,13 @@ const updateUser = async (req, res, next) => {
   const { id, name, email, isActiveAcc } = req.body;
   const user = await User.findByPk(id);
 
+  if (!user) return next(new HttpError('Something went wrong!', 400));
   if (email !== user.email && (await User.findOne({ where: { email } })))
     return next(new HttpError('Email is taken.', 400));
 
   try {
-    if (name) user.name = name;
-    if (email) user.email = email;
+    if (name) user.name = name.trim();
+    if (email) user.email = email.trim();
 
     // admin cannot deactivate their own account
     if (isActiveAcc && id !== req.user.userId) user.isActiveAcc = isActiveAcc;
@@ -161,14 +162,14 @@ const updateUser = async (req, res, next) => {
 
     // Usergroups management
     const { inGroups, notInGroups } = req.body;
-    console.log(inGroups);
+
     inGroups.forEach(async (group) => {
       const groupInSQL = await Group.findByPk(group);
       if (!groupInSQL) return next(new HttpError('Something went wrong!', 400));
     });
 
     const count = await UserGroup.destroy({ where: { userId: id } });
-    console.log(`${count} usergroup(s) are removed under userId: ${id}.`);
+    // console.info(`${count} usergroup(s) are removed under userId: ${id}.`);
     inGroups.forEach(async (group) => await user.addGroup(group));
 
     user.changed('updatedAt', true);

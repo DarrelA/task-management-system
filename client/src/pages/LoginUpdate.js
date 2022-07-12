@@ -9,6 +9,7 @@ import {
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { LoadingSpinner } from '../components';
 import useUserContext from '../context/userContext';
 
 const Login = () => {
@@ -55,7 +56,7 @@ const Login = () => {
     } else userContext.login(formData);
   };
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading) return <LoadingSpinner />;
 
   return (
     <Card style={{ maxWidth: 400, margin: '100px auto', padding: '20px 5px' }}>
