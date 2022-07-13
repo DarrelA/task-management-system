@@ -109,7 +109,7 @@ const Login = () => {
 
               <Typography variant="caption" color="inherit">
                 Comprise of alphabets , numbers, and special character. Minimum 8
-                charactersand maximum 10 characters.
+                characters and maximum 10 characters.
               </Typography>
             </>
           )}

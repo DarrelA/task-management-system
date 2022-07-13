@@ -56,7 +56,7 @@ User.prototype.comparePassword = async function (inputPassword) {
 };
 
 User.prototype.createAccessToken = function (userId) {
-  return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '15m' });
+  return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '2h' });
 };
 
 User.prototype.createRefreshToken = function (userId) {

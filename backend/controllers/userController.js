@@ -75,6 +75,7 @@ const getUsersData = async (req, res, next) => {
       attributes: { exclude: ['password', 'isAdmin', 'refreshToken', 'createdAt'] },
     });
 
+    // Get only dataValues from Sequelize ORM
     users = JSON.stringify(users);
     users = JSON.parse(users);
 
@@ -110,8 +111,20 @@ const createUser = async (req, res, next) => {
 
   try {
     const user = await User.create({
-      name: name.trim(),
-      email: email.trim(),
+      name: name
+        .trim()
+        .replace(/\s+/g, ' ') // Replace multiple whitespaces with single whitespace
+        .replace(/[^a-zA-Z]/g, '') // Keep only alphabets
+        .split(' ')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' '),
+
+      email: email
+        .trim()
+        .replace(/\s+/g, '') // Remove all whitespaces
+        .replace(/[&\/\\#,+()!$~%^'":*?<>{}]/g, '') // Remove symbols
+        .toLowerCase(),
+
       isActiveAcc: isActiveAcc,
       password: process.env.DEFAULT_USER_PASSWORD,
     });
@@ -148,8 +161,21 @@ const updateUser = async (req, res, next) => {
     return next(new HttpError('Email is taken.', 400));
 
   try {
-    if (name) user.name = name.trim();
-    if (email) user.email = email.trim();
+    if (name)
+      user.name = name
+        .trim()
+        .replace(/\s+/g, ' ') // Replace multiple whitespaces with single whitespace
+        .replace(/[^a-zA-Z]/g, '') // Keep only alphabets
+        .split(' ')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+
+    if (email)
+      user.email = email
+        .trim()
+        .replace(/\s+/g, '') // Replace multiple whitespaces with single whitespace
+        .replace(/[&\/\\#,+()!$~%^'":*?<>{}]/g, '') // Remove symbols
+        .toLowerCase();
 
     // admin cannot deactivate their own account
     if (isActiveAcc && id !== req.user.userId) user.isActiveAcc = isActiveAcc;
@@ -184,7 +210,14 @@ const updateUser = async (req, res, next) => {
 };
 
 const createGroup = async (req, res, next) => {
-  const { userGroup } = req.body;
+  const userGroup = req.body.userGroup
+    .trim()
+    .replace(/\s+/g, ' ') // Replace multiple whitespaces with single whitespace
+    .toLowerCase()
+    .split(' ')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+
   if (!userGroup) return next(new HttpError('Group name is required.', 400));
 
   try {
@@ -208,7 +241,7 @@ const checkGroup = async (req, res, next) => {
       where: { userId: id, groupName: userGroup },
     });
 
-    res.send(!!group[0]?.id); // Check user in user group? T/F
+    res.send(!!group[0]?.id); // Check user in user group? Return T/F
   } catch (e) {
     console.error(e);
     return next(new HttpError('Something went wrong!', 500));
