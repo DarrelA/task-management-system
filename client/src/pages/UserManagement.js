@@ -1,4 +1,4 @@
-import MaterialTable, { MTableEditRow } from '@material-table/core';
+import MaterialTable from '@material-table/core';
 import { toast } from 'react-toastify';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -33,8 +33,10 @@ const UserManagement = () => {
   }, [accessToken, getUsersData]);
 
   const toggleModalHandler = () => setOpenModal((prevState) => !prevState);
-  const newGroupHandler = (inputData) =>
+  const newGroupHandler = (inputData) => {
+    if (!inputData) return;
     createGroup({ userGroup: inputData }, accessToken);
+  };
 
   const renderUpdatedAt = useCallback((rowData) => {
     const options = {

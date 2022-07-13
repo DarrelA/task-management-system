@@ -12,6 +12,7 @@ const {
   resetUserPassword,
   updateUser,
   createGroup,
+  checkGroup,
   updateProfile,
 } = require('../controllers/userController');
 
@@ -27,6 +28,7 @@ router
   .patch(authMiddleware, adminMiddleware, updateUser);
 
 router.post('/um/creategroup', authMiddleware, adminMiddleware, createGroup);
+router.post('/um/checkgroup', authMiddleware, adminMiddleware, checkGroup);
 
 router.get('/um/all', authMiddleware, adminMiddleware, getUsersData);
 

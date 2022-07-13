@@ -2,8 +2,8 @@ import useUserContext from '../context/userContext';
 import { Navigate } from 'react-router-dom';
 
 const ProtectedRoute = ({ children }) => {
-  const { accessToken } = useUserContext();
-  if (!accessToken) return <Navigate to="/" />;
+  const { email } = useUserContext();
+  if (!email) return <Navigate to="/" />;
   return children;
 };
 

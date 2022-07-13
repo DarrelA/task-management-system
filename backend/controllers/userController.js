@@ -185,6 +185,8 @@ const updateUser = async (req, res, next) => {
 
 const createGroup = async (req, res, next) => {
   const { userGroup } = req.body;
+  if (!userGroup) return next(new HttpError('Group name is required.', 400));
+
   try {
     const group = await Group.findByPk(userGroup);
 
@@ -193,6 +195,20 @@ const createGroup = async (req, res, next) => {
       await newGroup.save();
       res.send({ message: 'success' });
     } else return next(new HttpError('Group name is taken.', 400));
+  } catch (e) {
+    console.error(e);
+    return next(new HttpError('Something went wrong!', 500));
+  }
+};
+
+const checkGroup = async (req, res, next) => {
+  const { id, userGroup } = req.body;
+  try {
+    const group = await UserGroup.findAll({
+      where: { userId: id, groupName: userGroup },
+    });
+
+    res.send(!!group[0]?.id); // Check user in user group? T/F
   } catch (e) {
     console.error(e);
     return next(new HttpError('Something went wrong!', 500));
@@ -238,5 +254,6 @@ module.exports = {
   resetUserPassword,
   updateUser,
   createGroup,
+  checkGroup,
   updateProfile,
 };

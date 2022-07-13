@@ -23,14 +23,12 @@ const Login = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    if (pathname === '/updateprofile') setUpdateProfilePage(true);
-    else {
-      if (!isLoading && !!accessToken) {
-        if (isAdmin) navigate('/usermanagement');
-        else navigate('/apps');
-      }
-      setUpdateProfilePage(false);
-    }
+    pathname === '/updateprofile'
+      ? setUpdateProfilePage(true)
+      : setUpdateProfilePage(false);
+
+    if (!isLoading && !!accessToken && pathname === '/')
+      isAdmin ? navigate('/usermanagement') : navigate('/apps');
 
     if (message === 'success') toast.success(message, { autoClose: 200 });
     if (!!message && !message.includes('success')) toast.error(message);
