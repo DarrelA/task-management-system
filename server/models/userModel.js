@@ -95,7 +95,10 @@ sequelize
 
 const createData = async () => {
   const defaultAdmin = await User.findOne({
-    where: { email: process.env.DEFAULT_ADMIN_EMAIL },
+    where: {
+      name: process.env.DEFAULT_ADMIN_NAME,
+      email: process.env.DEFAULT_ADMIN_EMAIL,
+    },
   });
 
   if (!defaultAdmin) {

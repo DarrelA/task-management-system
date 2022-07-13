@@ -305,9 +305,10 @@ const UserProvider = ({ children }) => {
       });
 
       const data = await response.json();
+
       if (!response.ok) throw new Error(data.message);
-      dispatch({ type: 'UPDATE_PROFILE_SUCCESS', payload: { ...data, email } });
-      addUserDataToLocalStorage(name, email);
+      dispatch({ type: 'UPDATE_PROFILE_SUCCESS', payload: data });
+      addUserDataToLocalStorage(data.name, data.email);
       clearAlert();
     } catch (e) {
       dispatch({ type: 'UPDATE_PROFILE_FAIL', payload: e });

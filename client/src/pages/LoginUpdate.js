@@ -32,7 +32,12 @@ const Login = () => {
 
     if (message === 'success') toast.success(message, { autoClose: 200 });
     if (!!message && !message.includes('success')) toast.error(message);
-  }, [isLoading, accessToken, isAdmin, navigate, pathname, message]);
+  }, [isLoading, message, accessToken, isAdmin, navigate, pathname]);
+
+  useEffect(
+    () => message === 'success' && setFormData({ ...formData, email }),
+    [message, email, formData]
+  );
 
   const inputHandler = (e) =>
     setFormData({ ...formData, [e.target.id]: e.target.value.trim() });

@@ -113,8 +113,8 @@ const createUser = async (req, res, next) => {
     const user = await User.create({
       name: name
         .trim()
+        .replace(/[^a-zA-Z ]/g, '') // Keep only alphabets and whitespace
         .replace(/\s+/g, ' ') // Replace multiple whitespaces with single whitespace
-        .replace(/[^a-zA-Z]/g, '') // Keep only alphabets
         .split(' ')
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' '),
@@ -164,8 +164,8 @@ const updateUser = async (req, res, next) => {
     if (name)
       user.name = name
         .trim()
+        .replace(/[^a-zA-Z ]/g, '') // Keep only alphabets and whitespace
         .replace(/\s+/g, ' ') // Replace multiple whitespaces with single whitespace
-        .replace(/[^a-zA-Z]/g, '') // Keep only alphabets
         .split(' ')
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');
@@ -268,10 +268,16 @@ const updateProfile = async (req, res, next) => {
   }
 
   try {
-    if (email) user.email = email;
+    if (email)
+      user.email = email
+        .trim()
+        .replace(/\s+/g, '') // Replace multiple whitespaces with single whitespace
+        .replace(/[&\/\\#,+()!$~%^'":*?<>{}]/g, '') // Remove symbols
+        .toLowerCase();
+
     if (password) user.password = password;
     await user.save();
-    res.send({ message: 'success' });
+    res.send({ name: user.name, email: user.email, message: 'success' });
   } catch (e) {
     console.error(e);
     return next(new HttpError('Something went wrong!', 500));
