@@ -195,12 +195,6 @@ const UserManagement = () => {
             onClick: toggleModalHandler,
           },
         ]}
-        components={{
-          EditRow: (props) => {
-            console.log(props);
-            return <MTableEditRow {...props} />;
-          },
-        }}
         options={{
           search: true,
           filtering: false,
