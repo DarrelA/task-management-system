@@ -1,4 +1,4 @@
-const { User, Group, UserGroup } = require('../models/userModel');
+const { User, Group, UserGroup } = require('../models/userTaskModel');
 const jwt = require('jsonwebtoken');
 const HttpError = require('../models/http-error');
 
