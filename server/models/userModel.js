@@ -94,12 +94,7 @@ sequelize
   .catch((e) => console.error(e));
 
 const createData = async () => {
-  const defaultAdmin = await User.findOne({
-    where: {
-      name: process.env.DEFAULT_ADMIN_NAME,
-      email: process.env.DEFAULT_ADMIN_EMAIL,
-    },
-  });
+  const defaultAdmin = await User.findOne({ where: { isAdmin: 1 } });
 
   if (!defaultAdmin) {
     User.bulkCreate(
