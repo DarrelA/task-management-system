@@ -1,11 +1,11 @@
 import React, { useCallback, useContext, useReducer } from 'react';
 
 const UserContext = React.createContext();
-const { name, email } = JSON.parse(localStorage.getItem('userData')) || {};
+const { username, email } = JSON.parse(localStorage.getItem('userData')) || {};
 
 const initialState = {
   isLoading: false,
-  name: name || '',
+  username: username || '',
   email: email || '',
   isAdmin: false,
   message: '',
@@ -28,8 +28,16 @@ const userReducer = (state, action) => {
     }
 
     case 'LOGIN_USER_SUCCESS': {
-      const { name, email, isAdmin, accessToken, message } = action.payload;
-      return { ...state, isLoading: false, name, email, isAdmin, accessToken, message };
+      const { username, email, isAdmin, accessToken, message } = action.payload;
+      return {
+        ...state,
+        isLoading: false,
+        username,
+        email,
+        isAdmin,
+        accessToken,
+        message,
+      };
     }
 
     case 'LOGIN_USER_FAIL': {
@@ -39,7 +47,7 @@ const userReducer = (state, action) => {
     case 'LOGOUT_USER': {
       return {
         isLoading: false,
-        name: '',
+        username: '',
         email: '',
         isAdmin: false,
         accessToken: '',
@@ -48,8 +56,8 @@ const userReducer = (state, action) => {
     }
 
     case 'GET_ALL_USER_SUCCESS': {
-      const { users, name, email } = action.payload;
-      return { ...state, isLoading: false, users, name, email };
+      const { users, username, email } = action.payload;
+      return { ...state, isLoading: false, users, username, email };
     }
 
     case 'GET_ALL_USER_FAIL': {
@@ -83,10 +91,10 @@ const UserProvider = ({ children }) => {
 
   const clearAlert = () => setTimeout(() => dispatch({ type: 'CLEAR_MESSAGE' }, 500));
 
-  const addUserDataToLocalStorage = async (name, email) => {
+  const addUserDataToLocalStorage = async (username, email) => {
     const userData = JSON.parse(localStorage.getItem('userData')) || {};
     const updatedUserData = {
-      name: name || userData.name,
+      username: username || userData.username,
       email: email || userData.email,
     };
     localStorage.setItem('userData', JSON.stringify(updatedUserData));
@@ -110,26 +118,26 @@ const UserProvider = ({ children }) => {
     } catch (e) {}
   }, []);
 
-  const login = async ({ email, password }) => {
+  const login = async ({ username, password }) => {
     dispatch({ type: 'IS_LOADING' });
     try {
       const response = await fetch(`/api/users/login`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, password }),
       });
 
       const data = await response.json();
-      const { name, isAdmin, accessToken } = data;
+      const { email, isAdmin, accessToken } = data;
       if (!response.ok) throw new Error(data.message);
 
       dispatch({
         type: 'LOGIN_USER_SUCCESS',
-        payload: { name, email, isAdmin, accessToken },
+        payload: { username, email, isAdmin, accessToken },
       });
 
-      addUserDataToLocalStorage(name, email);
+      addUserDataToLocalStorage(username, email);
       clearAlert();
     } catch (e) {
       dispatch({ type: 'LOGIN_USER_FAIL', payload: e });
@@ -170,7 +178,7 @@ const UserProvider = ({ children }) => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
       dispatch({ type: 'GET_ALL_USER_SUCCESS', payload: data });
-      addUserDataToLocalStorage(data.name, data.email);
+      addUserDataToLocalStorage(data.username, data.email);
 
       clearAlert();
     } catch (e) {
@@ -179,7 +187,7 @@ const UserProvider = ({ children }) => {
     }
   }, []);
 
-  const createUser = async ({ name, email, isActiveAcc }, accessToken) => {
+  const createUser = async ({ username, email, isActiveAcc }, accessToken) => {
     dispatch({ type: 'IS_LOADING' });
     try {
       const response = await fetch(`/api/users/um/user`, {
@@ -189,7 +197,7 @@ const UserProvider = ({ children }) => {
           'Content-Type': 'application/json',
           authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ name, email, isActiveAcc }),
+        body: JSON.stringify({ username, email, isActiveAcc }),
       });
 
       const data = await response.json();
@@ -209,7 +217,7 @@ const UserProvider = ({ children }) => {
     }
   };
 
-  const resetUserPassword = async (id, accessToken) => {
+  const resetUserPassword = async (username, accessToken) => {
     dispatch({ type: 'IS_LOADING' });
     try {
       const response = await fetch(`/api/users/um/resetuserpassword`, {
@@ -219,7 +227,7 @@ const UserProvider = ({ children }) => {
           'Content-Type': 'application/json',
           authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ id }),
+        body: JSON.stringify({ username }),
       });
 
       const data = await response.json();
@@ -236,7 +244,7 @@ const UserProvider = ({ children }) => {
   };
 
   const updateUser = async (
-    { id, name, email, inGroups, notInGroups, isActiveAcc },
+    { username, email, inGroups, notInGroups, isActiveAcc },
     accessToken
   ) => {
     dispatch({ type: 'IS_LOADING' });
@@ -248,7 +256,7 @@ const UserProvider = ({ children }) => {
           'Content-Type': 'application/json',
           authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ id, name, email, inGroups, notInGroups, isActiveAcc }),
+        body: JSON.stringify({ username, email, inGroups, notInGroups, isActiveAcc }),
       });
 
       const data = await response.json();
@@ -308,7 +316,7 @@ const UserProvider = ({ children }) => {
 
       if (!response.ok) throw new Error(data.message);
       dispatch({ type: 'UPDATE_PROFILE_SUCCESS', payload: data });
-      addUserDataToLocalStorage(data.name, data.email);
+      addUserDataToLocalStorage(data.username, data.email);
       clearAlert();
     } catch (e) {
       dispatch({ type: 'UPDATE_PROFILE_FAIL', payload: e });

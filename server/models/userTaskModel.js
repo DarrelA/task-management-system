@@ -9,14 +9,9 @@ const mockGroups = require('../config/mockGroups');
 const User = sequelize.define(
   'user',
   {
-    id: {
-      type: Sequelize.UUID,
-      defaultValue: Sequelize.UUIDV4,
-      primaryKey: true,
-    },
-    name: {
+    username: {
       type: Sequelize.STRING,
-      allowNull: false,
+      primaryKey: true,
     },
     email: {
       type: Sequelize.STRING,
@@ -55,12 +50,12 @@ User.prototype.comparePassword = async function (inputPassword) {
   return await bcrypt.compare(inputPassword, this.password);
 };
 
-User.prototype.createAccessToken = function (userId) {
-  return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '2h' });
+User.prototype.createAccessToken = function (username) {
+  return jwt.sign({ username }, process.env.JWT_SECRET, { expiresIn: '2h' });
 };
 
-User.prototype.createRefreshToken = function (userId) {
-  return jwt.sign({ userId }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
+User.prototype.createRefreshToken = function (username) {
+  return jwt.sign({ username }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 };
 
 User.prototype.sendRefreshToken = function (res, refreshToken) {
@@ -77,13 +72,7 @@ const Group = sequelize.define('group', {
   },
 });
 
-const UserGroup = sequelize.define('usergroups', {
-  id: {
-    type: Sequelize.UUID,
-    defaultValue: Sequelize.UUIDV4,
-    primaryKey: true,
-  },
-});
+const UserGroup = sequelize.define('usergroups');
 
 User.belongsToMany(Group, { through: UserGroup });
 Group.belongsToMany(User, { through: UserGroup });
@@ -206,7 +195,7 @@ const createData = async () => {
     User.bulkCreate(
       [
         {
-          name: process.env.DEFAULT_ADMIN_NAME,
+          username: process.env.DEFAULT_ADMIN_NAME,
           email: process.env.DEFAULT_ADMIN_EMAIL,
           password: process.env.DEFAULT_ADMIN_PASSWORD,
           isAdmin: true,

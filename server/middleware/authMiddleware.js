@@ -7,9 +7,9 @@ const authMiddleware = async (req, res, next) => {
   if (!authHeader) return next(new HttpError('Please authenticate.', 401));
   const token = authHeader.split(' ')[1];
   try {
-    const { userId } = verify(token, process.env.JWT_SECRET);
-    req.admin = await User.findByPk(userId);
-    req.user = { userId };
+    const { username } = verify(token, process.env.JWT_SECRET);
+    req.admin = await User.findByPk(username);
+    req.user = { username };
     next();
   } catch (e) {
     console.error(e);

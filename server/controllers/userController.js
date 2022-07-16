@@ -8,12 +8,12 @@ const checkRefreshToken = async (req, res, next) => {
 
   try {
     const payload = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
-    const user = await User.findByPk(payload.userId);
+    const user = await User.findByPk(payload.username);
     if (!user || user.refreshToken !== token)
       return next(new HttpError('Please authenticate', 401));
 
-    const accessToken = user.createAccessToken(user.id);
-    const refreshToken = user.createRefreshToken(user.id);
+    const accessToken = user.createAccessToken(user.username);
+    const refreshToken = user.createRefreshToken(user.username);
 
     user.refreshToken = refreshToken;
     await user.save();
@@ -27,9 +27,9 @@ const checkRefreshToken = async (req, res, next) => {
 };
 
 const login = async (req, res, next) => {
-  const { email, password } = req.body;
+  const { username, password } = req.body;
   try {
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findOne({ where: { username } });
 
     if (user && user.isActiveAcc === false)
       return next(
@@ -37,13 +37,13 @@ const login = async (req, res, next) => {
       );
 
     if (user && (await user.comparePassword(password))) {
-      const { name, isAdmin } = user;
-      const accessToken = user.createAccessToken(user.id);
-      const refreshToken = user.createRefreshToken(user.id);
+      const { isAdmin } = user;
+      const accessToken = user.createAccessToken(user.username);
+      const refreshToken = user.createRefreshToken(user.username);
       user.refreshToken = refreshToken;
       await user.save();
       user.sendRefreshToken(res, refreshToken);
-      return res.send({ name, isAdmin, accessToken, message: 'success' });
+      return res.send({ email: user.email, isAdmin, accessToken, message: 'success' });
     }
 
     return next(new HttpError('Invalid credentials.', 401));
@@ -95,7 +95,7 @@ const getUsersData = async (req, res, next) => {
         .sort();
     });
 
-    return res.send({ users, name: req.admin.name, email: req.admin.email });
+    return res.send({ users, username: req.admin.username, email: req.admin.email });
   } catch (e) {
     console.error(e);
     return next(new HttpError('Something went wrong!', 500));
@@ -103,17 +103,17 @@ const getUsersData = async (req, res, next) => {
 };
 
 const createUser = async (req, res, next) => {
-  const { name, email, isActiveAcc } = req.body;
-  if (!name || !email) return next(new HttpError('Please provide name and email.', 400));
+  const { username, email, isActiveAcc } = req.body;
+  if (!username || !email)
+    return next(new HttpError('Please provide username and email.', 400));
 
   if (await User.findOne({ where: { email } }))
     return next(new HttpError('Email is taken.', 400));
 
   try {
     const user = await User.create({
-      name: name
+      username: username
         .trim()
-        .replace(/[^a-zA-Z ]/g, '') // Keep only alphabets and whitespace
         .replace(/\s+/g, ' ') // Replace multiple whitespaces with single whitespace
         .split(' ')
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
@@ -138,9 +138,9 @@ const createUser = async (req, res, next) => {
 };
 
 const resetUserPassword = async (req, res, next) => {
-  if (req.body.id === req.user.userId)
+  if (req.body.username === req.user.username)
     return next(new HttpError('Please use update profile page to change password.', 404));
-  const user = await User.findByPk(req.body.id);
+  const user = await User.findByPk(req.body.username);
 
   try {
     user.password = process.env.DEFAULT_USER_PASSWORD;
@@ -153,23 +153,14 @@ const resetUserPassword = async (req, res, next) => {
 };
 
 const updateUser = async (req, res, next) => {
-  const { id, name, email, isActiveAcc } = req.body;
-  const user = await User.findByPk(id);
+  const { username, email, isActiveAcc } = req.body;
+  const user = await User.findByPk(username.toLowerCase());
 
   if (!user) return next(new HttpError('Something went wrong!', 400));
   if (email !== user.email && (await User.findOne({ where: { email } })))
     return next(new HttpError('Email is taken.', 400));
 
   try {
-    if (name)
-      user.name = name
-        .trim()
-        .replace(/[^a-zA-Z ]/g, '') // Keep only alphabets and whitespace
-        .replace(/\s+/g, ' ') // Replace multiple whitespaces with single whitespace
-        .split(' ')
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
-
     if (email)
       user.email = email
         .trim()
@@ -178,8 +169,8 @@ const updateUser = async (req, res, next) => {
         .toLowerCase();
 
     // admin cannot deactivate their own account
-    if (isActiveAcc && id !== req.user.userId) user.isActiveAcc = isActiveAcc;
-    if (isActiveAcc === 'false' && id === req.user.userId)
+    if (isActiveAcc && username !== req.user.username) user.isActiveAcc = isActiveAcc;
+    if (isActiveAcc === 'false' && username === req.user.username)
       return next(
         new HttpError('Cannot remove admin rights of your own admin account.', 404)
       );
@@ -194,8 +185,8 @@ const updateUser = async (req, res, next) => {
       if (!groupInSQL) return next(new HttpError('Something went wrong!', 400));
     });
 
-    const count = await UserGroup.destroy({ where: { userId: id } });
-    // console.info(`${count} usergroup(s) are removed under userId: ${id}.`);
+    const count = await UserGroup.destroy({ where: { userUsername: username } });
+    // console.info(`${count} usergroup(s) are removed under username: ${username}.`);
     inGroups.forEach(async (group) => await user.addGroup(group));
 
     user.changed('updatedAt', true);
@@ -218,16 +209,16 @@ const createGroup = async (req, res, next) => {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 
-  if (!userGroup) return next(new HttpError('Group name is required.', 400));
+  if (!userGroup) return next(new HttpError('Group username is required.', 400));
 
   try {
     const group = await Group.findByPk(userGroup);
 
     if (!group) {
-      const newGroup = await Group.create({ name: userGroup });
+      const newGroup = await Group.create({ username: userGroup });
       await newGroup.save();
       res.send({ message: 'success' });
-    } else return next(new HttpError('Group name is taken.', 400));
+    } else return next(new HttpError('Group username is taken.', 400));
   } catch (e) {
     console.error(e);
     return next(new HttpError('Something went wrong!', 500));
@@ -235,13 +226,13 @@ const createGroup = async (req, res, next) => {
 };
 
 const checkGroup = async (req, res, next) => {
-  const { id, userGroup } = req.body;
+  const { username, userGroup } = req.body;
   try {
     const group = await UserGroup.findAll({
-      where: { userId: id, groupName: userGroup },
+      where: { username, groupName: userGroup },
     });
 
-    res.send(!!group[0]?.id); // Check user in user group? Return T/F
+    res.send(!!group[0]?.username); // Check user in user group? Return T/F
   } catch (e) {
     console.error(e);
     return next(new HttpError('Something went wrong!', 500));
@@ -251,7 +242,7 @@ const checkGroup = async (req, res, next) => {
 const updateProfile = async (req, res, next) => {
   const { email, password, confirmPassword } = req.body;
 
-  const user = await User.findByPk(req.user.userId);
+  const user = await User.findByPk(req.user.username);
 
   if (email && email !== user.email && (await User.findOne({ where: { email } })))
     return next(new HttpError('Email is taken.', 400));
@@ -277,7 +268,7 @@ const updateProfile = async (req, res, next) => {
 
     if (password) user.password = password;
     await user.save();
-    res.send({ name: user.name, email: user.email, message: 'success' });
+    res.send({ username: user.username, email: user.email, message: 'success' });
   } catch (e) {
     console.error(e);
     return next(new HttpError('Something went wrong!', 500));

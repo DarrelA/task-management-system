@@ -16,7 +16,12 @@ const Login = () => {
   const userContext = useUserContext();
   const { isLoading, message, accessToken, isAdmin, email } = userContext;
 
-  const [formData, setFormData] = useState({ email, password: '', confirmPassword: '' });
+  const [formData, setFormData] = useState({
+    email,
+    username: '',
+    password: '',
+    confirmPassword: '',
+  });
   const [updateProfilePage, setUpdateProfilePage] = useState(false);
 
   const navigate = useNavigate();
@@ -67,15 +72,28 @@ const Login = () => {
         <Grid container spacing={1}>
           <form onSubmit={submitHandler}>
             <Typography variant="h5">{updateProfilePage ? 'Update' : 'Login'}</Typography>
-            <TextField
-              label="Email"
-              type="email"
-              id="email"
-              placeholder="lane@company.com"
-              onInput={inputHandler}
-              fullWidth
-              value={formData.email}
-            />
+            {updateProfilePage && (
+              <TextField
+                label="Email"
+                type="email"
+                id="email"
+                placeholder="lane@company.com"
+                onInput={inputHandler}
+                fullWidth
+                value={formData.email}
+              />
+            )}
+
+            {!updateProfilePage && (
+              <TextField
+                label="Username"
+                type="text"
+                id="username"
+                placeholder="John Doe"
+                onInput={inputHandler}
+                fullWidth
+              />
+            )}
 
             <TextField
               label="Password"

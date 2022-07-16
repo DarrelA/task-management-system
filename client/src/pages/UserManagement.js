@@ -58,7 +58,7 @@ const UserManagement = () => {
       <>
         <Grid container spacing={1} justifyContent="center">
           {inGroups.map((group, i) => (
-            <Grid item key={rowData.id + i}>
+            <Grid item key={rowData.username + i}>
               <Chip
                 label={group}
                 size="medium"
@@ -78,7 +78,7 @@ const UserManagement = () => {
 
         <Grid container spacing={1} justifyContent="center">
           {notInGroups.map((group, i) => (
-            <Grid item key={rowData.id + i}>
+            <Grid item key={rowData.username + i}>
               <Chip
                 label={group}
                 size="small"
@@ -105,7 +105,7 @@ const UserManagement = () => {
     (rowData) => (
       <Grid container spacing={1} justifyContent="center">
         {rowData.inGroups.map((group, i) => (
-          <Grid item key={rowData.id + i}>
+          <Grid item key={rowData.username + i}>
             <Chip label={group} size="small" variant="default" />
           </Grid>
         ))}
@@ -127,8 +127,9 @@ const UserManagement = () => {
         render: renderUpdatedAt,
       },
       {
-        title: 'Name',
-        field: 'name',
+        title: 'Username',
+        field: 'username',
+        editable: 'never',
         align: 'center',
         width: 220,
       },
@@ -187,7 +188,7 @@ const UserManagement = () => {
             onClick: (event, rowData) => {
               // @TODO: Create modal to display confirmation box before reset
               const confirmation = window.confirm(`Reset ${rowData.email}'s password?`);
-              if (confirmation) resetUserPassword(rowData.id, accessToken);
+              if (confirmation) resetUserPassword(rowData.username, accessToken);
             },
           },
           {

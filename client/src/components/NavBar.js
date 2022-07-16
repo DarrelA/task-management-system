@@ -11,7 +11,7 @@ const NavBar = () => {
   const classes = useStyles();
 
   const userContext = useUserContext();
-  const { isLoading, name, isAdmin, logout } = userContext;
+  const { isLoading, username, isAdmin, logout } = userContext;
 
   if (isLoading) return <p></p>;
 
@@ -26,7 +26,7 @@ const NavBar = () => {
           Apps
         </Button>
         <Button component={Link} to={'/updateprofile'}>
-          {name}
+          {username}
         </Button>
 
         {isAdmin && (
