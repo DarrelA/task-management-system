@@ -96,7 +96,12 @@ const getUsersData = async (req, res, next) => {
         .sort();
     });
 
-    return res.send({ users, username: req.admin.username, email: req.admin.email });
+    return res.send({
+      users,
+      groups,
+      username: req.admin.username,
+      email: req.admin.email,
+    });
   } catch (e) {
     console.error(e);
     return next(new HttpError('Something went wrong!', 500));
@@ -104,9 +109,12 @@ const getUsersData = async (req, res, next) => {
 };
 
 const createUser = async (req, res, next) => {
-  const { username, email, isActiveAcc } = req.body;
+  const { username, email, inGroups } = req.body;
   if (!username || !email)
     return next(new HttpError('Please provide username and email.', 400));
+
+  if (await User.findOne({ where: { username } }))
+    return next(new HttpError('Username is taken.', 400));
 
   if (await User.findOne({ where: { email } }))
     return next(new HttpError('Email is taken.', 400));
@@ -121,11 +129,25 @@ const createUser = async (req, res, next) => {
         .replace(/[&\/\\#,+()!$~%^'":*?<>{}]/g, '') // Remove symbols
         .toLowerCase(),
 
-      isActiveAcc: isActiveAcc,
       password: process.env.DEFAULT_USER_PASSWORD,
     });
 
     await user.save();
+
+    // Usergroups management
+    inGroups.forEach(async (group) => {
+      const groupInSQL = await Group.findByPk(group);
+      if (!groupInSQL) return next(new HttpError('Something went wrong!', 400));
+    });
+
+    const count = await UserGroup.destroy({ where: { userUsername: username } });
+    // console.info(`${count} usergroup(s) are removed under username: ${username}.`);
+    inGroups.forEach(async (group) => await user.addGroup(group));
+
+    user.changed('updatedAt', true);
+    user.updatedAt = new Date();
+    await user.save();
+
     return res.status(201).send({ message: 'success' });
   } catch (e) {
     console.error(e);

@@ -2,66 +2,165 @@ import { makeStyles } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
 
 import { useState } from 'react';
-import { Button, TextField } from '@material-ui/core';
+import { Button, Chip, Grid, TextField } from '@material-ui/core';
 
-const InputModal = ({ open, onClose, newGroupHandler }) => {
-  const getModalStyle = () => {
-    const top = 50;
-    const left = 50;
-
-    return {
-      top: `${top}%`,
-      left: `${left}%`,
-      transform: `translate(-${top}%, -${left}%)`,
-    };
-  };
-
+const InputModal = ({
+  whichModal,
+  open,
+  onClose,
+  newGroupHandler,
+  newUserHandler,
+  allGroups,
+}) => {
   const useStyles = makeStyles((theme) => ({
     paper: {
       position: 'absolute',
+      display: 'block',
+      overflow: 'hidden',
+      height: '100%',
+      maxHeight: 550,
       width: 400,
       backgroundColor: theme.palette.background.paper,
       border: '2px solid #000',
       boxShadow: theme.shadows[5],
       padding: theme.spacing(2, 4, 3),
     },
+
+    content: {
+      overflow: 'scroll',
+    },
   }));
 
   const classes = useStyles();
-  const [modalStyle] = useState(getModalStyle);
-  const [inputData, setInputData] = useState('');
+  const [modalStyle] = useState({ top: '15%', margin: 'auto' });
+  const [inputGroupData, setInputGroupData] = useState('');
+  const [inputUserData, setInputUserData] = useState({
+    username: '',
+    email: '@company.com',
+    inGroups: [],
+  });
+  const [inGroups, setInGroups] = useState([]);
+  const [notInGroups, setNotInGroups] = useState([...allGroups]);
 
-  const inputHandler = (e) => setInputData(e.target.value);
-  const createGroupHandler = () => {
-    onClose();
-    newGroupHandler(inputData);
-  };
+  const inputGroupHandler = (e) => setInputGroupData(e.target.value);
+  const createGroupHandler = () => newGroupHandler(inputGroupData);
 
-  const body = (
+  const inputUserHandler = (e) =>
+    setInputUserData({ ...inputUserData, [e.target.id]: e.target.value });
+  const createUserHandler = () => newUserHandler({ ...inputUserData, inGroups });
+
+  const groupForm = (
     <div style={modalStyle} className={classes.paper}>
-      <TextField
-        label="User Group"
-        type="text"
-        id="usergroup"
-        placeholder="Group 1"
-        onInput={inputHandler}
-        fullWidth
-      />
-      <Button
-        type="submit"
-        variant="contained"
-        color="primary"
-        fullWidth
-        style={{ margin: '16px 0' }}
-        onClick={createGroupHandler}
-      >
-        Create
-      </Button>
+      <form onSubmit={createGroupHandler}>
+        <TextField
+          label="User Group"
+          type="text"
+          id="usergroup"
+          placeholder="Group1"
+          onInput={inputGroupHandler}
+          fullWidth
+          autoFocus
+        />
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          fullWidth
+          style={{ margin: '16px 0' }}
+        >
+          Create
+        </Button>
+      </form>
     </div>
   );
+
+  const userForm = (
+    <div style={modalStyle} className={classes.paper}>
+      <form onSubmit={createUserHandler}>
+        <Grid
+          container
+          spacing={1}
+          alignContent="space-between"
+          justifyContent="space-between"
+        >
+          <TextField
+            label="Username"
+            type="text"
+            id="username"
+            placeholder="John Doe"
+            onInput={inputUserHandler}
+            value={inputUserData.username}
+            fullWidth
+            autoFocus
+          />
+
+          <TextField
+            label="Email"
+            type="email"
+            id="email"
+            placeholder="lane@company.com"
+            onInput={inputUserHandler}
+            fullWidth
+            value={inputUserData.email}
+          />
+
+          <Grid spacing={1} container justifyContent="center">
+            {inGroups.map((group) => (
+              <Grid item key={group}>
+                <Chip
+                  label={group}
+                  size="medium"
+                  variant="default"
+                  color="default"
+                  clickable
+                  onClick={() => {
+                    setInGroups(inGroups.filter((grp) => grp !== group));
+                    setNotInGroups([group, ...notInGroups].sort());
+                  }}
+                />
+              </Grid>
+            ))}
+          </Grid>
+
+          <Grid spacing={1} container justifyContent="center">
+            {notInGroups.map((group) => (
+              <Grid item key={group}>
+                <Chip
+                  label={group}
+                  size="small"
+                  variant="default"
+                  color="secondary"
+                  clickable
+                  onClick={() => {
+                    setNotInGroups(notInGroups.filter((grp) => grp !== group));
+                    setInGroups([group, ...inGroups]);
+                  }}
+                />
+              </Grid>
+            ))}
+          </Grid>
+
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            style={{ margin: '16px 0' }}
+          >
+            Create
+          </Button>
+        </Grid>
+      </form>
+    </div>
+  );
+
   return (
-    <Modal open={open} onClose={onClose}>
-      {body}
+    <Modal
+      open={open}
+      onClose={onClose}
+      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+    >
+      {whichModal === 'group' ? groupForm : userForm}
     </Modal>
   );
 };

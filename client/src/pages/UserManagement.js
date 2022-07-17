@@ -15,12 +15,14 @@ const UserManagement = () => {
     message,
     getUsersData,
     users,
+    groups,
     createUser,
     updateUser,
     createGroup,
   } = userContext;
 
-  const [openModal, setOpenModal] = useState(false);
+  const [openGroupModal, setOpenGroupModal] = useState(false);
+  const [openUserModal, setOpenUserModal] = useState(false);
 
   useEffect(() => {
     if (message === 'success') toast.success(message, { autoClose: 200 });
@@ -31,10 +33,16 @@ const UserManagement = () => {
     accessToken && getUsersData(accessToken);
   }, [accessToken, getUsersData]);
 
-  const toggleModalHandler = () => setOpenModal((prevState) => !prevState);
+  const toggleGroupModalHandler = () => setOpenGroupModal((prevState) => !prevState);
   const newGroupHandler = (inputData) => {
     if (!inputData) return;
     createGroup({ userGroup: inputData }, accessToken);
+  };
+
+  const toggleUserModalHandler = () => setOpenUserModal((prevState) => !prevState);
+  const newUserHandler = (inputData) => {
+    if (!inputData) return;
+    createUser(inputData, accessToken);
   };
 
   const renderUpdatedAt = useCallback((rowData) => {
@@ -206,19 +214,30 @@ const UserManagement = () => {
 
   return (
     <>
-      {openModal && (
+      {openGroupModal && (
         <InputModal
-          open={openModal}
-          onClose={toggleModalHandler}
+          whichModal="group"
+          open={openGroupModal}
+          onClose={toggleGroupModalHandler}
           newGroupHandler={newGroupHandler}
+          allGroups={groups}
         />
       )}
+
+      {openUserModal && (
+        <InputModal
+          open={openUserModal}
+          onClose={toggleUserModalHandler}
+          newUserHandler={newUserHandler}
+          allGroups={groups}
+        />
+      )}
+
       <MaterialTable
         title="User Management"
         columns={columns}
         data={users}
         editable={{
-          onRowAdd: (newRow) => createUser(newRow, accessToken),
           onRowUpdate: (newData, oldData) => updateUser(newData, accessToken),
         }}
         actions={[
@@ -226,7 +245,13 @@ const UserManagement = () => {
             icon: 'group_add',
             tooltip: 'Add Group',
             isFreeAction: true,
-            onClick: toggleModalHandler,
+            onClick: toggleGroupModalHandler,
+          },
+          {
+            icon: 'person_add',
+            tooltip: 'Add User',
+            isFreeAction: true,
+            onClick: toggleUserModalHandler,
           },
         ]}
         options={{

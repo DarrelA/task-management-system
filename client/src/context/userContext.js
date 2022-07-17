@@ -56,8 +56,8 @@ const userReducer = (state, action) => {
     }
 
     case 'GET_ALL_USER_SUCCESS': {
-      const { users, username, email } = action.payload;
-      return { ...state, isLoading: false, users, username, email };
+      const { users, groups, username, email } = action.payload;
+      return { ...state, isLoading: false, users, groups, username, email };
     }
 
     case 'GET_ALL_USER_FAIL': {
@@ -187,8 +187,9 @@ const UserProvider = ({ children }) => {
     }
   }, []);
 
-  const createUser = async ({ username, email, isActiveAcc }, accessToken) => {
+  const createUser = async ({ username, email, inGroups }, accessToken) => {
     dispatch({ type: 'IS_LOADING' });
+
     try {
       const response = await fetch(`/api/users/um/user`, {
         method: 'POST',
@@ -197,7 +198,7 @@ const UserProvider = ({ children }) => {
           'Content-Type': 'application/json',
           authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ username, email, isActiveAcc }),
+        body: JSON.stringify({ username, email, inGroups }),
       });
 
       const data = await response.json();
