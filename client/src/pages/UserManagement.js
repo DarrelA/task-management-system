@@ -3,7 +3,7 @@ import { toast } from 'react-toastify';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Chip, Grid } from '@material-ui/core';
+import { Chip, Grid, TextField } from '@material-ui/core';
 import { InputModal, LoadingSpinner } from '../components/';
 import useUserContext from '../context/userContext';
 
@@ -17,7 +17,6 @@ const UserManagement = () => {
     users,
     createUser,
     updateUser,
-    resetUserPassword,
     createGroup,
   } = userContext;
 
@@ -49,6 +48,39 @@ const UserManagement = () => {
     };
     return new Date(rowData.updatedAt).toLocaleString('en-US', options);
   }, []);
+
+  const EditPassword = ({ rowData }) => {
+    const [inputPassword, setInputPassword] = useState({
+      password: '',
+      confirmPassword: '',
+    });
+
+    return (
+      <>
+        <TextField
+          id="password"
+          type="password"
+          label="Password"
+          value={inputPassword.password}
+          onChange={(e) => {
+            setInputPassword({ ...inputPassword, password: e.target.value });
+            rowData.password = e.target.value;
+          }}
+        />
+        <TextField
+          id="confirmpassword"
+          type="password"
+          label="Confirm Password"
+          inputProps={{ style: { height: '35px' } }}
+          value={inputPassword.confirmPassword}
+          onChange={(e) => {
+            setInputPassword({ ...inputPassword, confirmPassword: e.target.value });
+            rowData.confirmPassword = e.target.value;
+          }}
+        />
+      </>
+    );
+  };
 
   const EditComponentUserGroups = ({ rowData }) => {
     const [inGroups, setInGroups] = useState([...rowData.inGroups]);
@@ -129,9 +161,10 @@ const UserManagement = () => {
       {
         title: 'Username',
         field: 'username',
-        editable: 'never',
+        editable: 'onAdd',
         align: 'center',
         width: 220,
+        hiddenByColumnsButton: true,
       },
       {
         title: 'Email',
@@ -139,7 +172,14 @@ const UserManagement = () => {
         initialEditValue: '@company.com',
         align: 'center',
         width: 220,
-        hiddenByColumnsButton: true,
+      },
+      {
+        title: 'Password',
+        field: 'pasword',
+        editable: 'onUpdate',
+        align: 'center',
+        width: 120,
+        editComponent: EditPassword,
       },
       {
         title: 'User Groups',
@@ -182,15 +222,6 @@ const UserManagement = () => {
           onRowUpdate: (newData, oldData) => updateUser(newData, accessToken),
         }}
         actions={[
-          {
-            icon: 'restart_alt',
-            tooltip: 'Reset Password',
-            onClick: (event, rowData) => {
-              // @TODO: Create modal to display confirmation box before reset
-              const confirmation = window.confirm(`Reset ${rowData.email}'s password?`);
-              if (confirmation) resetUserPassword(rowData.username, accessToken);
-            },
-          },
           {
             icon: 'group_add',
             tooltip: 'Add Group',

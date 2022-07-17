@@ -217,34 +217,8 @@ const UserProvider = ({ children }) => {
     }
   };
 
-  const resetUserPassword = async (username, accessToken) => {
-    dispatch({ type: 'IS_LOADING' });
-    try {
-      const response = await fetch(`/api/users/um/resetuserpassword`, {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({ username }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message);
-
-      dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
-
-      clearAlert();
-      getUsersData(accessToken);
-    } catch (e) {
-      dispatch({ type: 'RESPONSE_FAIL', payload: e });
-      clearAlert();
-    }
-  };
-
   const updateUser = async (
-    { username, email, inGroups, notInGroups, isActiveAcc },
+    { username, password, confirmPassword, email, inGroups, notInGroups, isActiveAcc },
     accessToken
   ) => {
     dispatch({ type: 'IS_LOADING' });
@@ -256,7 +230,15 @@ const UserProvider = ({ children }) => {
           'Content-Type': 'application/json',
           authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ username, email, inGroups, notInGroups, isActiveAcc }),
+        body: JSON.stringify({
+          username,
+          password,
+          confirmPassword,
+          email,
+          inGroups,
+          notInGroups,
+          isActiveAcc,
+        }),
       });
 
       const data = await response.json();
@@ -333,7 +315,6 @@ const UserProvider = ({ children }) => {
         logout,
         createUser,
         getUsersData,
-        resetUserPassword,
         updateUser,
         createGroup,
         updateProfile,

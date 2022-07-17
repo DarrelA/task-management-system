@@ -56,7 +56,7 @@ const Login = () => {
 
         // Comprise of alphabets , numbers, and special character
         // Minimum 8 characters and maximum 10 characters
-        const regex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,10}$/;
+        const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,10}$/;
         if (!formData.password.match(regex))
           return toast.error('Please provide a valid password.');
       }

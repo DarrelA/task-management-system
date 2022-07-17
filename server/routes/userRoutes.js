@@ -9,7 +9,6 @@ const {
   logout,
   getUsersData,
   createUser,
-  resetUserPassword,
   updateUser,
   createGroup,
   checkGroup,
@@ -32,7 +31,6 @@ router.post('/um/checkgroup', authMiddleware, adminMiddleware, checkGroup);
 
 router.get('/um/all', authMiddleware, adminMiddleware, getUsersData);
 
-router.patch('/um/resetuserpassword', authMiddleware, adminMiddleware, resetUserPassword);
 router.patch('/updateprofile', authMiddleware, updateProfile);
 
 module.exports = router;

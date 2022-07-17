@@ -27,7 +27,8 @@ const checkRefreshToken = async (req, res, next) => {
 };
 
 const login = async (req, res, next) => {
-  const { username, password } = req.body;
+  let { username, password } = req.body;
+
   try {
     const user = await User.findOne({ where: { username } });
 
@@ -80,7 +81,7 @@ const getUsersData = async (req, res, next) => {
     users = JSON.parse(users);
 
     users.forEach((user, i) => {
-      user.inGroups = [];
+      (user.password = ''), (user.confirmPassword = ''), (user.inGroups = []);
       user.groups.forEach((group) => {
         users[i].inGroups.push(group.name);
       });
@@ -112,12 +113,7 @@ const createUser = async (req, res, next) => {
 
   try {
     const user = await User.create({
-      username: username
-        .trim()
-        .replace(/\s+/g, ' ') // Replace multiple whitespaces with single whitespace
-        .split(' ')
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' '),
+      username: username.trim().toLowerCase().replace(/\s+/g, ' '), // Replace multiple whitespaces with single whitespace
 
       email: email
         .trim()
@@ -137,30 +133,28 @@ const createUser = async (req, res, next) => {
   }
 };
 
-const resetUserPassword = async (req, res, next) => {
-  if (req.body.username === req.user.username)
-    return next(new HttpError('Please use update profile page to change password.', 404));
-  const user = await User.findByPk(req.body.username);
-
-  try {
-    user.password = process.env.DEFAULT_USER_PASSWORD;
-    await user.save();
-    return res.send({ message: 'success' });
-  } catch (e) {
-    console.error(e);
-    return next(new HttpError('Something went wrong!', 500));
-  }
-};
-
 const updateUser = async (req, res, next) => {
-  const { username, email, isActiveAcc } = req.body;
-  const user = await User.findByPk(username.toLowerCase());
+  const { username, password, confirmPassword, email, isActiveAcc } = req.body;
+  const user = await User.findByPk(username);
 
   if (!user) return next(new HttpError('Something went wrong!', 400));
   if (email !== user.email && (await User.findOne({ where: { email } })))
     return next(new HttpError('Email is taken.', 400));
 
   try {
+    if (password) {
+      if (password !== confirmPassword)
+        return next(new HttpError('Password is different from Confirm Password.', 400));
+
+      // Comprise of alphabets, numbers, and special character
+      // Minimum 8 characters and maximum 10 characters
+      const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,10}$/;
+      if (!password.match(regex))
+        return next(new HttpError('Please provide a valid password.', 400));
+
+      user.password = password;
+    }
+
     if (email)
       user.email = email
         .trim()
@@ -215,7 +209,7 @@ const createGroup = async (req, res, next) => {
     const group = await Group.findByPk(userGroup);
 
     if (!group) {
-      const newGroup = await Group.create({ username: userGroup });
+      const newGroup = await Group.create({ name: userGroup });
       await newGroup.save();
       res.send({ message: 'success' });
     } else return next(new HttpError('Group username is taken.', 400));
@@ -251,11 +245,13 @@ const updateProfile = async (req, res, next) => {
     if (password !== confirmPassword)
       return next(new HttpError('Password is different from Confirm Password.', 400));
 
-    // Comprise of alphabets , numbers, and special character
+    // Comprise of alphabets, numbers, and special character
     // Minimum 8 characters and maximum 10 characters
-    const regex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,10}$/;
+    const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,10}$/;
     if (!password.match(regex))
       return next(new HttpError('Please provide a valid password.', 400));
+
+    user.password = password;
   }
 
   try {
@@ -266,7 +262,6 @@ const updateProfile = async (req, res, next) => {
         .replace(/[&\/\\#,+()!$~%^'":*?<>{}]/g, '') // Remove symbols
         .toLowerCase();
 
-    if (password) user.password = password;
     await user.save();
     res.send({ username: user.username, email: user.email, message: 'success' });
   } catch (e) {
@@ -281,7 +276,6 @@ module.exports = {
   logout,
   getUsersData,
   createUser,
-  resetUserPassword,
   updateUser,
   createGroup,
   checkGroup,
