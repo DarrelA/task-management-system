@@ -15,10 +15,6 @@ const InputModal = ({
   const useStyles = makeStyles((theme) => ({
     paper: {
       position: 'absolute',
-      display: 'block',
-      overflow: 'hidden',
-      height: '100%',
-      maxHeight: 550,
       width: 400,
       backgroundColor: theme.palette.background.paper,
       border: '2px solid #000',
@@ -26,8 +22,11 @@ const InputModal = ({
       padding: theme.spacing(2, 4, 3),
     },
 
-    content: {
+    usergroups: {
       overflow: 'scroll',
+      maxHeight: 400,
+      marginTop: 15,
+      marginBottom: 5,
     },
   }));
 
@@ -77,33 +76,34 @@ const InputModal = ({
   const userForm = (
     <div style={modalStyle} className={classes.paper}>
       <form onSubmit={createUserHandler}>
+        <TextField
+          label="Username"
+          type="text"
+          id="username"
+          placeholder="John Doe"
+          onInput={inputUserHandler}
+          value={inputUserData.username}
+          fullWidth
+          autoFocus
+        />
+
+        <TextField
+          label="Email"
+          type="email"
+          id="email"
+          placeholder="lane@company.com"
+          onInput={inputUserHandler}
+          fullWidth
+          value={inputUserData.email}
+        />
+
         <Grid
           container
           spacing={1}
           alignContent="space-between"
           justifyContent="space-between"
+          className={classes.usergroups}
         >
-          <TextField
-            label="Username"
-            type="text"
-            id="username"
-            placeholder="John Doe"
-            onInput={inputUserHandler}
-            value={inputUserData.username}
-            fullWidth
-            autoFocus
-          />
-
-          <TextField
-            label="Email"
-            type="email"
-            id="email"
-            placeholder="lane@company.com"
-            onInput={inputUserHandler}
-            fullWidth
-            value={inputUserData.email}
-          />
-
           <Grid spacing={1} container justifyContent="center">
             {inGroups.map((group) => (
               <Grid item key={group}>
@@ -139,17 +139,17 @@ const InputModal = ({
               </Grid>
             ))}
           </Grid>
-
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            fullWidth
-            style={{ margin: '16px 0' }}
-          >
-            Create
-          </Button>
         </Grid>
+
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          fullWidth
+          style={{ margin: '16px 0' }}
+        >
+          Create
+        </Button>
       </form>
     </div>
   );

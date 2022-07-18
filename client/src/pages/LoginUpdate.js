@@ -134,6 +134,15 @@ const Login = () => {
                 Comprise of alphabets , numbers, and special character. Minimum 8
                 characters and maximum 10 characters.
               </Typography>
+
+              <Button
+                type="button"
+                variant="outlined"
+                color="secondary"
+                onClick={() => navigate(-1)}
+              >
+                Back
+              </Button>
             </>
           )}
         </Grid>

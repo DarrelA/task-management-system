@@ -16,19 +16,19 @@
 - Default application setup with 1 Admin account
 - <b>User management interface (Admin only):</b>
   - Create new user
-  - Change user's name or email
-  - Reset user's password to default password
-    - Cannot reset Admin's password to default password
-  - Assign user to user group(s)
+  - Change user's username or email
+  - Change user's password
+  - Assign/remove user to/from usergroup(s)
   - Disable user's account
     - Cannot disable Admin account
-  - Check if given user id is in user group
+  - Check if given username is in user group
     - <b>Backend only: </b>use to check access rights in phase 2 (Task management) of the project
 - <b>Update profile interface (User or Admin):</b>
   - Change email
   - Change password
-    - Minimum 8 characters and maximum 10 characters
-    - Comprise of alphabets, numbers, and special character
+- <b>Password Requirements:</b>
+  - Minimum 8 characters and maximum 10 characters
+  - Comprise of alphabets, numbers, and special character
 
 <img src="./diagrams/phase1-eer.png" alt="phase1-eer" width="350"/>
 
