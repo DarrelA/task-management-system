@@ -121,7 +121,7 @@ const createUser = async (req, res, next) => {
 
   try {
     const user = await User.create({
-      username: username.trim().toLowerCase().replace(/\s+/g, ' '), // Replace multiple whitespaces with single whitespace
+      username: username.trim().replace(/\s+/g, ''), // Remove all whitespaces
 
       email: email
         .trim()
@@ -180,7 +180,7 @@ const updateUser = async (req, res, next) => {
     if (email)
       user.email = email
         .trim()
-        .replace(/\s+/g, '') // Replace multiple whitespaces with single whitespace
+        .replace(/\s+/g, '') // Remove all whitespaces
         .replace(/[&\/\\#,+()!$~%^'":*?<>{}]/g, '') // Remove symbols
         .toLowerCase();
 
@@ -217,13 +217,7 @@ const updateUser = async (req, res, next) => {
 };
 
 const createGroup = async (req, res, next) => {
-  const userGroup = req.body.userGroup
-    .trim()
-    .replace(/\s+/g, ' ') // Replace multiple whitespaces with single whitespace
-    .toLowerCase()
-    .split(' ')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+  const userGroup = req.body.userGroup.trim().replace(/\s+/g, ''); // Remove all whitespaces
 
   if (!userGroup) return next(new HttpError('Group username is required.', 400));
 
@@ -280,7 +274,7 @@ const updateProfile = async (req, res, next) => {
     if (email)
       user.email = email
         .trim()
-        .replace(/\s+/g, '') // Replace multiple whitespaces with single whitespace
+        .replace(/\s+/g, '') // Remove all whitespaces
         .replace(/[&\/\\#,+()!$~%^'":*?<>{}]/g, '') // Remove symbols
         .toLowerCase();
 
