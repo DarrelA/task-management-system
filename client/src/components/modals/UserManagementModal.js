@@ -89,6 +89,7 @@ const InputModal = ({
           id="usergroup"
           placeholder="Group1"
           onInput={inputGroupHandler}
+          required
           fullWidth
           autoFocus
         />
@@ -114,6 +115,7 @@ const InputModal = ({
           id="username"
           placeholder="John Doe"
           onInput={inputUserHandler}
+          required
           value={inputUserData.username}
           fullWidth
           autoFocus
@@ -125,6 +127,7 @@ const InputModal = ({
           id="email"
           placeholder="lane@company.com"
           onInput={inputUserHandler}
+          required
           fullWidth
           value={inputUserData.email}
         />
@@ -134,6 +137,7 @@ const InputModal = ({
           type="password"
           id="password"
           onInput={inputUserHandler}
+          required
           fullWidth
         />
 
@@ -142,6 +146,7 @@ const InputModal = ({
           type="password"
           id="confirmPassword"
           onInput={inputUserHandler}
+          required
           fullWidth
         />
 

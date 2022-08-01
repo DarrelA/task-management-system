@@ -8,9 +8,7 @@ const InputModal = ({ open, onClose, newTaskHandler }) => {
   const useStyles = makeStyles((theme) => ({
     paper: {
       position: 'absolute',
-      width: 400,
-      height: 500,
-      maxHeight: 500,
+      width: '75%',
       backgroundColor: theme.palette.background.paper,
       border: '2px solid #000',
       boxShadow: theme.shadows[5],
@@ -42,12 +40,41 @@ const InputModal = ({ open, onClose, newTaskHandler }) => {
         <TextField
           label="App Acronym"
           type="text"
-          id="app_acronym"
+          id="App_Acronym"
           placeholder="delta"
           onInput={inputUserHandler}
           value={inputTaskData.App_Acronym}
           fullWidth
           autoFocus
+        />
+
+        <TextField
+          label="Description"
+          type="textarea"
+          id="App_Description"
+          placeholder="Once upon a time..."
+          minRows={5}
+          multiline
+          onInput={inputUserHandler}
+          value={inputTaskData.App_Description}
+          fullWidth
+          autoFocus
+        />
+
+        <TextField
+          label="Start Date"
+          id="App_startDate"
+          type="date"
+          defaultValue="2022-08-15"
+          InputLabelProps={{ shrink: true }}
+        />
+
+        <TextField
+          label="End Date"
+          id="App_endDate"
+          type="date"
+          defaultValue="2022-08-22"
+          InputLabelProps={{ shrink: true }}
         />
 
         <Grid spacing={1} container>
