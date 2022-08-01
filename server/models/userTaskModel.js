@@ -81,11 +81,11 @@ Group.belongsToMany(User, { through: UserGroup });
 
 const Application = sequelize.define('application', {
   App_Acronym: {
-    type: Sequelize.STRING,
+    type: Sequelize.STRING(30),
     primaryKey: true,
   },
   App_Description: {
-    type: Sequelize.STRING,
+    type: Sequelize.TEXT('tiny'),
     allowNull: true,
   },
   App_Rnumber: {
@@ -101,26 +101,26 @@ const Application = sequelize.define('application', {
     allowNull: true,
   },
   App_permit_Open: {
-    type: Sequelize.BOOLEAN,
-    defaultValue: false,
+    type: Sequelize.STRING,
+    allowNull: true,
   },
   App_permit_toDoList: {
-    type: Sequelize.BOOLEAN,
-    defaultValue: false,
+    type: Sequelize.STRING,
+    allowNull: true,
   },
   App_permit_Doing: {
-    type: Sequelize.BOOLEAN,
-    defaultValue: false,
+    type: Sequelize.STRING,
+    allowNull: true,
   },
   App_permit_Done: {
-    type: Sequelize.BOOLEAN,
-    defaultValue: false,
+    type: Sequelize.STRING,
+    allowNull: true,
   },
 });
 
 const Plan = sequelize.define('plan', {
   Plan_MVP_name: {
-    type: Sequelize.STRING,
+    type: Sequelize.STRING(30),
     primaryKey: true,
   },
   Plan_startDate: {
@@ -132,47 +132,52 @@ const Plan = sequelize.define('plan', {
     allowNull: true,
   },
   Plan_app_Acronym: {
-    type: Sequelize.STRING,
-    allowNull: false,
+    type: Sequelize.STRING(30),
+    allowNull: true,
   },
 });
 
 const Task = sequelize.define('task', {
   Task_name: {
-    type: Sequelize.STRING,
-    allowNull: false,
-  },
-  Task_description: {
-    type: Sequelize.STRING,
-    allowNull: false,
-  },
-  Task_notes: {
-    type: Sequelize.STRING,
-    allowNull: false,
-  },
-  Task_id: {
-    type: Sequelize.STRING,
+    type: Sequelize.STRING(30),
     primaryKey: true,
   },
+  Task_description: {
+    type: Sequelize.TEXT('tiny'),
+    allowNull: true,
+  },
+  Task_id: {
+    type: Sequelize.STRING(30),
+    allowNull: true,
+  },
   Task_plan: {
-    type: Sequelize.STRING,
-    allowNull: false,
+    type: Sequelize.STRING(30),
+    allowNull: true,
   },
   Task_app_Acronym: {
-    type: Sequelize.STRING,
-    allowNull: false,
+    type: Sequelize.STRING(30),
+    allowNull: true,
   },
   Task_state: {
-    type: Sequelize.ENUM(['Open', 'To-do-list', 'Doing', 'Done']),
-    allowNull: false,
+    type: Sequelize.ENUM(['Open', 'To-do-list', 'Doing', 'Done', 'Close']),
   },
   Task_creator: {
     type: Sequelize.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   Task_owner: {
     type: Sequelize.STRING,
+    allowNull: true,
+  },
+});
+
+const Note = sequelize.define('note', {
+  username: {
+    type: Sequelize.STRING,
     allowNull: false,
+  },
+  state: {
+    type: Sequelize.ENUM(['Open', 'To-do-list', 'Doing', 'Done', 'Close']),
   },
 });
 
@@ -182,6 +187,8 @@ Application.hasMany(Task);
 Task.belongsTo(Application);
 Plan.hasMany(Task);
 Task.belongsTo(Plan);
+Task.hasMany(Note);
+Note.belongsTo(Task);
 
 sequelize
   .sync()
@@ -209,4 +216,4 @@ const createData = async () => {
   }
 };
 
-module.exports = { User, Group, UserGroup, Application, Plan, Task };
+module.exports = { User, Group, UserGroup, Application, Plan, Task, Note };

@@ -7,7 +7,7 @@ import { Route, Routes } from 'react-router-dom';
 
 import { NavBar, ProtectedRoute } from './components';
 import useUserContext from './context/userContext';
-import { LoginUpdate, UserManagement } from './pages/';
+import { Applications, LoginUpdate, UserManagement } from './pages/';
 
 const App = () => {
   const theme = createTheme({ palette: { type: 'dark' } });
@@ -42,7 +42,7 @@ const App = () => {
           path="/apps"
           element={
             <ProtectedRoute>
-              <div>apps page</div>
+              <Applications />
             </ProtectedRoute>
           }
         />

@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Chip, Grid, TextField } from '@material-ui/core';
-import { InputModal, LoadingSpinner } from '../components/';
+import { UserManagementModal, LoadingSpinner } from '../components/';
 import useUserContext from '../context/userContext';
 
 const UserManagement = () => {
@@ -215,7 +215,7 @@ const UserManagement = () => {
   return (
     <>
       {openGroupModal && (
-        <InputModal
+        <UserManagementModal
           whichModal="group"
           open={openGroupModal}
           onClose={toggleGroupModalHandler}
@@ -225,7 +225,7 @@ const UserManagement = () => {
       )}
 
       {openUserModal && (
-        <InputModal
+        <UserManagementModal
           open={openUserModal}
           onClose={toggleUserModalHandler}
           newUserHandler={newUserHandler}

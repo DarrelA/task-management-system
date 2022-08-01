@@ -1,8 +1,8 @@
-import { makeStyles } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
+import { makeStyles } from '@material-ui/core/styles';
 
-import { useState } from 'react';
-import { Button, Chip, Grid, TextField } from '@material-ui/core';
+import { Button, Chip, Grid, TextField, Typography } from '@material-ui/core';
+import { useEffect, useState } from 'react';
 
 const InputModal = ({
   whichModal,
@@ -16,7 +16,7 @@ const InputModal = ({
     paper: {
       position: 'absolute',
       width: 400,
-      height: 500,
+      height: whichModal === 'group' ? '' : 500,
       maxHeight: 500,
       backgroundColor: theme.palette.background.paper,
       border: '2px solid #000',
@@ -27,10 +27,12 @@ const InputModal = ({
     usergroups: {
       overflowY: 'scroll',
       overflowX: 'hidden',
-      height: 180,
-      maxHeight: 180,
-      marginTop: 15,
-      marginBottom: 5,
+      height: 100,
+      maxHeight: 100,
+      marginTop: 35,
+      marginBottom: 15,
+      paddingTop: 15,
+      paddingBottom: 15,
     },
   }));
 
@@ -41,7 +43,10 @@ const InputModal = ({
     username: '',
     email: '@company.com',
     inGroups: [],
+    password: '',
+    confirmPassword: '',
   });
+  const [disableCreate, setDisableCreate] = useState(false);
   const [inGroups, setInGroups] = useState([]);
   const [notInGroups, setNotInGroups] = useState([...allGroups]);
 
@@ -51,6 +56,29 @@ const InputModal = ({
   const inputUserHandler = (e) =>
     setInputUserData({ ...inputUserData, [e.target.id]: e.target.value });
   const createUserHandler = () => newUserHandler({ ...inputUserData, inGroups });
+
+  useEffect(() => {
+    // Comprise of alphabets, numbers, and special character
+    // Minimum 8 characters and maximum 10 characters
+    const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,10}$/;
+
+    (whichModal === 'group') & (inputGroupData === '') ||
+    inputUserData.username === '' ||
+    inputUserData.email === '@company.com' ||
+    inputUserData.password === '' ||
+    inputUserData.confirmPassword === '' ||
+    inputUserData.password !== inputUserData.confirmPassword ||
+    !inputUserData.password.match(regex)
+      ? setDisableCreate(true)
+      : setDisableCreate(false);
+  }, [
+    whichModal,
+    inputGroupData,
+    inputUserData.username,
+    inputUserData.email,
+    inputUserData.password,
+    inputUserData.confirmPassword,
+  ]);
 
   const groupForm = (
     <div style={modalStyle} className={classes.paper}>
@@ -161,15 +189,27 @@ const InputModal = ({
           </Grid>
         </Grid>
 
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          fullWidth
-          style={{ margin: '16px 0' }}
-        >
-          Create
-        </Button>
+        <Grid spacing={1} container>
+          <Typography variant="overline" color="inherit">
+            Password requirement:
+          </Typography>
+
+          <Typography variant="caption" color="inherit">
+            Comprise of alphabets , numbers, and special character. Minimum 8 characters
+            and maximum 10 characters.
+          </Typography>
+
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            style={{ margin: '16px 0' }}
+            disabled={disableCreate}
+          >
+            Create
+          </Button>
+        </Grid>
       </form>
     </div>
   );

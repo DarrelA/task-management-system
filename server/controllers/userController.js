@@ -228,7 +228,7 @@ const updateUser = async (req, res, next) => {
 const createGroup = async (req, res, next) => {
   const userGroup = req.body.userGroup.trim().replace(/\s+/g, ''); // Remove all whitespaces
 
-  if (!userGroup) return next(new HttpError('Group username is required.', 400));
+  if (!userGroup) return next(new HttpError('Group name is required.', 400));
 
   try {
     const group = await Group.findByPk(userGroup);
@@ -237,7 +237,7 @@ const createGroup = async (req, res, next) => {
       const newGroup = await Group.create({ name: userGroup });
       await newGroup.save();
       res.send({ message: 'success' });
-    } else return next(new HttpError('Group username is taken.', 400));
+    } else return next(new HttpError('Group name is taken.', 400));
   } catch (e) {
     console.error(e);
     return next(new HttpError('Something went wrong!', 500));
