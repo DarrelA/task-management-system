@@ -16,6 +16,8 @@ const InputModal = ({
     paper: {
       position: 'absolute',
       width: 400,
+      height: 500,
+      maxHeight: 500,
       backgroundColor: theme.palette.background.paper,
       border: '2px solid #000',
       boxShadow: theme.shadows[5],
@@ -23,8 +25,10 @@ const InputModal = ({
     },
 
     usergroups: {
-      overflow: 'scroll',
-      maxHeight: 400,
+      overflowY: 'scroll',
+      overflowX: 'hidden',
+      height: 180,
+      maxHeight: 180,
       marginTop: 15,
       marginBottom: 5,
     },
