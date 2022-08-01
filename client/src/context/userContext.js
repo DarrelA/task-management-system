@@ -187,7 +187,10 @@ const UserProvider = ({ children }) => {
     }
   }, []);
 
-  const createUser = async ({ username, email, inGroups }, accessToken) => {
+  const createUser = async (
+    { username, email, password, confirmPassword, inGroups },
+    accessToken
+  ) => {
     dispatch({ type: 'IS_LOADING' });
 
     try {
@@ -198,7 +201,7 @@ const UserProvider = ({ children }) => {
           'Content-Type': 'application/json',
           authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ username, email, inGroups }),
+        body: JSON.stringify({ username, email, password, confirmPassword, inGroups }),
       });
 
       const data = await response.json();

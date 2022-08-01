@@ -109,15 +109,24 @@ const getUsersData = async (req, res, next) => {
 };
 
 const createUser = async (req, res, next) => {
-  const { username, email, inGroups } = req.body;
-  if (!username || !email)
-    return next(new HttpError('Please provide username and email.', 400));
+  const { username, email, password, confirmPassword, inGroups } = req.body;
+  if (!username || !email || !password)
+    return next(new HttpError('Please provide username, email and password.', 400));
 
   if (await User.findOne({ where: { username } }))
     return next(new HttpError('Username is taken.', 400));
 
   if (await User.findOne({ where: { email } }))
     return next(new HttpError('Email is taken.', 400));
+
+  if (password !== confirmPassword)
+    return next(new HttpError('Password is different from Confirm Password.', 400));
+
+  // Comprise of alphabets, numbers, and special character
+  // Minimum 8 characters and maximum 10 characters
+  const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,10}$/;
+  if (!password.match(regex))
+    return next(new HttpError('Please provide a valid password.', 400));
 
   try {
     const user = await User.create({
@@ -129,7 +138,7 @@ const createUser = async (req, res, next) => {
         .replace(/[&\/\\#,+()!$~%^'":*?<>{}]/g, '') // Remove symbols
         .toLowerCase(),
 
-      password: process.env.DEFAULT_USER_PASSWORD,
+      password: password,
     });
 
     await user.save();

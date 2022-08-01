@@ -97,6 +97,22 @@ const InputModal = ({
           value={inputUserData.email}
         />
 
+        <TextField
+          label="Password"
+          type="password"
+          id="password"
+          onInput={inputUserHandler}
+          fullWidth
+        />
+
+        <TextField
+          label="Confirm Password"
+          type="password"
+          id="confirmPassword"
+          onInput={inputUserHandler}
+          fullWidth
+        />
+
         <Grid
           container
           spacing={1}
