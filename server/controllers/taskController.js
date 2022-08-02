@@ -7,17 +7,16 @@ const createApplication = async (req, res, next) => {
   if (!App_Acronym) return next(new HttpError('Application acronym is required.', 400));
 
   try {
-    const application = await Application.findByPk(userGroup);
+    const application = await Application.findByPk(App_Acronym);
     const appCount = await Application.count();
-    console.log('appCount', appCount);
 
     if (!application) {
       const newApplication = await Application.create({
         App_Acronym,
         App_Description,
-        App_Rnumber: appCount,
-        App_startDate,
-        App_endDate,
+        App_Rnumber: appCount + 1,
+        App_startDate: App_startDate || null,
+        App_endDate: App_endDate || null,
       });
       await newApplication.save();
       res.send({ message: 'success' });

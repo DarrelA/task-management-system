@@ -4,6 +4,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 
 const userRoutes = require('./routes/userRoutes');
+const taskRoutes = require('./routes/taskRoutes');
 const { notFoundMiddleware, errorMiddleware } = require('./middleware/errorMiddleware');
 const db = require('./config/db');
 
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/users', userRoutes);
+app.use('/api/tasks', taskRoutes);
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);

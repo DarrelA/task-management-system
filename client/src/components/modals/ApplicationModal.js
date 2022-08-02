@@ -4,7 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Button, Grid, TextField } from '@material-ui/core';
 import { useEffect, useState } from 'react';
 
-const InputModal = ({ open, onClose, newTaskHandler }) => {
+const InputModal = ({ open, onClose, newAppHandler }) => {
   const useStyles = makeStyles((theme) => ({
     paper: {
       position: 'absolute',
@@ -18,7 +18,7 @@ const InputModal = ({ open, onClose, newTaskHandler }) => {
 
   const classes = useStyles();
   const [modalStyle] = useState({ top: '15%', margin: 'auto' });
-  const [inputTaskData, setInputTaskData] = useState({
+  const [inputAppData, setInputAppData] = useState({
     App_Acronym: '',
     App_Description: '',
     App_startDate: '',
@@ -26,9 +26,9 @@ const InputModal = ({ open, onClose, newTaskHandler }) => {
   });
   const [disableCreate, setDisableCreate] = useState(false);
 
-  const inputUserHandler = (e) =>
-    setInputTaskData({ ...inputTaskData, [e.target.id]: e.target.value });
-  const createTaskHandler = () => newTaskHandler({ ...inputTaskData });
+  const inputAppHandler = (e) =>
+    setInputAppData({ ...inputAppData, [e.target.id]: e.target.value });
+  const createTaskHandler = () => newAppHandler({ ...inputAppData });
 
   useEffect(() => {
     // @TODO: Validation
@@ -42,8 +42,8 @@ const InputModal = ({ open, onClose, newTaskHandler }) => {
           type="text"
           id="App_Acronym"
           placeholder="delta"
-          onInput={inputUserHandler}
-          value={inputTaskData.App_Acronym}
+          onInput={inputAppHandler}
+          value={inputAppData.App_Acronym}
           fullWidth
           autoFocus
         />
@@ -55,27 +55,31 @@ const InputModal = ({ open, onClose, newTaskHandler }) => {
           placeholder="Once upon a time..."
           minRows={5}
           multiline
-          onInput={inputUserHandler}
-          value={inputTaskData.App_Description}
+          onInput={inputAppHandler}
+          value={inputAppData.App_Description}
           fullWidth
           autoFocus
         />
 
-        <TextField
-          label="Start Date"
-          id="App_startDate"
-          type="date"
-          defaultValue="2022-08-15"
-          InputLabelProps={{ shrink: true }}
-        />
+        <Grid container spacing={1} justifyContent="space-around" style={{ padding: 25 }}>
+          <TextField
+            label="Start Date"
+            id="App_startDate"
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            onInput={inputAppHandler}
+            defaultValue={inputAppData.App_startDate}
+          />
 
-        <TextField
-          label="End Date"
-          id="App_endDate"
-          type="date"
-          defaultValue="2022-08-22"
-          InputLabelProps={{ shrink: true }}
-        />
+          <TextField
+            label="End Date"
+            id="App_endDate"
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            onInput={inputAppHandler}
+            defaultValue={inputAppData.App_endDate}
+          />
+        </Grid>
 
         <Grid spacing={1} container>
           <Button

@@ -4,13 +4,13 @@ const TaskContext = React.createContext();
 
 const initialState = {
   isLoading: false,
-  message: '',
+  taskMessage: '',
 };
 
 const userReducer = (state, action) => {
   switch (action.type) {
     case 'CLEAR_MESSAGE': {
-      return { ...state, message: '' };
+      return { ...state, taskMessage: '' };
     }
 
     case 'IS_LOADING': {
@@ -18,11 +18,11 @@ const userReducer = (state, action) => {
     }
 
     case 'RESPONSE_SUCCESS': {
-      return { ...state, isLoading: false, message: action.payload.message };
+      return { ...state, isLoading: false, taskMessage: action.payload.message };
     }
 
     case 'RESPONSE_FAIL': {
-      return { ...state, isLoading: false, message: action.payload.message };
+      return { ...state, isLoading: false, taskMessage: action.payload.message };
     }
 
     default:
