@@ -85,7 +85,7 @@ const Application = sequelize.define('application', {
     primaryKey: true,
   },
   App_Description: {
-    type: Sequelize.TEXT('tiny'),
+    type: Sequelize.TEXT('medium'),
     allowNull: true,
   },
   App_Rnumber: {
