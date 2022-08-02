@@ -1,3 +1,4 @@
+const Sequelize = require('sequelize');
 const { Application, Plan, Task, Note, Group } = require('../models/userTaskModel');
 const HttpError = require('../models/http-error');
 
@@ -20,6 +21,7 @@ const createApplication = async (req, res, next) => {
   const {
     App_Acronym,
     App_Description,
+    App_Rnumber,
     App_startDate,
     App_endDate,
     App_permit_Open,
@@ -51,12 +53,13 @@ const createApplication = async (req, res, next) => {
       if (!doneGroup) return next(new HttpError('Usergroup is unavailable.', 400));
     }
 
-    const appCount = await Application.count();
+    const max_App_Rnumber = await Application.max('App_Rnumber');
+    if (max_App_Rnumber) App_Rnumber = '';
 
     const newApplication = await Application.create({
       App_Acronym,
       App_Description,
-      App_Rnumber: appCount + 1,
+      App_Rnumber: App_Rnumber || max_App_Rnumber + 1,
       App_startDate: App_startDate || null,
       App_endDate: App_endDate || null,
       App_permit_Open: App_permit_Open || null,

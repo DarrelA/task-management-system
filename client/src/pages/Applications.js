@@ -21,11 +21,19 @@ const useStyles = makeStyles({
     maxHeight: 375,
     margin: 10,
   },
+
   title: {
     fontSize: 22,
   },
-  pos: {
-    marginBottom: 12,
+
+  cardContent: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+
+  cardActions: {
+    display: 'flex',
+    justifyContent: 'flex-end',
   },
 });
 
@@ -107,15 +115,17 @@ const Applicationa = () => {
       >
         {applications?.map((application) => (
           <Card className={classes.root} variant="outlined" key={application.App_Acronym}>
-            <CardContent>
+            <CardContent className={classes.cardContent}>
               <Grid
                 container
+                spacing={1}
                 justifyContent="space-between"
-                style={{ paddingBottom: 10 }}
+                style={{ padding: (0, 15) }}
               >
                 <Typography className={classes.title} color="textSecondary" gutterBottom>
                   {application.App_Rnumber}: {application.App_Acronym}
                 </Typography>
+
                 <CardActions>
                   <Button
                     size="small"
@@ -126,6 +136,10 @@ const Applicationa = () => {
                   >
                     <span className="material-icons">edit</span>
                   </Button>
+
+                  <Button size="small" onClick={() => console.log('plan page')}>
+                    <span class="material-icons">menu_book</span>
+                  </Button>
                 </CardActions>
               </Grid>
 
@@ -135,7 +149,7 @@ const Applicationa = () => {
                 style={{ paddingBottom: 10 }}
               >
                 <Typography variant="overline">
-                  start date: {application.App_startDate}
+                  start date: {application.App_startDate || 'Pending'}
                 </Typography>
                 <Typography variant="overline">
                   end date: {application?.App_endDate || 'Pending'}

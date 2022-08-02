@@ -88,6 +88,19 @@ const InputModal = ({ open, onClose, appModalHandler, editAppMode, groups }) => 
           autoFocus
         />
 
+        <TextField
+          label="Description"
+          type="textarea"
+          id="App_Description"
+          placeholder="Once upon a time..."
+          minRows={5}
+          multiline
+          onInput={inputAppHandler}
+          value={inputAppData.App_Description}
+          fullWidth
+          autoFocus
+        />
+
         <Grid container spacing={1} justifyContent="space-around" style={{ padding: 25 }}>
           <TextField
             label="Start Date"
