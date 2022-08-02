@@ -31,9 +31,17 @@ const useStyles = makeStyles({
     flexDirection: 'column',
   },
 
+  description: {
+    overflowY: 'scroll',
+    overflowX: 'hidden',
+    height: 210,
+    maxHeight: 210,
+  },
+
   cardActions: {
     display: 'flex',
     justifyContent: 'flex-end',
+    padding: (0, 10),
   },
 });
 
@@ -44,6 +52,7 @@ const Applicationa = () => {
   const {
     getApplicationsData,
     applications,
+    max_App_Rnumber,
     groups,
     createApplication,
     updateApplication,
@@ -91,7 +100,9 @@ const Applicationa = () => {
           onClose={closeTaskModalHandler}
           appModalHandler={appModalHandler}
           editAppMode={editAppMode}
-          groups={groups}
+          // First application requires manual input of App_Rnumber
+          // Thereafter will increase by 1 automatically
+          data={{ groups, max_App_Rnumber }}
         />
       )}
 
@@ -116,32 +127,9 @@ const Applicationa = () => {
         {applications?.map((application) => (
           <Card className={classes.root} variant="outlined" key={application.App_Acronym}>
             <CardContent className={classes.cardContent}>
-              <Grid
-                container
-                spacing={1}
-                justifyContent="space-between"
-                style={{ padding: (0, 15) }}
-              >
-                <Typography className={classes.title} color="textSecondary" gutterBottom>
-                  {application.App_Rnumber}: {application.App_Acronym}
-                </Typography>
-
-                <CardActions>
-                  <Button
-                    size="small"
-                    onClick={() => {
-                      setEditAppMode({ ...application, edit: true });
-                      openTaskModalHandler();
-                    }}
-                  >
-                    <span className="material-icons">edit</span>
-                  </Button>
-
-                  <Button size="small" onClick={() => console.log('plan page')}>
-                    <span class="material-icons">menu_book</span>
-                  </Button>
-                </CardActions>
-              </Grid>
+              <Typography className={classes.title} color="textSecondary" gutterBottom>
+                #{application.App_Rnumber}: {application.App_Acronym}
+              </Typography>
 
               <Grid
                 container
@@ -156,7 +144,25 @@ const Applicationa = () => {
                 </Typography>
               </Grid>
 
-              <Typography variant="body2">{application.App_Description}</Typography>
+              <Typography variant="body2" className={classes.description}>
+                {application.App_Description}
+              </Typography>
+
+              <CardActions className={classes.cardActions}>
+                <Button
+                  size="small"
+                  onClick={() => {
+                    setEditAppMode({ ...application, edit: true });
+                    openTaskModalHandler();
+                  }}
+                >
+                  <span className="material-icons">edit</span>
+                </Button>
+
+                <Button size="small" onClick={() => console.log('plan page')}>
+                  <span className="material-icons">menu_book</span>
+                </Button>
+              </CardActions>
             </CardContent>
           </Card>
         ))}

@@ -18,8 +18,8 @@ const userReducer = (state, action) => {
     }
 
     case 'GET_ALL_APPLICATION_SUCCESS': {
-      const { applications, groups } = action.payload;
-      return { ...state, isLoading: false, applications, groups };
+      const { applications, max_App_Rnumber, groups } = action.payload;
+      return { ...state, isLoading: false, applications, max_App_Rnumber, groups };
     }
 
     case 'GET_ALL_APPLICATION_FAIL': {
@@ -70,6 +70,7 @@ const TaskProvider = ({ children }) => {
     async (
       {
         App_Acronym,
+        App_Rnumber,
         App_Description,
         App_startDate,
         App_endDate,
@@ -92,6 +93,7 @@ const TaskProvider = ({ children }) => {
           },
           body: JSON.stringify({
             App_Acronym,
+            App_Rnumber,
             App_Description,
             App_startDate,
             App_endDate,

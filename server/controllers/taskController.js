@@ -1,16 +1,16 @@
-const Sequelize = require('sequelize');
 const { Application, Plan, Task, Note, Group } = require('../models/userTaskModel');
 const HttpError = require('../models/http-error');
 
 const getApplicationsData = async (req, res, next) => {
   try {
+    const max_App_Rnumber = await Application.max('App_Rnumber');
     const applications = await Application.findAll({
       attributes: { exclude: ['createdAt'] },
     });
 
     const groups = await Group.findAll({ attributes: ['name'] });
 
-    return res.send({ applications, groups });
+    return res.send({ applications, max_App_Rnumber, groups });
   } catch (e) {
     console.error(e);
     return next(new HttpError('Something went wrong!', 500));
@@ -21,7 +21,6 @@ const createApplication = async (req, res, next) => {
   const {
     App_Acronym,
     App_Description,
-    App_Rnumber,
     App_startDate,
     App_endDate,
     App_permit_Open,
@@ -29,6 +28,8 @@ const createApplication = async (req, res, next) => {
     App_permit_Doing,
     App_permit_Done,
   } = req.body;
+
+  let { App_Rnumber } = req.body;
 
   if (!App_Acronym) return next(new HttpError('Application acronym is required.', 400));
 
@@ -53,6 +54,7 @@ const createApplication = async (req, res, next) => {
       if (!doneGroup) return next(new HttpError('Usergroup is unavailable.', 400));
     }
 
+    // if at least 1 app exist in db, auto increment App_Rnumber
     const max_App_Rnumber = await Application.max('App_Rnumber');
     if (max_App_Rnumber) App_Rnumber = '';
 
