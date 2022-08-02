@@ -34,12 +34,22 @@ const createApplication = async (req, res, next) => {
     const application = await Application.findByPk(App_Acronym);
     if (!!application) return next(new HttpError('Application acronym is taken.', 400));
 
-    const openGroup = await Group.findByPk(App_permit_Open);
-    const toDoGroup = await Group.findByPk(App_permit_toDoList);
-    const doingGroup = await Group.findByPk(App_permit_Doing);
-    const doneGroup = await Group.findByPk(App_permit_Done);
-    if (!openGroup || !toDoGroup || !doingGroup || !doneGroup)
-      return next(new HttpError('Usergroup is unavailable.', 400));
+    if (App_permit_Open) {
+      const openGroup = await Group.findByPk(App_permit_Open);
+      if (!openGroup) return next(new HttpError('Usergroup is unavailable.', 400));
+    }
+    if (App_permit_toDoList) {
+      const toDoGroup = await Group.findByPk(App_permit_toDoList);
+      if (!toDoGroup) return next(new HttpError('Usergroup is unavailable.', 400));
+    }
+    if (App_permit_Doing) {
+      const doingGroup = await Group.findByPk(App_permit_Doing);
+      if (!doingGroup) return next(new HttpError('Usergroup is unavailable.', 400));
+    }
+    if (App_permit_Done) {
+      const doneGroup = await Group.findByPk(App_permit_Done);
+      if (!doneGroup) return next(new HttpError('Usergroup is unavailable.', 400));
+    }
 
     const appCount = await Application.count();
 
@@ -100,10 +110,10 @@ const updateApplication = async (req, res, next) => {
     if (App_Description) application.App_Description = App_Description;
     if (App_startDate) application.App_startDate = App_startDate;
     if (App_endDate) application.App_endDate = App_endDate;
-    if (App_permit_Open) application.App_permit_Open = App_permit_Open;
-    if (App_permit_toDoList) application.App_permit_toDoList = App_permit_toDoList;
-    if (App_permit_Doing) application.App_permit_Doing = App_permit_Doing;
-    if (App_permit_Done) application.App_permit_Done = App_permit_Done;
+    application.App_permit_Open = App_permit_Open || null;
+    application.App_permit_toDoList = App_permit_toDoList || null;
+    application.App_permit_Doing = App_permit_Doing || null;
+    application.App_permit_Done = App_permit_Done || null;
 
     await application.save();
     res.send({ message: 'success' });
