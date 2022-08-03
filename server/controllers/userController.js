@@ -226,7 +226,13 @@ const updateUser = async (req, res, next) => {
 };
 
 const createGroup = async (req, res, next) => {
-  const userGroup = req.body.userGroup.trim().replace(/\s+/g, ''); // Remove all whitespaces
+  const userGroup = req.body.userGroup
+    .trim()
+    .replace(/\s+/g, ' ') // Replace multiple whitespaces with single whitespace
+    .toLowerCase()
+    .split(' ')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
 
   if (!userGroup) return next(new HttpError('Group name is required.', 400));
 
