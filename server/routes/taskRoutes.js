@@ -1,6 +1,9 @@
 const express = require('express');
 
-const { authMiddleware } = require('../middleware/authMiddleware');
+const {
+  authMiddleware,
+  appAccessRightsMiddleware,
+} = require('../middleware/authMiddleware');
 
 const router = express.Router();
 const {
@@ -10,7 +13,19 @@ const {
 } = require('../controllers/taskController');
 
 router.get('/all', authMiddleware, getApplicationsData);
-router.post('/createapplication', authMiddleware, createApplication);
-router.patch('/updateapplication', authMiddleware, updateApplication);
+
+router.post(
+  '/createapplication',
+  authMiddleware,
+  appAccessRightsMiddleware,
+  createApplication
+);
+
+router.patch(
+  '/updateapplication',
+  authMiddleware,
+  appAccessRightsMiddleware,
+  updateApplication
+);
 
 module.exports = router;

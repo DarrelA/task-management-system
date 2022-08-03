@@ -244,17 +244,13 @@ const createGroup = async (req, res, next) => {
   }
 };
 
-const checkGroup = async (req, res, next) => {
-  const { username, userGroup } = req.body;
+// This is for appAccessRightsMiddleware
+const checkGroup = async (userUsername, groupName) => {
   try {
-    const group = await UserGroup.findAll({
-      where: { username, groupName: userGroup },
-    });
-
-    res.send(!!group[0]?.username); // Check user in user group? Return T/F
+    const group = await UserGroup.findAll({ where: { userUsername, groupName } });
+    return !!group[0]?.userUsername; // Check user in user group? Return T/F
   } catch (e) {
     console.error(e);
-    return next(new HttpError('Something went wrong!', 500));
   }
 };
 

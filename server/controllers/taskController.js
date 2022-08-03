@@ -112,7 +112,7 @@ const updateApplication = async (req, res, next) => {
       if (!doneGroup) return next(new HttpError('Usergroup is unavailable.', 400));
     }
 
-    if (App_Description) application.App_Description = App_Description;
+    application.App_Description = App_Description || null;
     if (App_startDate) application.App_startDate = App_startDate;
     if (App_endDate) application.App_endDate = App_endDate;
     application.App_permit_Open = App_permit_Open || null;
