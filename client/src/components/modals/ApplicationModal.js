@@ -13,7 +13,7 @@ import {
 } from '@material-ui/core';
 import { useEffect, useState } from 'react';
 
-const InputModal = ({ open, onClose, appModalHandler, editAppMode, data }) => {
+const ApplicationModal = ({ open, onClose, appModalHandler, editAppMode, data }) => {
   const useStyles = makeStyles((theme) => ({
     paper: {
       position: 'absolute',
@@ -38,15 +38,15 @@ const InputModal = ({ open, onClose, appModalHandler, editAppMode, data }) => {
   const classes = useStyles();
   const [modalStyle] = useState({ top: '15%', margin: 'auto' });
   const [inputAppData, setInputAppData] = useState({
-    App_Acronym: editAppMode.App_Acronym || '',
-    App_Rnumber: editAppMode.App_Rnumber || '',
-    App_Description: editAppMode.App_Description || '',
-    App_startDate: editAppMode.App_startDate || '',
-    App_endDate: editAppMode.App_endDate || '',
-    App_permit_Open: editAppMode.App_permit_Open || '',
-    App_permit_toDoList: editAppMode.App_permit_toDoList || '',
-    App_permit_Doing: editAppMode.App_permit_Doing || '',
-    App_permit_Done: editAppMode.App_permit_Done || '',
+    App_Acronym: editAppMode?.App_Acronym || '',
+    App_Rnumber: editAppMode?.App_Rnumber || '',
+    App_Description: editAppMode?.App_Description || '',
+    App_startDate: editAppMode?.App_startDate || '',
+    App_endDate: editAppMode?.App_endDate || '',
+    App_permit_Open: editAppMode?.App_permit_Open || '',
+    App_permit_toDoList: editAppMode?.App_permit_toDoList || '',
+    App_permit_Doing: editAppMode?.App_permit_Doing || '',
+    App_permit_Done: editAppMode?.App_permit_Done || '',
   });
   const [disableCreate, setDisableCreate] = useState(false);
 
@@ -78,7 +78,7 @@ const InputModal = ({ open, onClose, appModalHandler, editAppMode, data }) => {
           }
           fullWidth
           autoFocus
-          disabled={!!data.max_App_Rnumber}
+          disabled={!!data?.max_App_Rnumber}
         />
 
         <TextField
@@ -90,7 +90,7 @@ const InputModal = ({ open, onClose, appModalHandler, editAppMode, data }) => {
           value={inputAppData.App_Acronym}
           fullWidth
           autoFocus
-          disabled={!!editAppMode.App_Acronym}
+          disabled={!!editAppMode?.App_Acronym}
           required
         />
 
@@ -98,7 +98,6 @@ const InputModal = ({ open, onClose, appModalHandler, editAppMode, data }) => {
           label="Description"
           type="textarea"
           id="App_Description"
-          placeholder="Once upon a time..."
           minRows={5}
           multiline
           onInput={inputAppHandler}
@@ -227,7 +226,7 @@ const InputModal = ({ open, onClose, appModalHandler, editAppMode, data }) => {
             style={{ margin: '16px 0' }}
             disabled={disableCreate}
           >
-            {editAppMode.App_Acronym ? 'Update' : 'Create'}
+            {editAppMode?.App_Acronym ? 'Update' : 'Create'}
           </Button>
         </Grid>
       </form>
@@ -245,4 +244,4 @@ const InputModal = ({ open, onClose, appModalHandler, editAppMode, data }) => {
   );
 };
 
-export default InputModal;
+export default ApplicationModal;

@@ -81,11 +81,11 @@ Group.belongsToMany(User, { through: UserGroup });
 
 const Application = sequelize.define('application', {
   App_Acronym: {
-    type: Sequelize.STRING(30),
+    type: Sequelize.STRING(45),
     primaryKey: true,
   },
   App_Description: {
-    type: Sequelize.TEXT('medium'),
+    type: Sequelize.TEXT('long'),
     allowNull: true,
   },
   App_Rnumber: {
@@ -120,7 +120,7 @@ const Application = sequelize.define('application', {
 
 const Plan = sequelize.define('plan', {
   Plan_MVP_name: {
-    type: Sequelize.STRING(30),
+    type: Sequelize.STRING(45),
     primaryKey: true,
   },
   Plan_startDate: {
@@ -132,32 +132,34 @@ const Plan = sequelize.define('plan', {
     allowNull: true,
   },
   Plan_app_Acronym: {
-    type: Sequelize.STRING(30),
+    type: Sequelize.STRING(45),
     allowNull: true,
   },
 });
 
 const Task = sequelize.define('task', {
   Task_name: {
-    type: Sequelize.STRING(30),
+    type: Sequelize.STRING(45),
     primaryKey: true,
   },
   Task_description: {
-    type: Sequelize.TEXT('tiny'),
+    type: Sequelize.TEXT('long'),
     allowNull: true,
   },
   Task_id: {
-    type: Sequelize.STRING(30),
+    type: Sequelize.STRING(45),
     allowNull: true,
   },
-  Task_plan: {
-    type: Sequelize.STRING(30),
-    allowNull: true,
-  },
-  Task_app_Acronym: {
-    type: Sequelize.STRING(30),
-    allowNull: true,
-  },
+  // Using sequelize planPlanMVPName
+  // Task_plan: {
+  //   type: Sequelize.STRING(45),
+  //   allowNull: true,
+  // },
+  // Using sequelize applicationAppAcronym
+  // Task_app_Acronym: {
+  //   type: Sequelize.STRING(45),
+  //   allowNull: true,
+  // },
   Task_state: {
     type: Sequelize.ENUM(['Open', 'To-do-list', 'Doing', 'Done', 'Close']),
   },
@@ -178,6 +180,10 @@ const Note = sequelize.define('note', {
   },
   state: {
     type: Sequelize.ENUM(['Open', 'To-do-list', 'Doing', 'Done', 'Close']),
+  },
+  description: {
+    type: Sequelize.TEXT('long'),
+    allowNull: true,
   },
 });
 

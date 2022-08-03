@@ -1,8 +1,11 @@
 // prettier-ignore
 const mockUsers = [
-  { username: 'Florina Poate', email: 'fpoate1d@dyndns.org', password: 'password' },
-  { username: 'Georgy Flockhart', email: 'gflockhart1e@naver.com', password: 'password' },
-  { username: 'Jess Maidens', email: 'jmaidens2g@dmoz.org', password: 'password' },
+  { username: 'pl', email: 'pl@company.com', password: 'admin' },
+  { username: 'pm', email: 'pm@company.com', password: 'admin' },
+  { username: 'tm', email: 'tm@company.com', password: 'admin' },
+  // { username: 'Florina Poate', email: 'fpoate1d@dyndns.org', password: 'password' },
+  // { username: 'Georgy Flockhart', email: 'gflockhart1e@naver.com', password: 'password' },
+  // { username: 'Jess Maidens', email: 'jmaidens2g@dmoz.org', password: 'password' },
   // { username: 'Phil Turfin', email: 'pturfin0@ft.com', password: 'password' },
   // { username: 'Imelda Sherston', email: 'isherston1@odnoklassniki.ru', password: 'password' },
   // { username: 'Jennilee Frise', email: 'jfrise2@t.co', password: 'password' },

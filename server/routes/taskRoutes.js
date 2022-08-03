@@ -10,6 +10,7 @@ const {
   getApplicationsData,
   createApplication,
   updateApplication,
+  createTask,
 } = require('../controllers/taskController');
 
 router.get('/all', authMiddleware, getApplicationsData);
@@ -27,5 +28,7 @@ router.patch(
   appAccessRightsMiddleware,
   updateApplication
 );
+
+router.post('/createtask', authMiddleware, appAccessRightsMiddleware, createTask);
 
 module.exports = router;

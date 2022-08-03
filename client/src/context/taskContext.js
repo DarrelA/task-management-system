@@ -66,62 +66,59 @@ const TaskProvider = ({ children }) => {
     }
   }, []);
 
-  const createApplication = useCallback(
-    async (
-      {
-        App_Acronym,
-        App_Rnumber,
-        App_Description,
-        App_startDate,
-        App_endDate,
-        App_permit_Open,
-        App_permit_toDoList,
-        App_permit_Doing,
-        App_permit_Done,
-      },
-      accessToken
-    ) => {
-      dispatch({ type: 'IS_LOADING' });
-
-      try {
-        const response = await fetch(`/api/tasks/createapplication`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-            authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({
-            App_Acronym,
-            App_Rnumber,
-            App_Description,
-            App_startDate,
-            App_endDate,
-            App_permit_Open,
-            App_permit_toDoList,
-            App_permit_Doing,
-            App_permit_Done,
-          }),
-        });
-
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message);
-
-        dispatch({
-          type: 'RESPONSE_SUCCESS',
-          payload: data,
-        });
-
-        clearAlert();
-        getApplicationsData(accessToken);
-        return 'success';
-      } catch (e) {
-        dispatch({ type: 'RESPONSE_FAIL', payload: e });
-        clearAlert();
-      }
+  const createApplication = async (
+    {
+      App_Acronym,
+      App_Rnumber,
+      App_Description,
+      App_startDate,
+      App_endDate,
+      App_permit_Open,
+      App_permit_toDoList,
+      App_permit_Doing,
+      App_permit_Done,
     },
-    [getApplicationsData]
-  );
+    accessToken
+  ) => {
+    dispatch({ type: 'IS_LOADING' });
+
+    try {
+      const response = await fetch(`/api/tasks/createapplication`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          App_Acronym,
+          App_Rnumber,
+          App_Description,
+          App_startDate,
+          App_endDate,
+          App_permit_Open,
+          App_permit_toDoList,
+          App_permit_Doing,
+          App_permit_Done,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+
+      dispatch({
+        type: 'RESPONSE_SUCCESS',
+        payload: data,
+      });
+
+      clearAlert();
+      getApplicationsData(accessToken);
+      return 'success';
+    } catch (e) {
+      dispatch({ type: 'RESPONSE_FAIL', payload: e });
+      clearAlert();
+    }
+  };
 
   const updateApplication = async (
     {
@@ -175,6 +172,45 @@ const TaskProvider = ({ children }) => {
     }
   };
 
+  const createTask = async (
+    { Task_name, Task_description },
+    App_Acronym,
+    accessToken
+  ) => {
+    dispatch({ type: 'IS_LOADING' });
+
+    try {
+      const response = await fetch('/api/tasks/createtask', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          App_Acronym,
+          Task_name,
+          Task_description,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+
+      dispatch({
+        type: 'RESPONSE_SUCCESS',
+        payload: data,
+      });
+
+      clearAlert();
+      getApplicationsData(accessToken);
+      return 'success';
+    } catch (e) {
+      dispatch({ type: 'RESPONSE_FAIL', payload: e });
+      clearAlert();
+    }
+  };
+
   return (
     <TaskContext.Provider
       value={{
@@ -182,6 +218,7 @@ const TaskProvider = ({ children }) => {
         getApplicationsData,
         createApplication,
         updateApplication,
+        createTask,
       }}
     >
       {children}

@@ -130,7 +130,13 @@ const createUser = async (req, res, next) => {
 
   try {
     const user = await User.create({
-      username: username.trim().replace(/\s+/g, ''), // Remove all whitespaces
+      username: username
+        .trim()
+        .replace(/\s+/g, ' ') // Replace multiple whitespaces with single whitespace
+        .toLowerCase()
+        .split(' ')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' '),
 
       email: email
         .trim()

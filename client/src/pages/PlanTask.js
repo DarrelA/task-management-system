@@ -8,9 +8,9 @@ import {
   Typography,
 } from '@material-ui/core';
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { ApplicationModal, LoadingSpinner } from '../components';
+import { LoadingSpinner, TaskModal } from '../components';
 import useTaskContext from '../context/taskContext';
 import useUserContext from '../context/userContext';
 
@@ -46,29 +46,24 @@ const useStyles = makeStyles({
   },
 });
 
-const Applications = () => {
+const PlanTask = () => {
   const classes = useStyles();
 
   const taskContext = useTaskContext();
-  const {
-    getApplicationsData,
-    applications,
-    max_App_Rnumber,
-    groups,
-    createApplication,
-    updateApplication,
-  } = taskContext;
+  const { getTasksData, tasks, createTask, updateTask } = taskContext;
   const userContext = useUserContext();
   const { accessToken, message } = userContext;
-
   const { isLoading, taskMessage } = taskContext;
-  const [openAppModal, setOpenAppModal] = useState(false);
-  const [editAppMode, setEditAppMode] = useState({ edit: false });
 
-  const openTaskModalHandler = () => setOpenAppModal(true);
+  const { App_Acronym } = useParams();
+
+  const [openTaskModal, setOpenTaskModal] = useState(false);
+  const [editTaskMode, setEditTaskMode] = useState({ edit: false });
+
+  const openTaskModalHandler = () => setOpenTaskModal(true);
   const closeTaskModalHandler = () => {
-    setEditAppMode({ edit: false });
-    setOpenAppModal(false);
+    setEditTaskMode({ edit: false });
+    setOpenTaskModal(false);
   };
 
   useEffect(() => {
@@ -78,15 +73,16 @@ const Applications = () => {
     if (!!message) toast.error(message);
   }, [taskMessage, message]);
 
-  useEffect(() => {
-    accessToken && getApplicationsData(accessToken);
-  }, [accessToken, getApplicationsData]);
+  // @TODO: To be implemented
+  // useEffect(() => {
+  //   accessToken && getTasksData(accessToken);
+  // }, [accessToken, getTasksData]);
 
-  const appModalHandler = (inputData) => {
+  const taskModalHandler = (inputData) => {
     if (!inputData) return;
-    if (!editAppMode.edit) createApplication(inputData, accessToken);
+    if (!editTaskMode.edit) createTask(inputData, App_Acronym, accessToken);
     else {
-      updateApplication(inputData, accessToken);
+      updateTask(inputData, App_Acronym, accessToken);
       closeTaskModalHandler();
     }
   };
@@ -95,15 +91,12 @@ const Applications = () => {
 
   return (
     <>
-      {openAppModal && (
-        <ApplicationModal
-          open={openAppModal}
+      {openTaskModal && (
+        <TaskModal
+          open={openTaskModal}
           onClose={closeTaskModalHandler}
-          appModalHandler={appModalHandler}
-          editAppMode={editAppMode}
-          // First application requires manual input of App_Rnumber
-          // Thereafter will increase by 1 automatically
-          data={{ groups, max_App_Rnumber }}
+          taskModalHandler={taskModalHandler}
+          editTaskMode={editTaskMode}
         />
       )}
 
@@ -115,7 +108,7 @@ const Applications = () => {
           style={{ margin: '16px 0' }}
           onClick={openTaskModalHandler}
         >
-          Create Application
+          Create Task
         </Button>
       </Grid>
 
@@ -125,47 +118,27 @@ const Applications = () => {
         justifyContent="flex-start"
         style={{ padding: (0, 15) }}
       >
-        {applications?.map((application) => (
-          <Card className={classes.root} variant="outlined" key={application.App_Acronym}>
+        {tasks?.map((task) => (
+          <Card className={classes.root} variant="outlined" key={task.Task_name}>
             <CardContent className={classes.cardContent}>
               <Typography className={classes.title} color="textSecondary" gutterBottom>
-                #{application.App_Rnumber}: {application.App_Acronym}
+                #{task.Task_id}: {task.Task_name}
               </Typography>
 
-              <Grid
-                container
-                justifyContent="space-between"
-                style={{ paddingBottom: 10 }}
-              >
-                <Typography variant="overline">
-                  start date: {application.App_startDate || 'Pending'}
-                </Typography>
-                <Typography variant="overline">
-                  end date: {application?.App_endDate || 'Pending'}
-                </Typography>
-              </Grid>
-
               <Typography variant="body2" className={classes.description}>
-                {application.App_Description}
+                {task.Task_description}
               </Typography>
 
               <CardActions className={classes.cardActions}>
                 <Button
                   size="small"
                   onClick={() => {
-                    setEditAppMode({ ...application, edit: true });
+                    setEditTaskMode({ ...task, edit: true });
                     openTaskModalHandler();
                   }}
                 >
                   <span className="material-icons">edit</span>
                 </Button>
-
-                <Link
-                  to={`/apps/${application.App_Acronym}`}
-                  style={{ textDecoration: 'none', color: 'inherit' }}
-                >
-                  <span className="material-icons">menu_book</span>
-                </Link>
               </CardActions>
             </CardContent>
           </Card>
@@ -175,4 +148,4 @@ const Applications = () => {
   );
 };
 
-export default Applications;
+export default PlanTask;

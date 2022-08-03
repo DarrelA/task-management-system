@@ -35,21 +35,17 @@ const appAccessRightsMiddleware = async (req, res, next) => {
       if ((req.admin && req.admin.isAdmin) || haveAccessRights) return next();
     }
 
+    if (req.path === '/createtask' && req.route.stack[0].method === 'post') {
+      const haveAccessRights = await checkGroup(req.user.username, 'Project Lead');
+      if ((req.admin && req.admin.isAdmin) || haveAccessRights) return next();
+    }
+
     const application = await Application.findByPk(req.body.App_Acronym);
     if (!application) return next(new HttpError('Forbidden', 403));
 
     if (req.path === '/updateapplication' && req.route.stack[0].method === 'patch') {
-      const haveAccessRights = await checkGroup(
-        req.user.username,
-        application.App_permit_Open
-      );
-
-      if (
-        (req.admin && req.admin.isAdmin) ||
-        application.App_permit_Open === null ||
-        haveAccessRights
-      )
-        return next();
+      const haveAccessRights = await checkGroup(req.user.username, 'Project Lead');
+      if ((req.admin && req.admin.isAdmin) || haveAccessRights) return next();
     }
 
     return next(new HttpError('Forbidden', 403));

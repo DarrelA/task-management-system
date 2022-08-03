@@ -128,8 +128,41 @@ const updateApplication = async (req, res, next) => {
   }
 };
 
+const createTask = async (req, res, next) => {
+  const { App_Acronym, Task_name, Task_description, Task_plan } = req.body;
+
+  console.log(App_Acronym, Task_name);
+
+  if (!Task_name) return next(new HttpError('Task name is required.', 400));
+
+  try {
+    const application = await Application.findByPk(App_Acronym);
+    if (!application) return next(new HttpError('Application not found.', 400));
+
+    const task_name = await Task.findByPk(Task_name);
+    if (!!task_name) return next(new HttpError('Task name is taken.', 400));
+
+    const newTask = await Task.create({
+      Task_name,
+      Task_description: Task_description || null,
+      Task_id: application.App_Acronym + application.App_Rnumber,
+      Task_state: 'Open',
+      Task_creator: req.user.username,
+      Task_owner: req.user.username,
+      applicationAppAcronym: App_Acronym, // Task_app_Acronym
+      planPlanMVPName: Task_plan || null, // Task_plan
+    });
+    await newTask.save();
+    res.send({ message: 'success' });
+  } catch (e) {
+    console.error(e);
+    return next(new HttpError('Something went wrong!', 500));
+  }
+};
+
 module.exports = {
   getApplicationsData,
   createApplication,
   updateApplication,
+  createTask,
 };
