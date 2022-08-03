@@ -149,8 +149,8 @@ const createTask = async (req, res, next) => {
       Task_state: 'Open',
       Task_creator: req.user.username,
       Task_owner: req.user.username,
-      applicationAppAcronym: App_Acronym, // Task_app_Acronym
-      planPlanMVPName: Task_plan || null, // Task_plan
+      Task_app_Acronym: App_Acronym,
+      Task_plan: Task_plan || null,
     });
     await newTask.save();
     res.send({ message: 'success' });

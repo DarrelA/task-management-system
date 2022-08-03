@@ -131,10 +131,6 @@ const Plan = sequelize.define('plan', {
     type: Sequelize.DATEONLY,
     allowNull: true,
   },
-  Plan_app_Acronym: {
-    type: Sequelize.STRING(45),
-    allowNull: true,
-  },
 });
 
 const Task = sequelize.define('task', {
@@ -150,16 +146,6 @@ const Task = sequelize.define('task', {
     type: Sequelize.STRING(45),
     allowNull: true,
   },
-  // Using sequelize planPlanMVPName
-  // Task_plan: {
-  //   type: Sequelize.STRING(45),
-  //   allowNull: true,
-  // },
-  // Using sequelize applicationAppAcronym
-  // Task_app_Acronym: {
-  //   type: Sequelize.STRING(45),
-  //   allowNull: true,
-  // },
   Task_state: {
     type: Sequelize.ENUM(['Open', 'To-do-list', 'Doing', 'Done', 'Close']),
   },
@@ -187,12 +173,12 @@ const Note = sequelize.define('note', {
   },
 });
 
-Application.hasMany(Plan);
-Plan.belongsTo(Application);
-Application.hasMany(Task);
-Task.belongsTo(Application);
-Plan.hasMany(Task);
-Task.belongsTo(Plan);
+Application.hasMany(Plan, { foreignKey: 'Plan_app_Acronym' });
+Plan.belongsTo(Application, { foreignKey: 'Plan_app_Acronym' });
+Application.hasMany(Task, { foreignKey: 'Task_app_Acronym' });
+Task.belongsTo(Application, { foreignKey: 'Task_app_Acronym' });
+Plan.hasMany(Task, { foreignKey: 'Task_plan' });
+Task.belongsTo(Plan, { foreignKey: 'Task_plan' });
 Task.hasMany(Note);
 Note.belongsTo(Task);
 
