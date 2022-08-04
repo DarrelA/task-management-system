@@ -207,10 +207,36 @@ const createTask = async (req, res, next) => {
   }
 };
 
+const updateTaskState = async (req, res, next) => {
+  const { App_Acronym, Task_state } = req.body;
+  const task = await Task.findByPk(App_Acronym);
+
+  if (!task) return next(new HttpError('Task not found.', 400));
+  if (
+    Task_state !== 'todolist' ||
+    Task_state !== 'doing' ||
+    Task_state !== 'done' ||
+    Task_state !== 'close'
+  )
+    return next(new HttpError('Invalid task state.', 400));
+
+  // @TODO: Validate state change & update access rights middleware
+
+  try {
+    task.Task_state = Task_state;
+    await task.save();
+    return res.send({ message: 'success' });
+  } catch (e) {
+    console.error(e);
+    return next(new HttpError('Something went wrong!', 500));
+  }
+};
+
 module.exports = {
   getApplicationsData,
   createApplication,
   updateApplication,
   getTasksData,
   createTask,
+  updateTaskState,
 };
