@@ -1,7 +1,7 @@
 import Modal from '@material-ui/core/Modal';
 import { makeStyles } from '@material-ui/core/styles';
 
-import { Button, Grid, TextField, Typography } from '@material-ui/core';
+import { Button, Grid, TextField } from '@material-ui/core';
 import { useEffect, useState } from 'react';
 
 const TaskModal = ({ open, onClose, taskModalHandler, editAppMode }) => {
@@ -55,7 +55,7 @@ const TaskModal = ({ open, onClose, taskModalHandler, editAppMode }) => {
           label="Task Name"
           type="text"
           id="Task_name"
-          placeholder="delta task 1"
+          placeholder="task 1"
           onInput={inputAppHandler}
           value={inputAppData.Task_name}
           fullWidth
@@ -73,7 +73,6 @@ const TaskModal = ({ open, onClose, taskModalHandler, editAppMode }) => {
           onInput={inputAppHandler}
           value={inputAppData.Task_description}
           fullWidth
-          autoFocus
         />
 
         <Grid spacing={1} container>

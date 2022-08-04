@@ -22,8 +22,8 @@ const userReducer = (state, action) => {
       return { ...state, isLoading: false, applications, max_App_Rnumber, groups };
     }
 
-    case 'GET_ALL_APPLICATION_FAIL': {
-      return { ...state, isLoading: false, message: action.payload.message };
+    case 'GET_ALL_TASK_SUCCESS': {
+      return { ...state, isLoading: false, tasks: action.payload.tasks };
     }
 
     case 'RESPONSE_SUCCESS': {
@@ -47,7 +47,7 @@ const TaskProvider = ({ children }) => {
   const getApplicationsData = useCallback(async (accessToken) => {
     dispatch({ type: 'IS_LOADING' });
     try {
-      const response = await fetch(`/api/tasks/all`, {
+      const response = await fetch(`/api/tasks/applications/all`, {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
@@ -61,7 +61,7 @@ const TaskProvider = ({ children }) => {
 
       clearAlert();
     } catch (e) {
-      dispatch({ type: 'GET_ALL_APPLICATION_FAIL', payload: e });
+      dispatch({ type: 'RESPONSE_FAIL', payload: e });
       clearAlert();
     }
   }, []);
@@ -172,6 +172,28 @@ const TaskProvider = ({ children }) => {
     }
   };
 
+  const getTasksData = useCallback(async (App_Acronym, accessToken) => {
+    dispatch({ type: 'IS_LOADING' });
+    try {
+      const response = await fetch(`/api/tasks/${App_Acronym}/all`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+      dispatch({ type: 'GET_ALL_TASK_SUCCESS', payload: data });
+
+      clearAlert();
+    } catch (e) {
+      dispatch({ type: 'RESPONSE_FAIL', payload: e });
+      clearAlert();
+    }
+  }, []);
+
   const createTask = async (
     { Task_name, Task_description },
     App_Acronym,
@@ -218,6 +240,7 @@ const TaskProvider = ({ children }) => {
         getApplicationsData,
         createApplication,
         updateApplication,
+        getTasksData,
         createTask,
       }}
     >

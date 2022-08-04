@@ -128,6 +128,23 @@ const updateApplication = async (req, res, next) => {
   }
 };
 
+const getTasksData = async (req, res, next) => {
+  try {
+    const hasAppInDB = await Application.findByPk(req.params.App_Acronym);
+    if (!hasAppInDB) return next(new HttpError('Application is unavailable.', 400));
+
+    const tasks = await Task.findAll({
+      where: { Task_app_Acronym: req.params.App_Acronym },
+      attributes: { exclude: ['createdAt'] },
+    });
+
+    return res.send({ tasks });
+  } catch (e) {
+    console.error(e);
+    return next(new HttpError('Something went wrong!', 500));
+  }
+};
+
 const createTask = async (req, res, next) => {
   const { App_Acronym, Task_name, Task_description, Task_plan } = req.body;
 
@@ -164,5 +181,6 @@ module.exports = {
   getApplicationsData,
   createApplication,
   updateApplication,
+  getTasksData,
   createTask,
 };
