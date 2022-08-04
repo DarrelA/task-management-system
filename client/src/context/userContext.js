@@ -158,6 +158,7 @@ const UserProvider = ({ children }) => {
 
       dispatch({ type: 'LOGOUT_USER', payload: data });
       localStorage.removeItem('userData');
+      localStorage.removeItem('taskData');
       clearAlert();
     } catch (e) {
       clearAlert();

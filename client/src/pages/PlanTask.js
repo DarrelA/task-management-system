@@ -57,6 +57,7 @@ const PlanTask = () => {
 
   const [openTaskModal, setOpenTaskModal] = useState(false);
   const [editTaskMode, setEditTaskMode] = useState({ edit: false });
+  const [columns, setColumns] = useState(tasks);
 
   const openTaskModalHandler = () => setOpenTaskModal(true);
   const closeTaskModalHandler = () => {
@@ -78,26 +79,50 @@ const PlanTask = () => {
 
   const taskModalHandler = (inputData) => {
     if (!inputData) return;
-    if (!editTaskMode.edit) createTask(inputData, App_Acronym, accessToken);
-    else {
+    if (!editTaskMode.edit) {
+      createTask(inputData, App_Acronym, accessToken);
+      setColumns({
+        ...columns,
+        open: { ...columns.open, items: [...columns.open.items, inputData] },
+      });
+    } else {
       updateTask(inputData, App_Acronym, accessToken);
       closeTaskModalHandler();
     }
   };
 
-  const columnsFromBackend = {
-    open: { name: 'Open', items: tasks },
-    toDoList: { name: 'To Do List', items: [] },
-    doing: { name: 'Doing', items: [] },
-    done: { name: 'Done', items: [] },
-    close: { name: 'Close', items: [] },
-  };
-
-  const [columns, setColumns] = useState(columnsFromBackend);
-
   const onDragEndHandler = (result, columns, setColumns) => {
     console.log(result);
     if (!result.destination) return;
+
+    if (
+      result.source.droppableId === 'open' &&
+      result.destination.droppableId !== 'todolist'
+    )
+      return;
+
+    if (
+      result.source.droppableId === 'todolist' &&
+      result.destination.droppableId !== 'doing'
+    )
+      return;
+
+    if (result.source.droppableId === 'doing')
+      if (
+        result.destination.droppableId !== 'todolist' &&
+        result.destination.droppableId !== 'done'
+      )
+        return;
+
+    if (result.source.droppableId === 'done')
+      if (
+        result.destination.droppableId !== 'doing' &&
+        result.destination.droppableId !== 'close'
+      )
+        return;
+
+    if (result.source.droppableId === 'close') return;
+
     const { source, destination } = result;
 
     if (source.droppableId !== destination.droppableId) {
@@ -148,18 +173,14 @@ const PlanTask = () => {
         </Button>
       </Grid>
 
-      <div style={{ display: 'flex', justifyContent: 'center', height: '100%' }}>
+      <Grid container spacing={1} justifyContent="center">
         <DragDropContext
           onDragEnd={(result) => onDragEndHandler(result, columns, setColumns)}
         >
           {Object.entries(columns)?.map(([columnId, column], index) => {
             return (
               <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                }}
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
                 key={columnId}
               >
                 <h2>{column.name}</h2>
@@ -223,7 +244,7 @@ const PlanTask = () => {
             );
           })}
         </DragDropContext>
-      </div>
+      </Grid>
     </>
   );
 };

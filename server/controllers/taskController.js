@@ -133,14 +133,42 @@ const getTasksData = async (req, res, next) => {
     const hasAppInDB = await Application.findByPk(req.params.App_Acronym);
     if (!hasAppInDB) return next(new HttpError('Application is unavailable.', 400));
 
-    let tasks = await Task.findAll({
+    let appTasks = await Task.findAll({
       where: { Task_app_Acronym: req.params.App_Acronym },
       attributes: { exclude: ['createdAt'] },
     });
 
     // Get only dataValues from Sequelize ORM
-    tasks = JSON.stringify(tasks);
-    tasks = JSON.parse(tasks);
+    appTasks = JSON.stringify(appTasks);
+    appTasks = JSON.parse(appTasks);
+
+    let tasks = {
+      open: { name: 'Open', items: [] },
+      todolist: { name: 'To Do List', items: [] },
+      doing: { name: 'Doing', items: [] },
+      done: { name: 'Done', items: [] },
+      close: { name: 'Close', items: [] },
+    };
+
+    appTasks.forEach((task) => {
+      switch (task.Task_state) {
+        case 'open':
+          tasks.open.items.push(task);
+          break;
+        case 'todolist':
+          tasks.todolist.items.push(task);
+          break;
+        case 'doing':
+          tasks.doing.items.push(task);
+          break;
+        case 'done':
+          tasks.done.items.push(task);
+          break;
+        case 'close':
+          tasks.close.items.push(task);
+          break;
+      }
+    });
 
     return res.send({ tasks });
   } catch (e) {
@@ -165,7 +193,7 @@ const createTask = async (req, res, next) => {
       Task_name,
       Task_description: Task_description || null,
       Task_id: application.App_Acronym + application.App_Rnumber,
-      Task_state: 'Open',
+      Task_state: 'open',
       Task_creator: req.user.username,
       Task_owner: req.user.username,
       Task_app_Acronym: App_Acronym,

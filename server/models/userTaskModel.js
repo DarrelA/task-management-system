@@ -147,7 +147,7 @@ const Task = sequelize.define('task', {
     allowNull: true,
   },
   Task_state: {
-    type: Sequelize.ENUM(['Open', 'To-do-list', 'Doing', 'Done', 'Close']),
+    type: Sequelize.ENUM(['open', 'todolist', 'doing', 'done', 'close']),
   },
   Task_creator: {
     type: Sequelize.STRING,
@@ -165,7 +165,7 @@ const Note = sequelize.define('note', {
     allowNull: false,
   },
   state: {
-    type: Sequelize.ENUM(['Open', 'To-do-list', 'Doing', 'Done', 'Close']),
+    type: Sequelize.ENUM(['open', 'todolist', 'doing', 'done', 'close']),
   },
   description: {
     type: Sequelize.TEXT('long'),
