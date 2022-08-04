@@ -148,8 +148,6 @@ const getTasksData = async (req, res, next) => {
 const createTask = async (req, res, next) => {
   const { App_Acronym, Task_name, Task_description, Task_plan } = req.body;
 
-  console.log(App_Acronym, Task_name);
-
   if (!Task_name) return next(new HttpError('Task name is required.', 400));
 
   try {

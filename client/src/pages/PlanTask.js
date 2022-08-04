@@ -14,6 +14,8 @@ import { LoadingSpinner, TaskModal } from '../components';
 import useTaskContext from '../context/taskContext';
 import useUserContext from '../context/userContext';
 
+import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+
 const useStyles = makeStyles({
   root: {
     minWidth: 240,
@@ -64,10 +66,20 @@ const PlanTask = () => {
   const [openTaskModal, setOpenTaskModal] = useState(false);
   const [editTaskMode, setEditTaskMode] = useState({ edit: false });
 
+  const [taskState, updateTaskState] = useState(tasks);
+
   const openTaskModalHandler = () => setOpenTaskModal(true);
   const closeTaskModalHandler = () => {
     setEditTaskMode({ edit: false });
     setOpenTaskModal(false);
+  };
+
+  const onDragEndHandler = (result) => {
+    if (!result.destination) return;
+    const items = Array.from(tasks);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+    updateTaskState(items);
   };
 
   useEffect(() => {
@@ -116,33 +128,61 @@ const PlanTask = () => {
         </Button>
       </Grid>
 
-      <Grid container spacing={1} justifyContent="flex-start">
-        {tasks?.map((task) => (
-          <Card className={classes.root} variant="outlined" key={task.Task_name}>
-            <CardContent className={classes.cardContent}>
-              <Typography className={classes.title} color="textSecondary" gutterBottom>
-                {task.Task_name}
-              </Typography>
+      <DragDropContext onDragEnd={onDragEndHandler}>
+        <Droppable droppableId="tasks">
+          {(provided) => (
+            <Grid
+              container
+              spacing={1}
+              justifyContent="flex-start"
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+            >
+              {taskState?.map((task, i) => (
+                <Draggable key={task.Task_name} draggableId={task.Task_name} index={i}>
+                  {(provided) => (
+                    <Card
+                      className={classes.root}
+                      variant="outlined"
+                      key={task.Task_name}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      ref={provided.innerRef}
+                    >
+                      <CardContent className={classes.cardContent}>
+                        <Typography
+                          className={classes.title}
+                          color="textSecondary"
+                          gutterBottom
+                        >
+                          {task.Task_name}
+                        </Typography>
 
-              <Typography variant="body2" className={classes.description}>
-                {task.Task_description}
-              </Typography>
+                        <Typography variant="body2" className={classes.description}>
+                          {task.Task_description}
+                        </Typography>
 
-              <CardActions className={classes.cardActions}>
-                <Button
-                  size="small"
-                  onClick={() => {
-                    setEditTaskMode({ ...task, edit: true });
-                    openTaskModalHandler();
-                  }}
-                >
-                  <span className="material-icons">edit</span>
-                </Button>
-              </CardActions>
-            </CardContent>
-          </Card>
-        ))}
-      </Grid>
+                        <CardActions className={classes.cardActions}>
+                          <Button
+                            size="small"
+                            onClick={() => {
+                              setEditTaskMode({ ...task, edit: true });
+                              openTaskModalHandler();
+                            }}
+                          >
+                            <span className="material-icons">edit</span>
+                          </Button>
+                        </CardActions>
+                      </CardContent>
+                    </Card>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </Grid>
+          )}
+        </Droppable>
+      </DragDropContext>
     </>
   );
 };
