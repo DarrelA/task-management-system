@@ -1,8 +1,10 @@
 import React, { useCallback, useContext, useReducer } from 'react';
 
 const TaskContext = React.createContext();
+const { tasks } = JSON.parse(localStorage.getItem('tasksData')) || {};
 
 const initialState = {
+  tasks: tasks || {},
   isLoading: false,
   taskMessage: '',
 };
@@ -43,6 +45,12 @@ const TaskProvider = ({ children }) => {
   const [userState, dispatch] = useReducer(userReducer, initialState);
 
   const clearAlert = () => setTimeout(() => dispatch({ type: 'CLEAR_MESSAGE' }, 500));
+
+  const addTasksDataToLocalStorage = async (tasks) => {
+    const tasksData = JSON.parse(localStorage.getItem('tasks')) || {};
+    const updatedTasksData = { tasks: tasks || tasksData.tasks };
+    localStorage.setItem('tasksData', JSON.stringify(updatedTasksData));
+  };
 
   const getApplicationsData = useCallback(async (accessToken) => {
     dispatch({ type: 'IS_LOADING' });
@@ -186,7 +194,7 @@ const TaskProvider = ({ children }) => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
       dispatch({ type: 'GET_ALL_TASK_SUCCESS', payload: data });
-
+      addTasksDataToLocalStorage(data.tasks);
       clearAlert();
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });
@@ -225,7 +233,7 @@ const TaskProvider = ({ children }) => {
       });
 
       clearAlert();
-      getApplicationsData(accessToken);
+      getTasksData(App_Acronym, accessToken);
       return 'success';
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });

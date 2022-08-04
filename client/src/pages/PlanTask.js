@@ -1,12 +1,4 @@
-import {
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Grid,
-  makeStyles,
-  Typography,
-} from '@material-ui/core';
+import { Button, Grid, makeStyles } from '@material-ui/core';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -66,20 +58,10 @@ const PlanTask = () => {
   const [openTaskModal, setOpenTaskModal] = useState(false);
   const [editTaskMode, setEditTaskMode] = useState({ edit: false });
 
-  const [taskState, updateTaskState] = useState(tasks);
-
   const openTaskModalHandler = () => setOpenTaskModal(true);
   const closeTaskModalHandler = () => {
     setEditTaskMode({ edit: false });
     setOpenTaskModal(false);
-  };
-
-  const onDragEndHandler = (result) => {
-    if (!result.destination) return;
-    const items = Array.from(tasks);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-    updateTaskState(items);
   };
 
   useEffect(() => {
@@ -103,7 +85,45 @@ const PlanTask = () => {
     }
   };
 
-  if (isLoading) return <LoadingSpinner />;
+  const columnsFromBackend = {
+    open: { name: 'Open', items: tasks },
+    toDoList: { name: 'To Do List', items: [] },
+    doing: { name: 'Doing', items: [] },
+    done: { name: 'Done', items: [] },
+    close: { name: 'Close', items: [] },
+  };
+
+  const [columns, setColumns] = useState(columnsFromBackend);
+
+  const onDragEndHandler = (result, columns, setColumns) => {
+    console.log(result);
+    if (!result.destination) return;
+    const { source, destination } = result;
+
+    if (source.droppableId !== destination.droppableId) {
+      const sourceColumn = columns[source.droppableId];
+      const destColumn = columns[destination.droppableId];
+      const sourceItems = [...sourceColumn.items];
+      const destItems = [...destColumn.items];
+      const [removed] = sourceItems.splice(source.index, 1);
+
+      destItems.splice(destination.index, 0, removed);
+
+      setColumns({
+        ...columns,
+        [source.droppableId]: { ...sourceColumn, items: sourceItems },
+        [destination.droppableId]: { ...destColumn, items: destItems },
+      });
+    } else {
+      const column = columns[source.droppableId];
+      const copiedItems = [...column.items];
+      const [removed] = copiedItems.splice(source.index, 1);
+      copiedItems.splice(destination.index, 0, removed);
+      setColumns({ ...columns, [source.droppableId]: { ...column, items: copiedItems } });
+    }
+  };
+
+  if (isLoading || tasks === undefined) return <LoadingSpinner />;
 
   return (
     <>
@@ -128,61 +148,82 @@ const PlanTask = () => {
         </Button>
       </Grid>
 
-      <DragDropContext onDragEnd={onDragEndHandler}>
-        <Droppable droppableId="tasks">
-          {(provided) => (
-            <Grid
-              container
-              spacing={1}
-              justifyContent="flex-start"
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-            >
-              {taskState?.map((task, i) => (
-                <Draggable key={task.Task_name} draggableId={task.Task_name} index={i}>
-                  {(provided) => (
-                    <Card
-                      className={classes.root}
-                      variant="outlined"
-                      key={task.Task_name}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      ref={provided.innerRef}
-                    >
-                      <CardContent className={classes.cardContent}>
-                        <Typography
-                          className={classes.title}
-                          color="textSecondary"
-                          gutterBottom
+      <div style={{ display: 'flex', justifyContent: 'center', height: '100%' }}>
+        <DragDropContext
+          onDragEnd={(result) => onDragEndHandler(result, columns, setColumns)}
+        >
+          {Object.entries(columns)?.map(([columnId, column], index) => {
+            return (
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                }}
+                key={columnId}
+              >
+                <h2>{column.name}</h2>
+                <div style={{ margin: 8 }}>
+                  <Droppable droppableId={columnId} key={columnId}>
+                    {(provided, snapshot) => {
+                      return (
+                        <div
+                          {...provided.droppableProps}
+                          ref={provided.innerRef}
+                          style={{
+                            background: snapshot.isDraggingOver
+                              ? 'lightblue'
+                              : 'lightgrey',
+                            padding: 4,
+                            width: 250,
+                            minHeight: 500,
+                          }}
                         >
-                          {task.Task_name}
-                        </Typography>
-
-                        <Typography variant="body2" className={classes.description}>
-                          {task.Task_description}
-                        </Typography>
-
-                        <CardActions className={classes.cardActions}>
-                          <Button
-                            size="small"
-                            onClick={() => {
-                              setEditTaskMode({ ...task, edit: true });
-                              openTaskModalHandler();
-                            }}
-                          >
-                            <span className="material-icons">edit</span>
-                          </Button>
-                        </CardActions>
-                      </CardContent>
-                    </Card>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </Grid>
-          )}
-        </Droppable>
-      </DragDropContext>
+                          {column.items.map((item, index) => {
+                            return (
+                              <Draggable
+                                key={item.Task_name}
+                                draggableId={item.Task_name}
+                                index={index}
+                              >
+                                {(provided, snapshot) => {
+                                  return (
+                                    <div
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                      {...provided.dragHandleProps}
+                                      style={{
+                                        userSelect: 'none',
+                                        padding: 16,
+                                        margin: '0 0 8px 0',
+                                        minHeight: '50px',
+                                        backgroundColor: snapshot.isDragging
+                                          ? '#263B4A'
+                                          : '#456C86',
+                                        color: 'white',
+                                        ...provided.draggableProps.style,
+                                      }}
+                                    >
+                                      {item.Task_name}
+                                      <br />
+                                      {item.Task_description}
+                                    </div>
+                                  );
+                                }}
+                              </Draggable>
+                            );
+                          })}
+                          {provided.placeholder}
+                        </div>
+                      );
+                    }}
+                  </Droppable>
+                </div>
+              </div>
+            );
+          })}
+        </DragDropContext>
+      </div>
     </>
   );
 };

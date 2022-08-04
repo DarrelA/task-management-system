@@ -133,10 +133,14 @@ const getTasksData = async (req, res, next) => {
     const hasAppInDB = await Application.findByPk(req.params.App_Acronym);
     if (!hasAppInDB) return next(new HttpError('Application is unavailable.', 400));
 
-    const tasks = await Task.findAll({
+    let tasks = await Task.findAll({
       where: { Task_app_Acronym: req.params.App_Acronym },
       attributes: { exclude: ['createdAt'] },
     });
+
+    // Get only dataValues from Sequelize ORM
+    tasks = JSON.stringify(tasks);
+    tasks = JSON.parse(tasks);
 
     return res.send({ tasks });
   } catch (e) {
