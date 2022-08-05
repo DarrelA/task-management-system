@@ -1,4 +1,4 @@
-import { Button, Grid, makeStyles } from '@material-ui/core';
+import { Button, Grid } from '@material-ui/core';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -8,46 +8,9 @@ import useUserContext from '../context/userContext';
 
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 
-const useStyles = makeStyles({
-  root: {
-    minWidth: 240,
-    maxWidth: 240,
-    minHeight: 200,
-    maxHeight: 200,
-    margin: (0, 10),
-  },
-
-  title: {
-    fontSize: 22,
-    textAlign: 'center',
-  },
-
-  cardContent: {
-    display: 'flex',
-    flexDirection: 'column',
-    padding: 5,
-    '&:last-child': {
-      paddingBottom: 0,
-    },
-  },
-
-  description: {
-    height: 90,
-    maxHeight: 90,
-  },
-
-  cardActions: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    padding: (0, 5),
-  },
-});
-
 const PlanTask = () => {
-  const classes = useStyles();
-
   const taskContext = useTaskContext();
-  const { getTasksData, tasks, createTask, updateTask } = taskContext;
+  const { getTasksData, tasks, createTask, updateTask, updateTaskState } = taskContext;
   const userContext = useUserContext();
   const { accessToken, message } = userContext;
   const { isLoading, taskMessage } = taskContext;
@@ -92,23 +55,25 @@ const PlanTask = () => {
   };
 
   const onDragEndHandler = (result, columns, setColumns) => {
-    console.log(result);
     if (!result.destination) return;
 
     if (
       result.source.droppableId === 'open' &&
+      result.destination.droppableId !== 'open' &&
       result.destination.droppableId !== 'todolist'
     )
       return;
 
     if (
       result.source.droppableId === 'todolist' &&
+      result.destination.droppableId !== 'todolist' &&
       result.destination.droppableId !== 'doing'
     )
       return;
 
     if (result.source.droppableId === 'doing')
       if (
+        result.destination.droppableId !== 'doing' &&
         result.destination.droppableId !== 'todolist' &&
         result.destination.droppableId !== 'done'
       )
@@ -116,12 +81,17 @@ const PlanTask = () => {
 
     if (result.source.droppableId === 'done')
       if (
+        result.destination.droppableId !== 'done' &&
         result.destination.droppableId !== 'doing' &&
         result.destination.droppableId !== 'close'
       )
         return;
 
-    if (result.source.droppableId === 'close') return;
+    if (
+      result.source.droppableId === 'close' &&
+      result.destination.droppableId !== 'close'
+    )
+      return;
 
     const { source, destination } = result;
 
@@ -139,12 +109,23 @@ const PlanTask = () => {
         [source.droppableId]: { ...sourceColumn, items: sourceItems },
         [destination.droppableId]: { ...destColumn, items: destItems },
       });
+
+      updateTaskState(
+        App_Acronym,
+        result.draggableId,
+        destination.droppableId,
+        accessToken
+      );
     } else {
       const column = columns[source.droppableId];
       const copiedItems = [...column.items];
       const [removed] = copiedItems.splice(source.index, 1);
       copiedItems.splice(destination.index, 0, removed);
       setColumns({ ...columns, [source.droppableId]: { ...column, items: copiedItems } });
+      console.log(column, {
+        ...columns,
+        [source.droppableId]: { ...column, items: copiedItems },
+      });
     }
   };
 

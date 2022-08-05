@@ -149,6 +149,10 @@ const Task = sequelize.define('task', {
   Task_state: {
     type: Sequelize.ENUM(['open', 'todolist', 'doing', 'done', 'close']),
   },
+  Kanban_index: {
+    type: Sequelize.INTEGER,
+    allowNull: true,
+  },
   Task_creator: {
     type: Sequelize.STRING,
     allowNull: true,

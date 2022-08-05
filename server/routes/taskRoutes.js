@@ -12,25 +12,21 @@ const {
   updateApplication,
   getTasksData,
   createTask,
+  updateTaskState,
 } = require('../controllers/taskController');
 
 router.get('/applications/all', authMiddleware, getApplicationsData);
 
-router.post(
-  '/createapplication',
-  authMiddleware,
-  appAccessRightsMiddleware,
-  createApplication
-);
-
-router.patch(
-  '/updateapplication',
-  authMiddleware,
-  appAccessRightsMiddleware,
-  updateApplication
-);
+router
+  .route('/application')
+  .post(authMiddleware, appAccessRightsMiddleware, createApplication)
+  .patch(authMiddleware, appAccessRightsMiddleware, updateApplication);
 
 router.get('/:App_Acronym/all', authMiddleware, getTasksData);
-router.post('/createtask', authMiddleware, appAccessRightsMiddleware, createTask);
+
+router
+  .route('/task')
+  .post(authMiddleware, appAccessRightsMiddleware, createTask)
+  .patch(authMiddleware, appAccessRightsMiddleware, updateTaskState);
 
 module.exports = router;

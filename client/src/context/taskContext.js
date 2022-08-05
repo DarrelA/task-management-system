@@ -91,7 +91,7 @@ const TaskProvider = ({ children }) => {
     dispatch({ type: 'IS_LOADING' });
 
     try {
-      const response = await fetch(`/api/tasks/createapplication`, {
+      const response = await fetch(`/api/tasks/application`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -144,7 +144,7 @@ const TaskProvider = ({ children }) => {
     dispatch({ type: 'IS_LOADING' });
 
     try {
-      const response = await fetch(`/api/tasks/updateapplication`, {
+      const response = await fetch(`/api/tasks/application`, {
         method: 'PATCH',
         credentials: 'include',
         headers: {
@@ -181,7 +181,6 @@ const TaskProvider = ({ children }) => {
   };
 
   const getTasksData = useCallback(async (App_Acronym, accessToken) => {
-    dispatch({ type: 'IS_LOADING' });
     try {
       const response = await fetch(`/api/tasks/${App_Acronym}/all`, {
         credentials: 'include',
@@ -207,10 +206,8 @@ const TaskProvider = ({ children }) => {
     App_Acronym,
     accessToken
   ) => {
-    dispatch({ type: 'IS_LOADING' });
-
     try {
-      const response = await fetch('/api/tasks/createtask', {
+      const response = await fetch('/api/tasks/task', {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -241,6 +238,66 @@ const TaskProvider = ({ children }) => {
     }
   };
 
+  const updateTaskState = async (App_Acronym, Task_name, Task_state, accessToken) => {
+    try {
+      const response = await fetch('/api/tasks/task', {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ App_Acronym, Task_name, Task_state }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+
+      dispatch({
+        type: 'RESPONSE_SUCCESS',
+        payload: data,
+      });
+
+      clearAlert();
+      getTasksData(App_Acronym, accessToken);
+      return 'success';
+    } catch (e) {
+      dispatch({ type: 'RESPONSE_FAIL', payload: e });
+      clearAlert();
+    }
+  };
+
+  const updateKanbanIndex = async (App_Acronym, column, tasksList, accessToken) => {
+    dispatch({ type: 'IS_LOADING' });
+
+    try {
+      const response = await fetch('/api/tasks/task', {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ column, tasksList }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+
+      dispatch({
+        type: 'RESPONSE_SUCCESS',
+        payload: data,
+      });
+
+      clearAlert();
+      getTasksData(App_Acronym, accessToken);
+      return 'success';
+    } catch (e) {
+      dispatch({ type: 'RESPONSE_FAIL', payload: e });
+      clearAlert();
+    }
+  };
+
   return (
     <TaskContext.Provider
       value={{
@@ -250,6 +307,8 @@ const TaskProvider = ({ children }) => {
         updateApplication,
         getTasksData,
         createTask,
+        updateTaskState,
+        updateKanbanIndex,
       }}
     >
       {children}
