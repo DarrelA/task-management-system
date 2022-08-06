@@ -125,7 +125,6 @@ const PlanTask = () => {
         accessToken
       );
 
-      // @TODO: Check destination index
       updateKanbanIndex(
         {
           ...columns.name,

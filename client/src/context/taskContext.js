@@ -251,7 +251,6 @@ const TaskProvider = ({ children }) => {
   };
 
   const updateKanbanIndex = async (tasksList, App_Acronym, accessToken) => {
-    dispatch({ type: 'IS_LOADING' });
     try {
       const response = await fetch('/api/tasks/kanbanindex', {
         method: 'PATCH',
