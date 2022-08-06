@@ -13,6 +13,7 @@ const {
   getTasksData,
   createTask,
   updateTaskState,
+  updateKanbanIndex,
 } = require('../controllers/taskController');
 
 router.get('/applications/all', authMiddleware, getApplicationsData);
@@ -28,5 +29,7 @@ router
   .route('/task')
   .post(authMiddleware, appAccessRightsMiddleware, createTask)
   .patch(authMiddleware, appAccessRightsMiddleware, updateTaskState);
+
+router.patch('/kanbanindex', authMiddleware, updateKanbanIndex);
 
 module.exports = router;

@@ -114,10 +114,7 @@ const TaskProvider = ({ children }) => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
 
-      dispatch({
-        type: 'RESPONSE_SUCCESS',
-        payload: data,
-      });
+      dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
 
       clearAlert();
       getApplicationsData(accessToken);
@@ -166,10 +163,7 @@ const TaskProvider = ({ children }) => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
 
-      dispatch({
-        type: 'RESPONSE_SUCCESS',
-        payload: data,
-      });
+      dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
 
       clearAlert();
       getApplicationsData(accessToken);
@@ -192,8 +186,8 @@ const TaskProvider = ({ children }) => {
 
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
-      dispatch({ type: 'GET_ALL_TASK_SUCCESS', payload: data });
       addTasksDataToLocalStorage(data.tasks);
+      dispatch({ type: 'GET_ALL_TASK_SUCCESS', payload: data });
       clearAlert();
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });
@@ -206,6 +200,7 @@ const TaskProvider = ({ children }) => {
     App_Acronym,
     accessToken
   ) => {
+    dispatch({ type: 'IS_LOADING' });
     try {
       const response = await fetch('/api/tasks/task', {
         method: 'POST',
@@ -214,21 +209,13 @@ const TaskProvider = ({ children }) => {
           'Content-Type': 'application/json',
           authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({
-          App_Acronym,
-          Task_name,
-          Task_description,
-        }),
+        body: JSON.stringify({ App_Acronym, Task_name, Task_description }),
       });
 
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
 
-      dispatch({
-        type: 'RESPONSE_SUCCESS',
-        payload: data,
-      });
-
+      dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
       clearAlert();
       getTasksData(App_Acronym, accessToken);
       return 'success';
@@ -253,11 +240,7 @@ const TaskProvider = ({ children }) => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
 
-      dispatch({
-        type: 'RESPONSE_SUCCESS',
-        payload: data,
-      });
-
+      dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
       clearAlert();
       getTasksData(App_Acronym, accessToken);
       return 'success';
@@ -267,27 +250,23 @@ const TaskProvider = ({ children }) => {
     }
   };
 
-  const updateKanbanIndex = async (App_Acronym, column, tasksList, accessToken) => {
+  const updateKanbanIndex = async (tasksList, App_Acronym, accessToken) => {
     dispatch({ type: 'IS_LOADING' });
-
     try {
-      const response = await fetch('/api/tasks/task', {
+      const response = await fetch('/api/tasks/kanbanindex', {
         method: 'PATCH',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ column, tasksList }),
+        body: JSON.stringify({ tasksList }),
       });
 
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
 
-      dispatch({
-        type: 'RESPONSE_SUCCESS',
-        payload: data,
-      });
+      dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
 
       clearAlert();
       getTasksData(App_Acronym, accessToken);

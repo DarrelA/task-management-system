@@ -10,7 +10,14 @@ import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 
 const PlanTask = () => {
   const taskContext = useTaskContext();
-  const { getTasksData, tasks, createTask, updateTask, updateTaskState } = taskContext;
+  const {
+    getTasksData,
+    tasks,
+    createTask,
+    updateTask,
+    updateTaskState,
+    updateKanbanIndex,
+  } = taskContext;
   const userContext = useUserContext();
   const { accessToken, message } = userContext;
   const { isLoading, taskMessage } = taskContext;
@@ -40,14 +47,15 @@ const PlanTask = () => {
     accessToken && getTasksData(App_Acronym, accessToken);
   }, [App_Acronym, accessToken, getTasksData]);
 
+  // @TODO: Validation for error sync with backend
   const taskModalHandler = (inputData) => {
     if (!inputData) return;
     if (!editTaskMode.edit) {
-      createTask(inputData, App_Acronym, accessToken);
       setColumns({
         ...columns,
         open: { ...columns.open, items: [...columns.open.items, inputData] },
       });
+      createTask(inputData, App_Acronym, accessToken);
     } else {
       updateTask(inputData, App_Acronym, accessToken);
       closeTaskModalHandler();
@@ -116,20 +124,46 @@ const PlanTask = () => {
         destination.droppableId,
         accessToken
       );
+
+      // @TODO: Check destination index
+      updateKanbanIndex(
+        {
+          ...columns.name,
+          [source.droppableId]: {
+            ...sourceColumn,
+            name: columns.name,
+            items: sourceItems,
+          },
+          [destination.droppableId]: {
+            ...destColumn,
+            name: columns.name,
+            items: destItems,
+          },
+        },
+        App_Acronym,
+        accessToken
+      );
     } else {
       const column = columns[source.droppableId];
       const copiedItems = [...column.items];
       const [removed] = copiedItems.splice(source.index, 1);
       copiedItems.splice(destination.index, 0, removed);
-      setColumns({ ...columns, [source.droppableId]: { ...column, items: copiedItems } });
-      console.log(column, {
+      setColumns({
         ...columns,
         [source.droppableId]: { ...column, items: copiedItems },
       });
+      updateKanbanIndex(
+        {
+          ...columns.name,
+          [source.droppableId]: { ...column, name: columns.name, items: copiedItems },
+        },
+        App_Acronym,
+        accessToken
+      );
     }
   };
 
-  if (isLoading || tasks === undefined) return <LoadingSpinner />;
+  if (isLoading) return <LoadingSpinner />;
 
   return (
     <>
@@ -181,40 +215,36 @@ const PlanTask = () => {
                             minHeight: 500,
                           }}
                         >
-                          {column.items.map((item, index) => {
-                            return (
-                              <Draggable
-                                key={item.Task_name}
-                                draggableId={item.Task_name}
-                                index={index}
-                              >
-                                {(provided, snapshot) => {
-                                  return (
-                                    <div
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                      {...provided.dragHandleProps}
-                                      style={{
-                                        userSelect: 'none',
-                                        padding: 16,
-                                        margin: '0 0 8px 0',
-                                        minHeight: '50px',
-                                        backgroundColor: snapshot.isDragging
-                                          ? '#263B4A'
-                                          : '#456C86',
-                                        color: 'white',
-                                        ...provided.draggableProps.style,
-                                      }}
-                                    >
-                                      {item.Task_name}
-                                      <br />
-                                      {item.Task_description}
-                                    </div>
-                                  );
-                                }}
-                              </Draggable>
-                            );
-                          })}
+                          {column.items.map((item, index) => (
+                            <Draggable
+                              key={item.Task_name}
+                              draggableId={item.Task_name}
+                              index={index}
+                            >
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  style={{
+                                    userSelect: 'none',
+                                    padding: 16,
+                                    margin: '0 0 8px 0',
+                                    minHeight: '50px',
+                                    backgroundColor: snapshot.isDragging
+                                      ? '#263B4A'
+                                      : '#456C86',
+                                    color: 'white',
+                                    ...provided.draggableProps.style,
+                                  }}
+                                >
+                                  {item.Task_name}
+                                  <br />
+                                  {item.Task_description}
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
                           {provided.placeholder}
                         </div>
                       );

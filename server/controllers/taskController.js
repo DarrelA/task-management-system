@@ -136,6 +136,7 @@ const getTasksData = async (req, res, next) => {
     let appTasks = await Task.findAll({
       where: { Task_app_Acronym: req.params.App_Acronym },
       attributes: { exclude: ['createdAt'] },
+      order: [['Kanban_index', 'ASC']],
     });
 
     // Get only dataValues from Sequelize ORM
@@ -233,14 +234,69 @@ const updateTaskState = async (req, res, next) => {
 };
 
 const updateKanbanIndex = async (req, res, next) => {
-  const { column, tasksList } = req.body;
-  const task = await Task.findByPk(Task_name);
-
-  if (!task) return next(new HttpError('Task not found.', 400));
+  const openItems = req.body.tasksList.open?.items;
+  const todolistItems = req.body.tasksList.todolist?.items;
+  const doingItems = req.body.tasksList.doing?.items;
+  const doneItems = req.body.tasksList.done?.items;
+  const closeItems = req.body.tasksList.close?.items;
 
   try {
-    await task.save();
-    return res.send({ message: 'success' });
+    if (!!openItems)
+      openItems.forEach(async (item, i) => {
+        let task = await Task.findByPk(item.Task_name);
+        if (!task) return next(new HttpError('Task not found.', 400));
+
+        task.Kanban_index = i;
+        task.Task_state = req.body.tasksList.name;
+
+        await task.save();
+      });
+
+    if (!!todolistItems)
+      todolistItems.forEach(async (item, i) => {
+        let task = await Task.findByPk(item.Task_name);
+        if (!task) return next(new HttpError('Task not found.', 400));
+
+        task.Kanban_index = i;
+        task.Task_state = req.body.tasksList.name;
+
+        await task.save();
+      });
+
+    if (!!doingItems)
+      doingItems.forEach(async (item, i) => {
+        let task = await Task.findByPk(item.Task_name);
+        if (!task) return next(new HttpError('Task not found.', 400));
+
+        task.Kanban_index = i;
+        task.Task_state = req.body.tasksList.name;
+
+        await task.save();
+      });
+
+    if (!!doneItems)
+      doneItems.forEach(async (item, i) => {
+        let task = await Task.findByPk(item.Task_name);
+        if (!task) return next(new HttpError('Task not found.', 400));
+
+        task.Kanban_index = i;
+        task.Task_state = req.body.tasksList.name;
+
+        await task.save();
+      });
+
+    if (!!closeItems)
+      closeItems.forEach(async (item, i) => {
+        let task = await Task.findByPk(item.Task_name);
+        if (!task) return next(new HttpError('Task not found.', 400));
+
+        task.Kanban_index = i;
+        task.Task_state = req.body.tasksList.name;
+
+        await task.save();
+      });
+
+    return res.send({ success: true });
   } catch (e) {
     console.error(e);
     return next(new HttpError('Something went wrong!', 500));
@@ -254,4 +310,5 @@ module.exports = {
   getTasksData,
   createTask,
   updateTaskState,
+  updateKanbanIndex,
 };
