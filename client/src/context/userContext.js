@@ -1,13 +1,15 @@
 import React, { useCallback, useContext, useReducer } from 'react';
 
 const UserContext = React.createContext();
-const { username, email } = JSON.parse(localStorage.getItem('userData')) || {};
+const { username, email, usergroups } =
+  JSON.parse(localStorage.getItem('userData')) || {};
 
 const initialState = {
   isLoading: false,
   username: username || '',
   email: email || '',
   isAdmin: false,
+  usergroups: usergroups || [],
   message: '',
   accessToken: '',
 };
@@ -28,7 +30,8 @@ const userReducer = (state, action) => {
     }
 
     case 'LOGIN_USER_SUCCESS': {
-      const { username, email, isAdmin, accessToken, message } = action.payload;
+      const { username, email, isAdmin, accessToken, usergroups, message } =
+        action.payload;
       return {
         ...state,
         isLoading: false,
@@ -36,6 +39,7 @@ const userReducer = (state, action) => {
         email,
         isAdmin,
         accessToken,
+        usergroups,
         message,
       };
     }
@@ -91,11 +95,12 @@ const UserProvider = ({ children }) => {
 
   const clearAlert = () => setTimeout(() => dispatch({ type: 'CLEAR_MESSAGE' }, 500));
 
-  const addUserDataToLocalStorage = async (username, email) => {
+  const addUserDataToLocalStorage = async (username, email, usergroups) => {
     const userData = JSON.parse(localStorage.getItem('userData')) || {};
     const updatedUserData = {
       username: username || userData.username,
       email: email || userData.email,
+      usergroups: usergroups || userData.usergroups,
     };
     localStorage.setItem('userData', JSON.stringify(updatedUserData));
   };
@@ -129,15 +134,15 @@ const UserProvider = ({ children }) => {
       });
 
       const data = await response.json();
-      const { email, isAdmin, accessToken } = data;
+      const { email, isAdmin, accessToken, usergroups } = data;
       if (!response.ok) throw new Error(data.message);
 
       dispatch({
         type: 'LOGIN_USER_SUCCESS',
-        payload: { username, email, isAdmin, accessToken },
+        payload: { username, email, isAdmin, accessToken, usergroups },
       });
 
-      addUserDataToLocalStorage(username, email);
+      addUserDataToLocalStorage(username, email, usergroups);
       clearAlert();
     } catch (e) {
       dispatch({ type: 'LOGIN_USER_FAIL', payload: e });

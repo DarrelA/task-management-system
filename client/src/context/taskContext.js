@@ -242,7 +242,6 @@ const TaskProvider = ({ children }) => {
 
       dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
       clearAlert();
-      getTasksData(App_Acronym, accessToken);
       return 'success';
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });

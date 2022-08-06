@@ -1,6 +1,6 @@
 import { Button, Grid } from '@material-ui/core';
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { LoadingSpinner, TaskModal } from '../components';
 import useTaskContext from '../context/taskContext';
@@ -19,11 +19,17 @@ const PlanTask = () => {
     updateKanbanIndex,
   } = taskContext;
   const userContext = useUserContext();
-  const { accessToken, message } = userContext;
+  const { accessToken, usergroups, message } = userContext;
   const { isLoading, taskMessage } = taskContext;
 
   const { App_Acronym } = useParams();
   const navigate = useNavigate();
+
+  // Passed from Applications page via Link component
+  const location = useLocation();
+  const { application } = location.state || {};
+  const { App_permit_Open, App_permit_toDoList, App_permit_Doing, App_permit_Done } =
+    application;
 
   const [openTaskModal, setOpenTaskModal] = useState(false);
   const [editTaskMode, setEditTaskMode] = useState({ edit: false });
@@ -38,6 +44,7 @@ const PlanTask = () => {
   useEffect(() => {
     if (taskMessage === 'success') toast.success(taskMessage, { autoClose: 200 });
     else if (taskMessage === 'Application is unavailable.') return navigate('/apps');
+    else if (taskMessage === 'Forbidden') return window.location.reload();
     else if (!!taskMessage) toast.error(taskMessage);
 
     if (!!message) toast.error(message);
@@ -66,40 +73,49 @@ const PlanTask = () => {
     if (!result.destination) return;
 
     if (
-      result.source.droppableId === 'open' &&
-      result.destination.droppableId !== 'open' &&
-      result.destination.droppableId !== 'todolist'
-    )
-      return;
-
-    if (
-      result.source.droppableId === 'todolist' &&
-      result.destination.droppableId !== 'todolist' &&
-      result.destination.droppableId !== 'doing'
-    )
-      return;
-
-    if (result.source.droppableId === 'doing')
-      if (
+      (result.source.droppableId === 'open' &&
+        result.destination.droppableId !== 'open' &&
+        result.destination.droppableId !== 'todolist') ||
+      (result.source.droppableId === 'todolist' &&
+        result.destination.droppableId !== 'todolist' &&
+        result.destination.droppableId !== 'doing') ||
+      (result.source.droppableId === 'doing' &&
         result.destination.droppableId !== 'doing' &&
         result.destination.droppableId !== 'todolist' &&
-        result.destination.droppableId !== 'done'
-      )
-        return;
-
-    if (result.source.droppableId === 'done')
-      if (
+        result.destination.droppableId !== 'done') ||
+      (result.source.droppableId === 'done' &&
         result.destination.droppableId !== 'done' &&
         result.destination.droppableId !== 'doing' &&
-        result.destination.droppableId !== 'close'
-      )
-        return;
-
-    if (
-      result.source.droppableId === 'close' &&
-      result.destination.droppableId !== 'close'
+        result.destination.droppableId !== 'close') ||
+      (result.source.droppableId === 'close' &&
+        result.destination.droppableId !== 'close')
     )
       return;
+
+    if (result.source.droppableId === 'open') {
+      const appAccessRights = usergroups.find(
+        (usergroup) => usergroup === App_permit_Open
+      );
+      if (!appAccessRights) return;
+    }
+    if (result.source.droppableId === 'todolist') {
+      const appAccessRights = usergroups.find(
+        (usergroup) => usergroup === App_permit_toDoList
+      );
+      if (!appAccessRights) return;
+    }
+    if (result.source.droppableId === 'doing') {
+      const appAccessRights = usergroups.find(
+        (usergroup) => usergroup === App_permit_Doing
+      );
+      if (!appAccessRights) return;
+    }
+    if (result.source.droppableId === 'done') {
+      const appAccessRights = usergroups.find(
+        (usergroup) => usergroup === App_permit_Done
+      );
+      if (!appAccessRights) return;
+    }
 
     const { source, destination } = result;
 
@@ -197,6 +213,7 @@ const PlanTask = () => {
                 style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
                 key={columnId}
               >
+                {/* @TODO: Change name color depending on access rights*/}
                 <h2>{column.name}</h2>
                 <div style={{ margin: 8 }}>
                   <Droppable droppableId={columnId} key={columnId}>

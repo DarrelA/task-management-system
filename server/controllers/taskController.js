@@ -214,6 +214,7 @@ const updateTaskState = async (req, res, next) => {
 
   if (!task) return next(new HttpError('Task not found.', 400));
   if (
+    Task_state !== 'open' &&
     Task_state !== 'todolist' &&
     Task_state !== 'doing' &&
     Task_state !== 'done' &&
@@ -221,7 +222,22 @@ const updateTaskState = async (req, res, next) => {
   )
     return next(new HttpError('Invalid task state.', 400));
 
-  // @TODO: Validate state change & update access rights middleware
+  if (
+    (task.Task_state === 'open' && Task_state !== 'open' && Task_state !== 'todolist') ||
+    (task.Task_state === 'todolist' &&
+      Task_state !== 'todolist' &&
+      Task_state !== 'doing') ||
+    (task.Task_state === 'doing' &&
+      Task_state !== 'doing' &&
+      Task_state !== 'todolist' &&
+      Task_state !== 'done') ||
+    (task.Task_state === 'done' &&
+      Task_state !== 'done' &&
+      Task_state !== 'doing' &&
+      Task_state !== 'close') ||
+    (task.Task_state === 'close' && Task_state !== 'close')
+  )
+    return next(new HttpError('Not allowed.', 400));
 
   try {
     task.Task_state = Task_state;
