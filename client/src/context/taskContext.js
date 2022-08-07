@@ -1,11 +1,10 @@
 import React, { useCallback, useContext, useReducer } from 'react';
 
 const TaskContext = React.createContext();
-const { tasks } = JSON.parse(localStorage.getItem('tasksData')) || {};
 const { appPermits } = JSON.parse(localStorage.getItem('appPermitData')) || {};
 
 const initialState = {
-  tasks: tasks || {},
+  tasks: {},
   appPermits: appPermits || {},
   isLoading: false,
   taskMessage: '',
@@ -27,8 +26,7 @@ const userReducer = (state, action) => {
     }
 
     case 'GET_ALL_TASK_SUCCESS': {
-      const { appPermits, tasks } = action.payload;
-      return { ...state, isLoading: false, appPermits, tasks };
+      return { ...state, isLoading: false, appPermits: action.payload.appPermits };
     }
 
     case 'RESPONSE_SUCCESS': {
@@ -48,12 +46,6 @@ const TaskProvider = ({ children }) => {
   const [userState, dispatch] = useReducer(userReducer, initialState);
 
   const clearAlert = () => setTimeout(() => dispatch({ type: 'CLEAR_MESSAGE' }, 500));
-
-  const addTasksDataToLocalStorage = async (tasks) => {
-    const tasksData = JSON.parse(localStorage.getItem('tasks')) || {};
-    const updatedTasksData = { tasks: tasks || tasksData.tasks };
-    localStorage.setItem('tasksData', JSON.stringify(updatedTasksData));
-  };
 
   const addAppPermitsDataToLocalStorage = async (appPermits) => {
     const appPermitsData = JSON.parse(localStorage.getItem('appPermits')) || {};
@@ -196,9 +188,9 @@ const TaskProvider = ({ children }) => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
       addAppPermitsDataToLocalStorage(data.appPermits);
-      addTasksDataToLocalStorage(data.tasks);
       dispatch({ type: 'GET_ALL_TASK_SUCCESS', payload: data });
       clearAlert();
+      return data.tasks; // To PlanTask page
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });
       clearAlert();
@@ -263,7 +255,6 @@ const TaskProvider = ({ children }) => {
 
       dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
       clearAlert();
-      return 'success';
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });
       clearAlert();
@@ -289,7 +280,6 @@ const TaskProvider = ({ children }) => {
 
       clearAlert();
       getTasksData(App_Acronym, accessToken);
-      return 'success';
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });
       clearAlert();

@@ -12,10 +12,6 @@ const useStyles = makeStyles({
   columnHeaderRed: { color: 'red' },
   columnHeaderGreen: { color: 'green' },
 
-  title: {
-    fontSize: 22,
-  },
-
   description: {
     overflowY: 'scroll',
     overflowX: 'hidden',
@@ -24,8 +20,6 @@ const useStyles = makeStyles({
   },
 });
 
-// @TODO: Need to fix render; useeffect to get data runs after render
-
 const PlanTask = () => {
   const classes = useStyles();
 
@@ -33,7 +27,6 @@ const PlanTask = () => {
   const {
     getTasksData,
     appPermits,
-    tasks,
     createTask,
     updateTask,
     updateTaskState,
@@ -41,14 +34,16 @@ const PlanTask = () => {
   } = taskContext;
   const userContext = useUserContext();
   const { accessToken, message } = userContext;
-  const { isLoading, taskMessage } = taskContext;
+  const { taskMessage } = taskContext;
 
   const { App_Acronym } = useParams();
   const navigate = useNavigate();
 
   const [openTaskModal, setOpenTaskModal] = useState(false);
   const [editTaskMode, setEditTaskMode] = useState({ edit: false });
-  const [columns, setColumns] = useState(tasks);
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [columns, setColumns] = useState();
 
   const openTaskModalHandler = () => setOpenTaskModal(true);
   const closeTaskModalHandler = () => {
@@ -66,7 +61,14 @@ const PlanTask = () => {
   }, [navigate, taskMessage, message]);
 
   useEffect(() => {
-    accessToken && getTasksData(App_Acronym, accessToken);
+    const fetchTasksOnRefresh = async () => {
+      const tasks = await getTasksData(App_Acronym, accessToken);
+      if (tasks) {
+        setColumns(tasks);
+        setIsLoading(false);
+      }
+    };
+    accessToken && fetchTasksOnRefresh();
   }, [App_Acronym, accessToken, getTasksData]);
 
   const taskModalHandler = async (inputData) => {
@@ -203,7 +205,11 @@ const PlanTask = () => {
           {Object.entries(columns)?.map(([columnId, column], index) => {
             return (
               <div
-                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                }}
                 key={columnId}
               >
                 {column.name === 'Open' && (
