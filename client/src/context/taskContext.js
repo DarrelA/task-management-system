@@ -22,8 +22,8 @@ const userReducer = (state, action) => {
     }
 
     case 'GET_ALL_APPLICATION_SUCCESS': {
-      const { applications, max_App_Rnumber, groups } = action.payload;
-      return { ...state, isLoading: false, applications, max_App_Rnumber, groups };
+      const { applications, groups, isProjectLead } = action.payload;
+      return { ...state, isLoading: false, applications, groups, isProjectLead };
     }
 
     case 'GET_ALL_TASK_SUCCESS': {

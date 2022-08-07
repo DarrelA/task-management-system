@@ -100,6 +100,10 @@ const Application = sequelize.define('application', {
     type: Sequelize.DATEONLY,
     allowNull: true,
   },
+  App_permit_Create: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
   App_permit_Open: {
     type: Sequelize.STRING,
     allowNull: true,

@@ -190,6 +190,7 @@ const PlanTask = () => {
           color="primary"
           style={{ margin: '16px 0' }}
           onClick={openTaskModalHandler}
+          disabled={!appPermits.App_permit_Create}
         >
           Create Task
         </Button>
@@ -289,6 +290,8 @@ const PlanTask = () => {
                                     ...provided.draggableProps.style,
                                   }}
                                 >
+                                  {item.Task_id}
+                                  <br />
                                   {item.Task_name}
                                   <br />
                                   {item.Task_description}

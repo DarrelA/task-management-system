@@ -40,14 +40,16 @@ const appAccessRightsMiddleware = async (req, res, next) => {
       if ((req.admin && req.admin.isAdmin) || haveAccessRights) return next();
     }
 
-    // @TODO: App_permit_Create needed
-    if (req.path === '/task' && req.method === 'POST') {
-      const haveAccessRights = await checkGroup(req.user.username, 'Project Lead');
-      if ((req.admin && req.admin.isAdmin) || haveAccessRights) return next();
-    }
-
     const application = await Application.findByPk(req.body.App_Acronym);
     if (!application) return next(new HttpError('Forbidden', 403));
+
+    if (req.path === '/task' && req.method === 'POST') {
+      const haveAccessRights = await checkGroup(
+        req.user.username,
+        application.App_permit_Create
+      );
+      if ((req.admin && req.admin.isAdmin) || haveAccessRights) return next();
+    }
 
     if (
       req.path === '/task' &&

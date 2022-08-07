@@ -7,6 +7,7 @@ const initialState = {
   isLoading: false,
   username: username || '',
   email: email || '',
+  isAdmin: false,
   message: '',
   accessToken: '',
 };
@@ -128,12 +129,12 @@ const UserProvider = ({ children }) => {
       });
 
       const data = await response.json();
-      const { email, accessToken } = data;
+      const { email, isAdmin, accessToken } = data;
       if (!response.ok) throw new Error(data.message);
 
       dispatch({
         type: 'LOGIN_USER_SUCCESS',
-        payload: { username, email, accessToken },
+        payload: { username, isAdmin, email, accessToken },
       });
 
       addUserDataToLocalStorage(username, email);

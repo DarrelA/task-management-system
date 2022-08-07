@@ -7,17 +7,19 @@ const {
   UserGroup,
 } = require('../models/userTaskModel');
 const HttpError = require('../models/http-error');
+const { checkGroup } = require('./userController');
 
 const getApplicationsData = async (req, res, next) => {
   try {
-    const max_App_Rnumber = await Application.max('App_Rnumber');
     const applications = await Application.findAll({
       attributes: { exclude: ['createdAt'] },
     });
 
     const groups = await Group.findAll({ attributes: ['name'] });
+    let isProjectLead = await checkGroup(req.user.username, 'Project Lead');
+    if (!isProjectLead && req?.admin.isAdmin) isProjectLead = true;
 
-    return res.send({ applications, max_App_Rnumber, groups });
+    return res.send({ applications, groups, isProjectLead });
   } catch (e) {
     console.error(e);
     return next(new HttpError('Something went wrong!', 500));
@@ -28,22 +30,32 @@ const createApplication = async (req, res, next) => {
   const {
     App_Acronym,
     App_Description,
+    App_Rnumber,
     App_startDate,
     App_endDate,
+    App_permit_Create,
     App_permit_Open,
     App_permit_toDoList,
     App_permit_Doing,
     App_permit_Done,
   } = req.body;
 
-  let { App_Rnumber } = req.body;
-
   if (!App_Acronym) return next(new HttpError('Application acronym is required.', 400));
+  if (!App_Description)
+    return next(new HttpError('Application description is required.', 400));
+
+  if (!App_Rnumber) return next(new HttpError('Application Rnumber is required.', 400));
+  if (typeof +App_Rnumber !== 'number' || +App_Rnumber < 0)
+    return next(new HttpError('Application Rnumber needs to be a valid number.', 400));
 
   try {
     const application = await Application.findByPk(App_Acronym);
     if (!!application) return next(new HttpError('Application acronym is taken.', 400));
 
+    if (App_permit_Create) {
+      const openGroup = await Group.findByPk(App_permit_Create);
+      if (!openGroup) return next(new HttpError('Usergroup is unavailable.', 400));
+    }
     if (App_permit_Open) {
       const openGroup = await Group.findByPk(App_permit_Open);
       if (!openGroup) return next(new HttpError('Usergroup is unavailable.', 400));
@@ -61,14 +73,10 @@ const createApplication = async (req, res, next) => {
       if (!doneGroup) return next(new HttpError('Usergroup is unavailable.', 400));
     }
 
-    // if at least 1 app exist in db, auto increment App_Rnumber
-    const max_App_Rnumber = await Application.max('App_Rnumber');
-    if (max_App_Rnumber) App_Rnumber = '';
-
     const newApplication = await Application.create({
       App_Acronym,
       App_Description,
-      App_Rnumber: App_Rnumber || max_App_Rnumber + 1,
+      App_Rnumber: +App_Rnumber,
       App_startDate: App_startDate || null,
       App_endDate: App_endDate || null,
       App_permit_Open: App_permit_Open || null,
@@ -97,6 +105,8 @@ const updateApplication = async (req, res, next) => {
   } = req.body;
 
   if (!App_Acronym) return next(new HttpError('Application acronym is required.', 400));
+  if (!App_Description)
+    return next(new HttpError('Application description is required.', 400));
 
   try {
     const application = await Application.findByPk(App_Acronym);
@@ -119,7 +129,7 @@ const updateApplication = async (req, res, next) => {
       if (!doneGroup) return next(new HttpError('Usergroup is unavailable.', 400));
     }
 
-    application.App_Description = App_Description || null;
+    application.App_Description = App_Description;
     if (App_startDate) application.App_startDate = App_startDate;
     if (App_endDate) application.App_endDate = App_endDate;
     application.App_permit_Open = App_permit_Open || null;
@@ -149,10 +159,18 @@ const getTasksData = async (req, res, next) => {
     ].map((usergroup) => usergroup.groupName);
 
     // Set T/F permissions in respective App_permit states
-    const { App_permit_Open, App_permit_toDoList, App_permit_Doing, App_permit_Done } =
-      application;
+    const {
+      App_permit_Create,
+      App_permit_Open,
+      App_permit_toDoList,
+      App_permit_Doing,
+      App_permit_Done,
+    } = application;
     const appPermits = {};
 
+    appPermits.App_permit_Create =
+      req?.admin.isAdmin ||
+      !!usergroups.find((usergroup) => usergroup === App_permit_Create);
     appPermits.App_permit_Open =
       req?.admin.isAdmin ||
       !!usergroups.find((usergroup) => usergroup === App_permit_Open);
@@ -215,18 +233,25 @@ const createTask = async (req, res, next) => {
   const { App_Acronym, Task_name, Task_description, Task_plan } = req.body;
 
   if (!Task_name) return next(new HttpError('Task name is required.', 400));
+  if (!Task_description) return next(new HttpError('Task description is required.', 400));
 
   try {
     const application = await Application.findByPk(App_Acronym);
     if (!application) return next(new HttpError('Application not found.', 400));
+
+    const hasTask = await Task.findOne({ where: { Task_app_Acronym: App_Acronym } });
+    let runningNum = application.App_Rnumber;
+    if (!!hasTask) runningNum += 1;
+    application.App_Rnumber = runningNum;
+    application.save();
 
     const task_name = await Task.findByPk(Task_name);
     if (!!task_name) return next(new HttpError('Task name is taken.', 400));
 
     const newTask = await Task.create({
       Task_name,
-      Task_description: Task_description || null,
-      Task_id: application.App_Acronym + application.App_Rnumber,
+      Task_description: Task_description,
+      Task_id: application.App_Acronym + '_' + runningNum,
       Task_state: 'open',
       Task_creator: req.user.username,
       Task_owner: req.user.username,

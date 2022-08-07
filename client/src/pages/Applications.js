@@ -53,8 +53,8 @@ const Applications = () => {
   const {
     getApplicationsData,
     applications,
-    max_App_Rnumber,
     groups,
+    isProjectLead,
     createApplication,
     updateApplication,
   } = taskContext;
@@ -101,9 +101,7 @@ const Applications = () => {
           onClose={closeTaskModalHandler}
           appModalHandler={appModalHandler}
           editAppMode={editAppMode}
-          // First application requires manual input of App_Rnumber
-          // Thereafter will increase by 1 automatically
-          data={{ groups, max_App_Rnumber }}
+          groups={groups}
         />
       )}
 
@@ -114,6 +112,7 @@ const Applications = () => {
           color="primary"
           style={{ margin: '16px 0' }}
           onClick={openTaskModalHandler}
+          disabled={!isProjectLead}
         >
           Create Application
         </Button>
@@ -156,6 +155,7 @@ const Applications = () => {
                     setEditAppMode({ ...application, edit: true });
                     openTaskModalHandler();
                   }}
+                  disabled={!isProjectLead}
                 >
                   <span className="material-icons">edit</span>
                 </Button>

@@ -13,11 +13,11 @@ import {
 } from '@material-ui/core';
 import { useEffect, useState } from 'react';
 
-const ApplicationModal = ({ open, onClose, appModalHandler, editAppMode, data }) => {
+const ApplicationModal = ({ open, onClose, appModalHandler, editAppMode, groups }) => {
   const useStyles = makeStyles((theme) => ({
     paper: {
       position: 'absolute',
-      maxWidth: 800,
+      maxWidth: 600,
       width: '75%',
       backgroundColor: theme.palette.background.paper,
       border: '2px solid #000',
@@ -43,6 +43,7 @@ const ApplicationModal = ({ open, onClose, appModalHandler, editAppMode, data })
     App_Description: editAppMode?.App_Description || '',
     App_startDate: editAppMode?.App_startDate || '',
     App_endDate: editAppMode?.App_endDate || '',
+    App_permit_Create: editAppMode?.App_permit_Create || '',
     App_permit_Open: editAppMode?.App_permit_Open || '',
     App_permit_toDoList: editAppMode?.App_permit_toDoList || '',
     App_permit_Doing: editAppMode?.App_permit_Doing || '',
@@ -71,14 +72,11 @@ const ApplicationModal = ({ open, onClose, appModalHandler, editAppMode, data })
           type="number"
           id="App_Rnumber"
           onInput={inputAppHandler}
-          value={
-            !data.max_App_Rnumber || editAppMode.App_Acronym
-              ? inputAppData.App_Rnumber
-              : data.max_App_Rnumber + 1
-          }
+          value={inputAppData.App_Rnumber}
+          required
           fullWidth
+          disabled={!!editAppMode?.App_Rnumber}
           autoFocus
-          disabled={!!data?.max_App_Rnumber}
         />
 
         <TextField
@@ -88,22 +86,22 @@ const ApplicationModal = ({ open, onClose, appModalHandler, editAppMode, data })
           placeholder="delta"
           onInput={inputAppHandler}
           value={inputAppData.App_Acronym}
-          fullWidth
-          autoFocus
-          disabled={!!editAppMode?.App_Acronym}
           required
+          fullWidth
+          disabled={!!editAppMode?.App_Acronym}
         />
 
         <TextField
           label="Description"
           type="textarea"
           id="App_Description"
-          minRows={5}
+          minRows={8}
           multiline
           onInput={inputAppHandler}
           value={inputAppData.App_Description}
+          required
           fullWidth
-          autoFocus
+          style={{ height: 200, overflowY: 'scroll' }}
         />
 
         <Grid container spacing={1} justifyContent="space-around" style={{ padding: 25 }}>
@@ -137,6 +135,26 @@ const ApplicationModal = ({ open, onClose, appModalHandler, editAppMode, data })
           style={{ paddingBottom: 25 }}
         >
           <FormControl className={classes.formControl}>
+            <InputLabel id="App_permit_Create">Create</InputLabel>
+            <Select
+              labelId="App_permit_Create"
+              id="App_permit_Create"
+              name="App_permit_Create"
+              value={inputAppData.App_permit_Create}
+              onChange={inputAppHandler}
+            >
+              <MenuItem key="empty" value="">
+                None
+              </MenuItem>
+              {groups.map((group) => (
+                <MenuItem key={group.name} value={group.name}>
+                  {group.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl className={classes.formControl}>
             <InputLabel id="App_permit_Open">Open</InputLabel>
             <Select
               labelId="App_permit_Open"
@@ -148,7 +166,7 @@ const ApplicationModal = ({ open, onClose, appModalHandler, editAppMode, data })
               <MenuItem key="empty" value="">
                 None
               </MenuItem>
-              {data.groups.map((group) => (
+              {groups.map((group) => (
                 <MenuItem key={group.name} value={group.name}>
                   {group.name}
                 </MenuItem>
@@ -168,7 +186,7 @@ const ApplicationModal = ({ open, onClose, appModalHandler, editAppMode, data })
               <MenuItem key="empty" value="">
                 None
               </MenuItem>
-              {data.groups.map((group) => (
+              {groups.map((group) => (
                 <MenuItem key={group.name} value={group.name}>
                   {group.name}
                 </MenuItem>
@@ -188,7 +206,7 @@ const ApplicationModal = ({ open, onClose, appModalHandler, editAppMode, data })
               <MenuItem key="empty" value="">
                 None
               </MenuItem>
-              {data.groups.map((group) => (
+              {groups.map((group) => (
                 <MenuItem key={group.name} value={group.name}>
                   {group.name}
                 </MenuItem>
@@ -208,7 +226,7 @@ const ApplicationModal = ({ open, onClose, appModalHandler, editAppMode, data })
               <MenuItem key="empty" value="">
                 None
               </MenuItem>
-              {data.groups.map((group) => (
+              {groups.map((group) => (
                 <MenuItem key={group.name} value={group.name}>
                   {group.name}
                 </MenuItem>
