@@ -38,28 +38,13 @@ const login = async (req, res, next) => {
       );
 
     if (user && (await user.comparePassword(password))) {
-      const { isAdmin } = user;
       const accessToken = user.createAccessToken(user.username);
       const refreshToken = user.createRefreshToken(user.username);
       user.refreshToken = refreshToken;
       await user.save();
       user.sendRefreshToken(res, refreshToken);
 
-      const usergroups = [
-        ...(await UserGroup.findAll({
-          where: { userUsername: username },
-          attributes: ['groupName'],
-          raw: true,
-        })),
-      ].map((usergroup) => usergroup.groupName);
-
-      return res.send({
-        email: user.email,
-        isAdmin,
-        accessToken,
-        usergroups,
-        message: 'success',
-      });
+      return res.send({ email: user.email, accessToken, message: 'success' });
     }
 
     return next(new HttpError('Invalid credentials.', 401));

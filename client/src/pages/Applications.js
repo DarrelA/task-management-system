@@ -162,7 +162,6 @@ const Applications = () => {
 
                 <Link
                   to={`/apps/${application.App_Acronym}`}
-                  state={{ application }}
                   style={{ textDecoration: 'none', color: 'inherit' }}
                 >
                   <span className="material-icons">menu_book</span>

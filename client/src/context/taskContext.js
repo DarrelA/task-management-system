@@ -2,9 +2,11 @@ import React, { useCallback, useContext, useReducer } from 'react';
 
 const TaskContext = React.createContext();
 const { tasks } = JSON.parse(localStorage.getItem('tasksData')) || {};
+const { appPermits } = JSON.parse(localStorage.getItem('appPermitData')) || {};
 
 const initialState = {
   tasks: tasks || {},
+  appPermits: appPermits || {},
   isLoading: false,
   taskMessage: '',
 };
@@ -25,7 +27,8 @@ const userReducer = (state, action) => {
     }
 
     case 'GET_ALL_TASK_SUCCESS': {
-      return { ...state, isLoading: false, tasks: action.payload.tasks };
+      const { appPermits, tasks } = action.payload;
+      return { ...state, isLoading: false, appPermits, tasks };
     }
 
     case 'RESPONSE_SUCCESS': {
@@ -50,6 +53,12 @@ const TaskProvider = ({ children }) => {
     const tasksData = JSON.parse(localStorage.getItem('tasks')) || {};
     const updatedTasksData = { tasks: tasks || tasksData.tasks };
     localStorage.setItem('tasksData', JSON.stringify(updatedTasksData));
+  };
+
+  const addAppPermitsDataToLocalStorage = async (appPermits) => {
+    const appPermitsData = JSON.parse(localStorage.getItem('appPermits')) || {};
+    const updatedAppPermitsData = { appPermits: appPermits || appPermitsData.appPermits };
+    localStorage.setItem('appPermitsData', JSON.stringify(updatedAppPermitsData));
   };
 
   const getApplicationsData = useCallback(async (accessToken) => {
@@ -186,6 +195,7 @@ const TaskProvider = ({ children }) => {
 
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
+      addAppPermitsDataToLocalStorage(data.appPermits);
       addTasksDataToLocalStorage(data.tasks);
       dispatch({ type: 'GET_ALL_TASK_SUCCESS', payload: data });
       clearAlert();
@@ -218,14 +228,20 @@ const TaskProvider = ({ children }) => {
       dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
       clearAlert();
       getTasksData(App_Acronym, accessToken);
-      return 'success';
+      return 'success'; // To PlanTask page
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });
       clearAlert();
     }
   };
 
-  const updateTaskState = async (App_Acronym, Task_name, Task_state, accessToken) => {
+  const updateTaskState = async (
+    App_Acronym,
+    Task_name,
+    Task_state_source,
+    Task_state_destination,
+    accessToken
+  ) => {
     try {
       const response = await fetch('/api/tasks/task', {
         method: 'PATCH',
@@ -234,7 +250,12 @@ const TaskProvider = ({ children }) => {
           'Content-Type': 'application/json',
           authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ App_Acronym, Task_name, Task_state }),
+        body: JSON.stringify({
+          App_Acronym,
+          Task_name,
+          Task_state_source,
+          Task_state_destination,
+        }),
       });
 
       const data = await response.json();

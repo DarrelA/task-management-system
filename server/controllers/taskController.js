@@ -1,4 +1,11 @@
-const { Application, Plan, Task, Note, Group } = require('../models/userTaskModel');
+const {
+  Application,
+  Plan,
+  Task,
+  Note,
+  Group,
+  UserGroup,
+} = require('../models/userTaskModel');
 const HttpError = require('../models/http-error');
 
 const getApplicationsData = async (req, res, next) => {
@@ -130,8 +137,34 @@ const updateApplication = async (req, res, next) => {
 
 const getTasksData = async (req, res, next) => {
   try {
-    const hasAppInDB = await Application.findByPk(req.params.App_Acronym);
-    if (!hasAppInDB) return next(new HttpError('Application is unavailable.', 400));
+    let application = await Application.findByPk(req.params.App_Acronym);
+    if (!application) return next(new HttpError('Application is unavailable.', 400));
+
+    // Find the usergroups that user belongs to
+    let usergroups = [
+      ...(await UserGroup.findAll({
+        where: { userUsername: req.user.username },
+        attributes: ['groupName'],
+      })),
+    ].map((usergroup) => usergroup.groupName);
+
+    // Set T/F permissions in respective App_permit states
+    const { App_permit_Open, App_permit_toDoList, App_permit_Doing, App_permit_Done } =
+      application;
+    const appPermits = {};
+
+    appPermits.App_permit_Open =
+      req?.admin.isAdmin ||
+      !!usergroups.find((usergroup) => usergroup === App_permit_Open);
+    appPermits.App_permit_toDoList =
+      req?.admin.isAdmin ||
+      !!usergroups.find((usergroup) => usergroup === App_permit_toDoList);
+    appPermits.App_permit_Doing =
+      req?.admin.isAdmin ||
+      !!usergroups.find((usergroup) => usergroup === App_permit_Doing);
+    appPermits.App_permit_Done =
+      req?.admin.isAdmin ||
+      !!usergroups.find((usergroup) => usergroup === App_permit_Done);
 
     let appTasks = await Task.findAll({
       where: { Task_app_Acronym: req.params.App_Acronym },
@@ -171,7 +204,7 @@ const getTasksData = async (req, res, next) => {
       }
     });
 
-    return res.send({ tasks });
+    return res.send({ appPermits, tasks });
   } catch (e) {
     console.error(e);
     return next(new HttpError('Something went wrong!', 500));
@@ -209,38 +242,28 @@ const createTask = async (req, res, next) => {
 };
 
 const updateTaskState = async (req, res, next) => {
-  const { Task_name, Task_state } = req.body;
+  const { Task_name, Task_state_source: from, Task_state_destination: to } = req.body;
   const task = await Task.findByPk(Task_name);
 
   if (!task) return next(new HttpError('Task not found.', 400));
-  if (
-    Task_state !== 'open' &&
-    Task_state !== 'todolist' &&
-    Task_state !== 'doing' &&
-    Task_state !== 'done' &&
-    Task_state !== 'close'
-  )
-    return next(new HttpError('Invalid task state.', 400));
 
+  const validAppPermitStates = ['open', 'todolist', 'doing', 'done', 'close'];
+  const validFrom = validAppPermitStates.includes(from);
+  const validTo = validAppPermitStates.includes(to);
+  if (!validFrom || !validTo) return next(new HttpError('Invalid task state.', 400));
+
+  // Validation for promoting and demoting state
   if (
-    (task.Task_state === 'open' && Task_state !== 'open' && Task_state !== 'todolist') ||
-    (task.Task_state === 'todolist' &&
-      Task_state !== 'todolist' &&
-      Task_state !== 'doing') ||
-    (task.Task_state === 'doing' &&
-      Task_state !== 'doing' &&
-      Task_state !== 'todolist' &&
-      Task_state !== 'done') ||
-    (task.Task_state === 'done' &&
-      Task_state !== 'done' &&
-      Task_state !== 'doing' &&
-      Task_state !== 'close') ||
-    (task.Task_state === 'close' && Task_state !== 'close')
+    (from === 'open' && to !== 'open' && to !== 'todolist') ||
+    (from === 'todolist' && to !== 'todolist' && to !== 'doing') ||
+    (from === 'doing' && to !== 'doing' && to !== 'todolist' && to !== 'done') ||
+    (from === 'done' && to !== 'done' && to !== 'doing' && to !== 'close') ||
+    (from === 'close' && to !== 'close')
   )
-    return next(new HttpError('Not allowed.', 400));
+    return next(new HttpError('Forbidden', 400));
 
   try {
-    task.Task_state = Task_state;
+    task.Task_state = to;
     await task.save();
     return res.send({ success: true });
   } catch (e) {

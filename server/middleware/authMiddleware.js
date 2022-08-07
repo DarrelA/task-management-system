@@ -52,7 +52,7 @@ const appAccessRightsMiddleware = async (req, res, next) => {
     if (
       req.path === '/task' &&
       req.method === 'PATCH' &&
-      req.body.Task_state === 'open'
+      req.body.Task_state_source === 'open'
     ) {
       const haveAccessRights = await checkGroup(
         req.user.username,
@@ -64,7 +64,7 @@ const appAccessRightsMiddleware = async (req, res, next) => {
     if (
       req.path === '/task' &&
       req.method === 'PATCH' &&
-      req.body.Task_state === 'todolist'
+      req.body.Task_state_source === 'todolist'
     ) {
       const haveAccessRights = await checkGroup(
         req.user.username,
@@ -76,7 +76,7 @@ const appAccessRightsMiddleware = async (req, res, next) => {
     if (
       req.path === '/task' &&
       req.method === 'PATCH' &&
-      req.body.Task_state === 'doing'
+      req.body.Task_state_source === 'doing'
     ) {
       const haveAccessRights = await checkGroup(
         req.user.username,
@@ -88,7 +88,7 @@ const appAccessRightsMiddleware = async (req, res, next) => {
     if (
       req.path === '/task' &&
       req.method === 'PATCH' &&
-      req.body.Task_state === 'done'
+      req.body.Task_state_source === 'done'
     ) {
       const haveAccessRights = await checkGroup(
         req.user.username,

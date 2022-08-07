@@ -1,6 +1,6 @@
-import { Button, Grid } from '@material-ui/core';
+import { Button, Grid, makeStyles } from '@material-ui/core';
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { LoadingSpinner, TaskModal } from '../components';
 import useTaskContext from '../context/taskContext';
@@ -8,10 +8,31 @@ import useUserContext from '../context/userContext';
 
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 
+const useStyles = makeStyles({
+  columnHeaderRed: { color: 'red' },
+  columnHeaderGreen: { color: 'green' },
+
+  title: {
+    fontSize: 22,
+  },
+
+  description: {
+    overflowY: 'scroll',
+    overflowX: 'hidden',
+    height: 210,
+    maxHeight: 210,
+  },
+});
+
+// @TODO: Need to fix render; useeffect to get data runs after render
+
 const PlanTask = () => {
+  const classes = useStyles();
+
   const taskContext = useTaskContext();
   const {
     getTasksData,
+    appPermits,
     tasks,
     createTask,
     updateTask,
@@ -19,17 +40,11 @@ const PlanTask = () => {
     updateKanbanIndex,
   } = taskContext;
   const userContext = useUserContext();
-  const { accessToken, usergroups, message } = userContext;
+  const { accessToken, message } = userContext;
   const { isLoading, taskMessage } = taskContext;
 
   const { App_Acronym } = useParams();
   const navigate = useNavigate();
-
-  // Passed from Applications page via Link component
-  const location = useLocation();
-  const { application } = location.state || {};
-  const { App_permit_Open, App_permit_toDoList, App_permit_Doing, App_permit_Done } =
-    application;
 
   const [openTaskModal, setOpenTaskModal] = useState(false);
   const [editTaskMode, setEditTaskMode] = useState({ edit: false });
@@ -54,15 +69,15 @@ const PlanTask = () => {
     accessToken && getTasksData(App_Acronym, accessToken);
   }, [App_Acronym, accessToken, getTasksData]);
 
-  // @TODO: Validation for error sync with backend
-  const taskModalHandler = (inputData) => {
+  const taskModalHandler = async (inputData) => {
     if (!inputData) return;
     if (!editTaskMode.edit) {
-      setColumns({
-        ...columns,
-        open: { ...columns.open, items: [...columns.open.items, inputData] },
-      });
-      createTask(inputData, App_Acronym, accessToken);
+      const success = await createTask(inputData, App_Acronym, accessToken);
+      if (success)
+        setColumns({
+          ...columns,
+          open: { ...columns.open, items: [...columns.open.items, inputData] },
+        });
     } else {
       updateTask(inputData, App_Acronym, accessToken);
       closeTaskModalHandler();
@@ -72,50 +87,26 @@ const PlanTask = () => {
   const onDragEndHandler = (result, columns, setColumns) => {
     if (!result.destination) return;
 
+    const from = result.source.droppableId;
+    const to = result.destination.droppableId;
+
+    // Validation for promoting and demoting state
     if (
-      (result.source.droppableId === 'open' &&
-        result.destination.droppableId !== 'open' &&
-        result.destination.droppableId !== 'todolist') ||
-      (result.source.droppableId === 'todolist' &&
-        result.destination.droppableId !== 'todolist' &&
-        result.destination.droppableId !== 'doing') ||
-      (result.source.droppableId === 'doing' &&
-        result.destination.droppableId !== 'doing' &&
-        result.destination.droppableId !== 'todolist' &&
-        result.destination.droppableId !== 'done') ||
-      (result.source.droppableId === 'done' &&
-        result.destination.droppableId !== 'done' &&
-        result.destination.droppableId !== 'doing' &&
-        result.destination.droppableId !== 'close') ||
-      (result.source.droppableId === 'close' &&
-        result.destination.droppableId !== 'close')
+      (from === 'open' && to !== 'open' && to !== 'todolist') ||
+      (from === 'todolist' && to !== 'todolist' && to !== 'doing') ||
+      (from === 'doing' && to !== 'doing' && to !== 'todolist' && to !== 'done') ||
+      (from === 'done' && to !== 'done' && to !== 'doing' && to !== 'close') ||
+      (from === 'close' && to !== 'close')
     )
       return;
 
-    if (result.source.droppableId === 'open') {
-      const appAccessRights = usergroups.find(
-        (usergroup) => usergroup === App_permit_Open
-      );
-      if (!appAccessRights) return;
-    }
-    if (result.source.droppableId === 'todolist') {
-      const appAccessRights = usergroups.find(
-        (usergroup) => usergroup === App_permit_toDoList
-      );
-      if (!appAccessRights) return;
-    }
-    if (result.source.droppableId === 'doing') {
-      const appAccessRights = usergroups.find(
-        (usergroup) => usergroup === App_permit_Doing
-      );
-      if (!appAccessRights) return;
-    }
-    if (result.source.droppableId === 'done') {
-      const appAccessRights = usergroups.find(
-        (usergroup) => usergroup === App_permit_Done
-      );
-      if (!appAccessRights) return;
-    }
+    if (
+      (from === 'open' && !appPermits.App_permit_Open) ||
+      (from === 'todolist' && !appPermits.App_permit_toDoList) ||
+      (from === 'doing' && !appPermits.App_permit_Doing) ||
+      (from === 'done' && !appPermits.App_permit_Done)
+    )
+      return;
 
     const { source, destination } = result;
 
@@ -137,6 +128,7 @@ const PlanTask = () => {
       updateTaskState(
         App_Acronym,
         result.draggableId,
+        source.droppableId,
         destination.droppableId,
         accessToken
       );
@@ -213,8 +205,51 @@ const PlanTask = () => {
                 style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
                 key={columnId}
               >
-                {/* @TODO: Change name color depending on access rights*/}
-                <h2>{column.name}</h2>
+                {column.name === 'Open' && (
+                  <h2
+                    className={
+                      appPermits.App_permit_Open
+                        ? classes.columnHeaderGreen
+                        : classes.columnHeaderRed
+                    }
+                  >
+                    {column.name}
+                  </h2>
+                )}
+                {column.name === 'To Do List' && (
+                  <h2
+                    className={
+                      appPermits.App_permit_toDoList
+                        ? classes.columnHeaderGreen
+                        : classes.columnHeaderRed
+                    }
+                  >
+                    {column.name}
+                  </h2>
+                )}
+                {column.name === 'Doing' && (
+                  <h2
+                    className={
+                      appPermits.App_permit_Doing
+                        ? classes.columnHeaderGreen
+                        : classes.columnHeaderRed
+                    }
+                  >
+                    {column.name}
+                  </h2>
+                )}
+                {column.name === 'Done' && (
+                  <h2
+                    className={
+                      appPermits.App_permit_Done
+                        ? classes.columnHeaderGreen
+                        : classes.columnHeaderRed
+                    }
+                  >
+                    {column.name}
+                  </h2>
+                )}
+                {column.name === 'Close' && <h2>{column.name}</h2>}
                 <div style={{ margin: 8 }}>
                   <Droppable droppableId={columnId} key={columnId}>
                     {(provided, snapshot) => {
