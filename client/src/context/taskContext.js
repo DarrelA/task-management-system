@@ -82,6 +82,7 @@ const TaskProvider = ({ children }) => {
       App_Description,
       App_startDate,
       App_endDate,
+      App_permit_Create,
       App_permit_Open,
       App_permit_toDoList,
       App_permit_Doing,
@@ -105,6 +106,7 @@ const TaskProvider = ({ children }) => {
           App_Description,
           App_startDate,
           App_endDate,
+          App_permit_Create,
           App_permit_Open,
           App_permit_toDoList,
           App_permit_Doing,
@@ -132,6 +134,7 @@ const TaskProvider = ({ children }) => {
       App_Description,
       App_startDate,
       App_endDate,
+      App_permit_Create,
       App_permit_Open,
       App_permit_toDoList,
       App_permit_Doing,
@@ -154,6 +157,7 @@ const TaskProvider = ({ children }) => {
           App_Description,
           App_startDate,
           App_endDate,
+          App_permit_Create,
           App_permit_Open,
           App_permit_toDoList,
           App_permit_Doing,
@@ -219,8 +223,36 @@ const TaskProvider = ({ children }) => {
 
       dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
       clearAlert();
-      getTasksData(App_Acronym, accessToken);
+      // getTasksData(App_Acronym, accessToken);
       return 'success'; // To PlanTask page
+    } catch (e) {
+      dispatch({ type: 'RESPONSE_FAIL', payload: e });
+      clearAlert();
+    }
+  };
+
+  const updateTask = async ({ App_Acronym }, accessToken) => {
+    dispatch({ type: 'IS_LOADING' });
+
+    try {
+      const response = await fetch(`/api/tasks/application`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({}),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+
+      dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
+
+      clearAlert();
+      getApplicationsData(accessToken);
+      return 'success';
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });
       clearAlert();
@@ -235,7 +267,7 @@ const TaskProvider = ({ children }) => {
     accessToken
   ) => {
     try {
-      const response = await fetch('/api/tasks/task', {
+      const response = await fetch('/api/tasks/taskstate', {
         method: 'PATCH',
         credentials: 'include',
         headers: {
@@ -261,7 +293,7 @@ const TaskProvider = ({ children }) => {
     }
   };
 
-  const updateKanbanIndex = async (tasksList, App_Acronym, accessToken) => {
+  const updateKanbanIndex = async (tasksList, Task_name, App_Acronym, accessToken) => {
     try {
       const response = await fetch('/api/tasks/kanbanindex', {
         method: 'PATCH',
@@ -270,7 +302,7 @@ const TaskProvider = ({ children }) => {
           'Content-Type': 'application/json',
           authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ tasksList }),
+        body: JSON.stringify({ tasksList, Task_name, App_Acronym }),
       });
 
       const data = await response.json();
@@ -286,6 +318,71 @@ const TaskProvider = ({ children }) => {
     }
   };
 
+  const createPlan = async (
+    { Plan_MVP_name, Plan_startDate, Plan_endDate },
+    App_Acronym,
+    accessToken
+  ) => {
+    try {
+      const response = await fetch('/api/tasks/plan', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          App_Acronym,
+          Plan_MVP_name,
+          Plan_startDate,
+          Plan_endDate,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+
+      dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
+      clearAlert();
+      // getTasksData(App_Acronym, accessToken);
+      return 'success'; // To PlanTask page
+    } catch (e) {
+      dispatch({ type: 'RESPONSE_FAIL', payload: e });
+      clearAlert();
+    }
+  };
+
+  const updatePlan = async (
+    { App_Acronym, Plan_startDate, Plan_endDate },
+    accessToken
+  ) => {
+    dispatch({ type: 'IS_LOADING' });
+
+    try {
+      const response = await fetch(`/api/tasks/plan`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ App_Acronym, Plan_startDate, Plan_endDate }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+
+      dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
+
+      clearAlert();
+      getApplicationsData(accessToken);
+      return 'success';
+    } catch (e) {
+      dispatch({ type: 'RESPONSE_FAIL', payload: e });
+      clearAlert();
+    }
+  };
+
   return (
     <TaskContext.Provider
       value={{
@@ -295,8 +392,11 @@ const TaskProvider = ({ children }) => {
         updateApplication,
         getTasksData,
         createTask,
+        updateTask,
         updateTaskState,
         updateKanbanIndex,
+        createPlan,
+        updatePlan,
       }}
     >
       {children}

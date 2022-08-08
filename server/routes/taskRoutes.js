@@ -12,8 +12,11 @@ const {
   updateApplication,
   getTasksData,
   createTask,
+  updateTask,
   updateTaskState,
   updateKanbanIndex,
+  createPlan,
+  updatePlan,
 } = require('../controllers/taskController');
 
 router.get('/applications/all', authMiddleware, getApplicationsData);
@@ -28,8 +31,11 @@ router.get('/:App_Acronym/all', authMiddleware, getTasksData);
 router
   .route('/task')
   .post(authMiddleware, appAccessRightsMiddleware, createTask)
-  .patch(authMiddleware, appAccessRightsMiddleware, updateTaskState);
+  .patch(authMiddleware, appAccessRightsMiddleware, updateTask);
 
+router.patch('/taskstate', authMiddleware, updateTaskState);
 router.patch('/kanbanindex', authMiddleware, updateKanbanIndex);
+
+router.route('/plan').post(authMiddleware, createPlan).patch(authMiddleware, updatePlan);
 
 module.exports = router;

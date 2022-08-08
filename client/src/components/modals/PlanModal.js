@@ -4,7 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Button, Grid, TextField } from '@material-ui/core';
 import { useEffect, useState } from 'react';
 
-const TaskModal = ({ open, onClose, taskModalHandler, editAppMode }) => {
+const PlanModal = ({ open, onClose, planModalHandler, editPlanMode }) => {
   const useStyles = makeStyles((theme) => ({
     paper: {
       position: 'absolute',
@@ -29,8 +29,10 @@ const TaskModal = ({ open, onClose, taskModalHandler, editAppMode }) => {
   const classes = useStyles();
   const [modalStyle] = useState({ top: '15%', margin: 'auto' });
   const [inputAppData, setInputAppData] = useState({
-    Task_name: editAppMode?.Task_name || '',
-    Task_description: editAppMode?.Task_description || '',
+    Plan_MVP_name: editPlanMode?.Plan_MVP_name || '',
+    Task_description: editPlanMode?.Task_description || '',
+    Plan_startDate: editPlanMode?.Plan_startDate || '',
+    Plan_endDate: editPlanMode?.Plan_endDate || '',
   });
   const [disableCreate, setDisableCreate] = useState(false);
 
@@ -41,38 +43,47 @@ const TaskModal = ({ open, onClose, taskModalHandler, editAppMode }) => {
       [e.target?.name]: e.target.value,
     });
 
-  const createTaskHandler = () => taskModalHandler({ ...inputAppData });
+  const createTaskHandler = () => planModalHandler({ ...inputAppData });
 
   useEffect(() => {
-    !inputAppData.Task_name ? setDisableCreate(true) : setDisableCreate(false);
-  }, [inputAppData.Task_name]);
+    !inputAppData.Plan_MVP_name ? setDisableCreate(true) : setDisableCreate(false);
+  }, [inputAppData.Plan_MVP_name]);
 
   const taskForm = (
     <div style={modalStyle} className={classes.paper}>
       <form onSubmit={createTaskHandler}>
         <TextField
-          label="Task Name"
+          label="Plan Name"
           type="text"
-          id="Task_name"
-          placeholder="task 1"
+          id="Plan_MVP_name"
+          placeholder="plan 1"
           onInput={inputAppHandler}
-          value={inputAppData.Task_name}
+          value={inputAppData.Plan_MVP_name}
           fullWidth
           autoFocus
-          disabled={!!editAppMode?.Task_name}
+          disabled={!!editPlanMode?.Plan_MVP_name}
           required
         />
 
-        <TextField
-          label="Description"
-          type="textarea"
-          id="Task_description"
-          minRows={5}
-          multiline
-          onInput={inputAppHandler}
-          value={inputAppData.Task_description}
-          fullWidth
-        />
+        <Grid container spacing={1} justifyContent="space-around" style={{ padding: 25 }}>
+          <TextField
+            label="Start Date"
+            id="Plan_startDate"
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            onInput={inputAppHandler}
+            defaultValue={inputAppData.Plan_startDate}
+          />
+
+          <TextField
+            label="End Date"
+            id="Plan_endDate"
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            onInput={inputAppHandler}
+            defaultValue={inputAppData.Plan_endDate}
+          />
+        </Grid>
 
         <Grid spacing={1} container>
           <Button
@@ -83,7 +94,7 @@ const TaskModal = ({ open, onClose, taskModalHandler, editAppMode }) => {
             style={{ margin: '16px 0' }}
             disabled={disableCreate}
           >
-            {editAppMode?.Task_name ? 'Update' : 'Create'}
+            {editPlanMode?.Plan_MVP_name ? 'Update' : 'Create'}
           </Button>
         </Grid>
       </form>
@@ -101,4 +112,4 @@ const TaskModal = ({ open, onClose, taskModalHandler, editAppMode }) => {
   );
 };
 
-export default TaskModal;
+export default PlanModal;

@@ -79,6 +79,7 @@ const createApplication = async (req, res, next) => {
       App_Rnumber: +App_Rnumber,
       App_startDate: App_startDate || null,
       App_endDate: App_endDate || null,
+      App_permit_Create: App_permit_Create || null,
       App_permit_Open: App_permit_Open || null,
       App_permit_toDoList: App_permit_toDoList || null,
       App_permit_Doing: App_permit_Doing || null,
@@ -98,6 +99,7 @@ const updateApplication = async (req, res, next) => {
     App_Description,
     App_startDate,
     App_endDate,
+    App_permit_Create,
     App_permit_Open,
     App_permit_toDoList,
     App_permit_Doing,
@@ -112,6 +114,10 @@ const updateApplication = async (req, res, next) => {
     const application = await Application.findByPk(App_Acronym);
     if (!application) return next(new HttpError('Application not found.', 400));
 
+    if (App_permit_Create) {
+      const openGroup = await Group.findByPk(App_permit_Create);
+      if (!openGroup) return next(new HttpError('Usergroup is unavailable.', 400));
+    }
     if (App_permit_Open) {
       const openGroup = await Group.findByPk(App_permit_Open);
       if (!openGroup) return next(new HttpError('Usergroup is unavailable.', 400));
@@ -132,6 +138,7 @@ const updateApplication = async (req, res, next) => {
     application.App_Description = App_Description;
     if (App_startDate) application.App_startDate = App_startDate;
     if (App_endDate) application.App_endDate = App_endDate;
+    application.App_permit_Create = App_permit_Create || null;
     application.App_permit_Open = App_permit_Open || null;
     application.App_permit_toDoList = App_permit_toDoList || null;
     application.App_permit_Doing = App_permit_Doing || null;
@@ -266,6 +273,8 @@ const createTask = async (req, res, next) => {
   }
 };
 
+const updateTask = async (req, res, next) => {};
+
 const updateTaskState = async (req, res, next) => {
   const { Task_name, Task_state_source: from, Task_state_destination: to } = req.body;
   const task = await Task.findByPk(Task_name);
@@ -298,13 +307,19 @@ const updateTaskState = async (req, res, next) => {
 };
 
 const updateKanbanIndex = async (req, res, next) => {
-  const openItems = req.body.tasksList.open?.items;
-  const todolistItems = req.body.tasksList.todolist?.items;
-  const doingItems = req.body.tasksList.doing?.items;
-  const doneItems = req.body.tasksList.done?.items;
-  const closeItems = req.body.tasksList.close?.items;
+  const { tasksList, Task_name, App_Acronym } = req.body;
+
+  const openItems = tasksList.open?.items;
+  const todolistItems = tasksList.todolist?.items;
+  const doingItems = tasksList.doing?.items;
+  const doneItems = tasksList.done?.items;
+  const closeItems = tasksList.close?.items;
 
   try {
+    const taskSource = await Task.findOne({ where: { Task_name } });
+    taskSource.Task_owner = req.user.username;
+    await taskSource.save();
+
     if (!!openItems)
       openItems.forEach(async (item, i) => {
         let task = await Task.findByPk(item.Task_name);
@@ -367,12 +382,64 @@ const updateKanbanIndex = async (req, res, next) => {
   }
 };
 
+const createPlan = async (req, res, next) => {
+  const { App_Acronym, Plan_MVP_name, Plan_startDate, Plan_endDate } = req.body;
+
+  if (!Plan_MVP_name) return next(new HttpError('Plan name is required.', 400));
+
+  try {
+    const application = await Application.findByPk(App_Acronym);
+    if (!application) return next(new HttpError('Application not found.', 400));
+
+    const plan_MVP_name = await Plan.findByPk(Plan_MVP_name);
+    if (!!plan_MVP_name) return next(new HttpError('Plan name is taken.', 400));
+
+    const newPlan = await Plan.create({
+      Plan_MVP_name,
+      Plan_startDate: Plan_startDate || null,
+      Plan_endDate: Plan_endDate || null,
+      Plan_app_Acronym: App_Acronym,
+    });
+    await newPlan.save();
+    res.send({ message: 'success' });
+  } catch (e) {
+    console.error(e);
+    return next(new HttpError('Something went wrong!', 500));
+  }
+};
+
+const updatePlan = async (req, res, next) => {
+  const { App_Acronym, Plan_startDate, Plan_endDate } = req.body;
+
+  try {
+    const application = await Application.findByPk(App_Acronym);
+    if (!application) return next(new HttpError('Application not found.', 400));
+
+    const plan = await Plan.findByPk(Plan_MVP_name);
+    if (!plan) return next(new HttpError('Plan not found.', 400));
+
+    if (Plan_startDate) plan.Plan_startDate = Plan_startDate;
+    if (Plan.Plan_endDate) plan.Plan_endDate = Plan_endDate;
+
+    await plan.save();
+    res.send({ message: 'success' });
+  } catch (e) {
+    console.error(e);
+    return next(new HttpError('Something went wrong!', 500));
+  }
+};
+
 module.exports = {
   getApplicationsData,
   createApplication,
   updateApplication,
   getTasksData,
   createTask,
+  updateTask,
   updateTaskState,
   updateKanbanIndex,
+  createPlan,
+  updatePlan,
 };
+
+// @TODO: updateTask

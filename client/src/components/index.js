@@ -4,6 +4,7 @@ import ProtectedRoute from './ProtectedRoute';
 import UserManagementModal from './modals/UserManagementModal';
 import ApplicationModal from './modals/ApplicationModal';
 import TaskModal from './modals/TaskModal';
+import PlanModal from './modals/PlanModal';
 
 export {
   LoadingSpinner,
@@ -12,4 +13,5 @@ export {
   UserManagementModal,
   ApplicationModal,
   TaskModal,
+  PlanModal,
 };
