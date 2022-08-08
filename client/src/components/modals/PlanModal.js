@@ -1,14 +1,16 @@
-import Modal from '@material-ui/core/Modal';
-import { makeStyles } from '@material-ui/core/styles';
+import { useEffect, useState } from 'react';
+import { SwatchesPicker } from 'react-color';
 
 import { Button, Grid, TextField } from '@material-ui/core';
-import { useEffect, useState } from 'react';
+import Modal from '@material-ui/core/Modal';
+import { makeStyles } from '@material-ui/core/styles';
 
 const PlanModal = ({ open, onClose, planModalHandler, editPlanMode }) => {
   const useStyles = makeStyles((theme) => ({
     paper: {
       position: 'absolute',
-      maxWidth: 800,
+      maxWidth: 500,
+      maxHeight: 700,
       width: '75%',
       backgroundColor: theme.palette.background.paper,
       border: '2px solid #000',
@@ -16,13 +18,16 @@ const PlanModal = ({ open, onClose, planModalHandler, editPlanMode }) => {
       padding: theme.spacing(2, 4, 3),
     },
 
-    formControl: {
-      margin: theme.spacing(1),
-      minWidth: 150,
+    dates: {
+      paddingLeft: 20,
+      paddingRight: 20,
+      paddingTop: 20,
     },
 
-    selectEmpty: {
-      marginTop: theme.spacing(2),
+    colorDisplay: {
+      maxHeight: 100,
+      maxWidth: '320px',
+      margin: (0, 10),
     },
   }));
 
@@ -30,9 +35,9 @@ const PlanModal = ({ open, onClose, planModalHandler, editPlanMode }) => {
   const [modalStyle] = useState({ top: '15%', margin: 'auto' });
   const [inputAppData, setInputAppData] = useState({
     Plan_MVP_name: editPlanMode?.Plan_MVP_name || '',
-    Task_description: editPlanMode?.Task_description || '',
     Plan_startDate: editPlanMode?.Plan_startDate || '',
     Plan_endDate: editPlanMode?.Plan_endDate || '',
+    Plan_color: editPlanMode?.Plan_color || '',
   });
   const [disableCreate, setDisableCreate] = useState(false);
 
@@ -65,7 +70,12 @@ const PlanModal = ({ open, onClose, planModalHandler, editPlanMode }) => {
           required
         />
 
-        <Grid container spacing={1} justifyContent="space-around" style={{ padding: 25 }}>
+        <Grid
+          container
+          spacing={1}
+          justifyContent="space-around"
+          className={classes.dates}
+        >
           <TextField
             label="Start Date"
             id="Plan_startDate"
@@ -83,6 +93,29 @@ const PlanModal = ({ open, onClose, planModalHandler, editPlanMode }) => {
             onInput={inputAppHandler}
             defaultValue={inputAppData.Plan_endDate}
           />
+        </Grid>
+
+        <Grid
+          container
+          spacing={1}
+          justifyContent="center"
+          style={{ padding: 25, paddingBottom: 0 }}
+        >
+          <SwatchesPicker
+            color={inputAppData.Plan_color}
+            onChange={(colorPicked) =>
+              setInputAppData({ ...inputAppData, Plan_color: colorPicked.hex })
+            }
+          />
+          <Grid
+            container
+            spacing={1}
+            justifyContent="center"
+            className={classes.colorDisplay}
+            style={{ backgroundColor: inputAppData.Plan_color }}
+          >
+            {inputAppData.Plan_color.toUpperCase() || 'Pick a color!'}
+          </Grid>
         </Grid>
 
         <Grid spacing={1} container>

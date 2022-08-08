@@ -397,7 +397,8 @@ const getPlansData = async (req, res, next) => {
 };
 
 const createPlan = async (req, res, next) => {
-  const { App_Acronym, Plan_MVP_name, Plan_startDate, Plan_endDate } = req.body;
+  const { App_Acronym, Plan_MVP_name, Plan_startDate, Plan_endDate, Plan_color } =
+    req.body;
 
   if (!Plan_MVP_name) return next(new HttpError('Plan name is required.', 400));
 
@@ -413,6 +414,7 @@ const createPlan = async (req, res, next) => {
       Plan_startDate: Plan_startDate || null,
       Plan_endDate: Plan_endDate || null,
       Plan_app_Acronym: App_Acronym,
+      Plan_color: Plan_color || '#3f51b5',
     });
     await newPlan.save();
     res.send({ message: 'success' });
@@ -423,7 +425,7 @@ const createPlan = async (req, res, next) => {
 };
 
 const updatePlan = async (req, res, next) => {
-  const { App_Acronym, Plan_startDate, Plan_endDate } = req.body;
+  const { App_Acronym, Plan_startDate, Plan_endDate, Plan_color } = req.body;
 
   try {
     const application = await Application.findByPk(App_Acronym);
@@ -434,6 +436,7 @@ const updatePlan = async (req, res, next) => {
 
     if (Plan_startDate) plan.Plan_startDate = Plan_startDate;
     if (Plan.Plan_endDate) plan.Plan_endDate = Plan_endDate;
+    if (Plan.Plan_color) plan.Plan_color = Plan_color;
 
     await plan.save();
     res.send({ message: 'success' });

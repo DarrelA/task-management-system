@@ -20,20 +20,13 @@ const useStyles = makeStyles({
   columnHeaderRed: { color: '#f44336' },
   columnHeaderGreen: { color: '#8bc34a' },
 
-  root: {
-    maxWidth: 1400,
-    minHeight: 800,
-    padding: 10,
-  },
+  root: { maxWidth: 1400, padding: 10, margin: 10 },
+  buttons: { maxWidth: 300 },
 
-  buttons: {
-    maxWidth: 300,
-  },
-
-  cardContent: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
+  tasksCardContent: { display: 'flex', flexDirection: 'column' },
+  dragDropContext: { display: 'flex', flexDirection: 'column', alignItems: 'center' },
+  droppable: { padding: 4, width: 250, minHeight: 500 },
+  draggable: { userSelect: 'none', padding: 16, margin: '0 0 8px 0', minHeight: '50px' },
 
   planContent: {
     display: 'flex',
@@ -44,12 +37,7 @@ const useStyles = makeStyles({
     maxWidth: 800,
   },
 
-  description: {
-    overflowY: 'scroll',
-    overflowX: 'hidden',
-    height: 210,
-    maxHeight: 210,
-  },
+  description: { overflowY: 'scroll', overflowX: 'hidden', height: 210, maxHeight: 210 },
 });
 
 const PlanTask = () => {
@@ -294,16 +282,9 @@ const PlanTask = () => {
         </Grid>
       </Grid>
 
-      {/* @TODO: Collaspe all kanbans of all plans*/}
       <Grid container spacing={1} justifyContent="center">
-        <Card
-          className={classes.root}
-          variant="outlined"
-          key={App_Acronym}
-          style={{ borderColor: 'blue' }} // @TODO: Match respective plan's hex code
-        >
-          <CardContent className={classes.cardContent}>
-            {/* @TODO: Collaspe all plans */}
+        <Card className={classes.root} variant="outlined" key={App_Acronym}>
+          <CardContent className={classes.cardContent1}>
             {plans?.map((plan) => (
               <Grid
                 container
@@ -315,21 +296,20 @@ const PlanTask = () => {
                 <Typography>{plan.Plan_MVP_name}</Typography>
               </Grid>
             ))}
+          </CardContent>
+        </Card>
+      </Grid>
 
+      <Grid container spacing={1} justifyContent="center">
+        <Card className={classes.root} variant="outlined" key={App_Acronym}>
+          <CardContent className={classes.tasksCardContent}>
             <Grid container spacing={1} justifyContent="center">
               <DragDropContext
                 onDragEnd={(result) => onDragEndHandler(result, columns, setColumns)}
               >
                 {Object.entries(columns)?.map(([columnId, column], index) => {
                   return (
-                    <div
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                      }}
-                      key={columnId}
-                    >
+                    <div key={columnId} className={classes.dragDropContext}>
                       {column.name === 'Open' && (
                         <h2
                           className={
@@ -377,56 +357,49 @@ const PlanTask = () => {
                       {column.name === 'Close' && <h2>{column.name}</h2>}
                       <div style={{ margin: 8 }}>
                         <Droppable droppableId={columnId} key={columnId}>
-                          {(provided, snapshot) => {
-                            return (
-                              <div
-                                {...provided.droppableProps}
-                                ref={provided.innerRef}
-                                style={{
-                                  background: snapshot.isDraggingOver
-                                    ? 'lightblue'
-                                    : 'lightgrey',
-                                  padding: 4,
-                                  width: 250,
-                                  minHeight: 500,
-                                }}
-                              >
-                                {column.items.map((item, index) => (
-                                  <Draggable
-                                    key={item.Task_name}
-                                    draggableId={item.Task_name}
-                                    index={index}
-                                  >
-                                    {(provided, snapshot) => (
-                                      <div
-                                        ref={provided.innerRef}
-                                        {...provided.draggableProps}
-                                        {...provided.dragHandleProps}
-                                        style={{
-                                          userSelect: 'none',
-                                          padding: 16,
-                                          margin: '0 0 8px 0',
-                                          minHeight: '50px',
-                                          backgroundColor: snapshot.isDragging
-                                            ? '#263B4A'
-                                            : '#456C86',
-                                          color: 'white',
-                                          ...provided.draggableProps.style,
-                                        }}
-                                      >
-                                        {item.Task_id}
-                                        <br />
-                                        {item.Task_name}
-                                        <br />
-                                        {item.Task_description}
-                                      </div>
-                                    )}
-                                  </Draggable>
-                                ))}
-                                {provided.placeholder}
-                              </div>
-                            );
-                          }}
+                          {(provided, snapshot) => (
+                            <div
+                              {...provided.droppableProps}
+                              ref={provided.innerRef}
+                              className={classes.droppable}
+                              style={{
+                                background: snapshot.isDraggingOver
+                                  ? 'lightblue'
+                                  : 'lightgrey',
+                              }}
+                            >
+                              {column.items.map((item, index) => (
+                                <Draggable
+                                  key={item.Task_name}
+                                  draggableId={item.Task_name}
+                                  index={index}
+                                >
+                                  {(provided, snapshot) => (
+                                    <div
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                      {...provided.dragHandleProps}
+                                      className={classes.draggable}
+                                      style={{
+                                        backgroundColor: snapshot.isDragging
+                                          ? '#263B4A'
+                                          : '#456C86',
+                                        color: 'white',
+                                        ...provided.draggableProps.style,
+                                      }}
+                                    >
+                                      {item.Task_id}
+                                      <br />
+                                      {item.Task_name}
+                                      <br />
+                                      {item.Task_description}
+                                    </div>
+                                  )}
+                                </Draggable>
+                              ))}
+                              {provided.placeholder}
+                            </div>
+                          )}
                         </Droppable>
                       </div>
                     </div>

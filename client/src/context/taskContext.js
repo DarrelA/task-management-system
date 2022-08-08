@@ -344,7 +344,7 @@ const TaskProvider = ({ children }) => {
   }, []);
 
   const createPlan = async (
-    { Plan_MVP_name, Plan_startDate, Plan_endDate },
+    { Plan_MVP_name, Plan_startDate, Plan_endDate, Plan_color },
     App_Acronym,
     accessToken
   ) => {
@@ -361,6 +361,7 @@ const TaskProvider = ({ children }) => {
           Plan_MVP_name,
           Plan_startDate,
           Plan_endDate,
+          Plan_color,
         }),
       });
 
@@ -378,7 +379,7 @@ const TaskProvider = ({ children }) => {
   };
 
   const updatePlan = async (
-    { App_Acronym, Plan_startDate, Plan_endDate },
+    { App_Acronym, Plan_startDate, Plan_endDate, Plan_color },
     accessToken
   ) => {
     dispatch({ type: 'IS_LOADING' });
@@ -391,7 +392,7 @@ const TaskProvider = ({ children }) => {
           'Content-Type': 'application/json',
           authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ App_Acronym, Plan_startDate, Plan_endDate }),
+        body: JSON.stringify({ App_Acronym, Plan_startDate, Plan_endDate, Plan_color }),
       });
 
       const data = await response.json();
