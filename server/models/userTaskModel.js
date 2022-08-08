@@ -135,6 +135,10 @@ const Plan = sequelize.define('plan', {
     type: Sequelize.DATEONLY,
     allowNull: true,
   },
+  Plan_color: {
+    type: Sequelize.STRING(45),
+    allowNull: true,
+  },
 });
 
 const Task = sequelize.define('task', {

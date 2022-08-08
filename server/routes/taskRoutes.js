@@ -15,6 +15,7 @@ const {
   updateTask,
   updateTaskState,
   updateKanbanIndex,
+  getPlansData,
   createPlan,
   updatePlan,
 } = require('../controllers/taskController');
@@ -35,6 +36,8 @@ router
 
 router.patch('/taskstate', authMiddleware, updateTaskState);
 router.patch('/kanbanindex', authMiddleware, updateKanbanIndex);
+
+router.get('/:App_Acronym/plans', authMiddleware, getPlansData);
 
 router.route('/plan').post(authMiddleware, createPlan).patch(authMiddleware, updatePlan);
 

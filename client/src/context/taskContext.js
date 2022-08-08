@@ -29,6 +29,10 @@ const userReducer = (state, action) => {
       return { ...state, isLoading: false, appPermits: action.payload.appPermits };
     }
 
+    case 'GET_ALL_PlAN_SUCCESS': {
+      return { ...state, isLoading: false, plans: action.payload.plans };
+    }
+
     case 'RESPONSE_SUCCESS': {
       return { ...state, isLoading: false, taskMessage: action.payload.message };
     }
@@ -302,7 +306,7 @@ const TaskProvider = ({ children }) => {
           'Content-Type': 'application/json',
           authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ tasksList, Task_name, App_Acronym }),
+        body: JSON.stringify({ tasksList, Task_name }),
       });
 
       const data = await response.json();
@@ -317,6 +321,27 @@ const TaskProvider = ({ children }) => {
       clearAlert();
     }
   };
+
+  const getPlansData = useCallback(async (App_Acronym, accessToken) => {
+    try {
+      const response = await fetch(`/api/tasks/${App_Acronym}/plans`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+      dispatch({ type: 'GET_ALL_PlAN_SUCCESS', payload: data });
+      clearAlert();
+      return data.plans; // To PlanTask page
+    } catch (e) {
+      dispatch({ type: 'RESPONSE_FAIL', payload: e });
+      clearAlert();
+    }
+  }, []);
 
   const createPlan = async (
     { Plan_MVP_name, Plan_startDate, Plan_endDate },
@@ -395,6 +420,7 @@ const TaskProvider = ({ children }) => {
         updateTask,
         updateTaskState,
         updateKanbanIndex,
+        getPlansData,
         createPlan,
         updatePlan,
       }}

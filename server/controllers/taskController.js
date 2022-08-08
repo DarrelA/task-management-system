@@ -307,7 +307,7 @@ const updateTaskState = async (req, res, next) => {
 };
 
 const updateKanbanIndex = async (req, res, next) => {
-  const { tasksList, Task_name, App_Acronym } = req.body;
+  const { tasksList, Task_name } = req.body;
 
   const openItems = tasksList.open?.items;
   const todolistItems = tasksList.todolist?.items;
@@ -382,6 +382,20 @@ const updateKanbanIndex = async (req, res, next) => {
   }
 };
 
+const getPlansData = async (req, res, next) => {
+  try {
+    const plans = await Plan.findAll({
+      where: { Plan_app_Acronym: req.params.App_Acronym },
+    });
+
+    if (!plans) return next(new HttpError('Plan is unavailable.', 400));
+    return res.send({ plans });
+  } catch (e) {
+    console.error(e);
+    return next(new HttpError('Something went wrong!', 500));
+  }
+};
+
 const createPlan = async (req, res, next) => {
   const { App_Acronym, Plan_MVP_name, Plan_startDate, Plan_endDate } = req.body;
 
@@ -438,6 +452,7 @@ module.exports = {
   updateTask,
   updateTaskState,
   updateKanbanIndex,
+  getPlansData,
   createPlan,
   updatePlan,
 };

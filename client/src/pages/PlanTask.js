@@ -63,6 +63,8 @@ const PlanTask = () => {
     updateTask,
     updateTaskState,
     updateKanbanIndex,
+    getPlansData,
+    plans,
     createPlan,
     updatePlan,
   } = taskContext;
@@ -116,6 +118,10 @@ const PlanTask = () => {
     accessToken && fetchTasksOnRefresh();
   }, [App_Acronym, accessToken, getTasksData]);
 
+  useEffect(() => {
+    accessToken && getPlansData(App_Acronym, accessToken);
+  }, [App_Acronym, accessToken, getPlansData]);
+
   const taskModalHandler = async (inputData) => {
     if (!inputData) return;
     if (!editTaskMode.edit) {
@@ -134,7 +140,8 @@ const PlanTask = () => {
   const planModalHandler = async (inputData) => {
     if (!inputData) return;
     if (!editTaskMode.edit) {
-      const success = await createPlan(inputData, App_Acronym, accessToken);
+      await createPlan(inputData, App_Acronym, accessToken);
+      // const success = await createPlan(inputData, App_Acronym, accessToken);
       // if (success)
       //   setColumns({
       //     ...columns,
@@ -297,15 +304,17 @@ const PlanTask = () => {
         >
           <CardContent className={classes.cardContent}>
             {/* @TODO: Collaspe all plans */}
-            <Grid
-              container
-              spacing={1}
-              justifyContent="center"
-              className={classes.planContent}
-            >
-              <Typography>Plan Name</Typography>
-              <Typography>Plan Description</Typography>
-            </Grid>
+            {plans?.map((plan) => (
+              <Grid
+                container
+                spacing={1}
+                justifyContent="center"
+                className={classes.planContent}
+                key={plan.Plan_MVP_name}
+              >
+                <Typography>{plan.Plan_MVP_name}</Typography>
+              </Grid>
+            ))}
 
             <Grid container spacing={1} justifyContent="center">
               <DragDropContext
