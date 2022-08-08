@@ -13,7 +13,14 @@ import {
 } from '@material-ui/core';
 import { useEffect, useState } from 'react';
 
-const ApplicationModal = ({ open, onClose, appModalHandler, editAppMode, groups }) => {
+const ApplicationModal = ({
+  open,
+  onClose,
+  appModalHandler,
+  editAppMode,
+  groups,
+  isProjectLead,
+}) => {
   const useStyles = makeStyles((theme) => ({
     paper: {
       position: 'absolute',
@@ -102,6 +109,7 @@ const ApplicationModal = ({ open, onClose, appModalHandler, editAppMode, groups 
           required
           fullWidth
           style={{ height: 200, overflowY: 'scroll' }}
+          disabled={!isProjectLead}
         />
 
         <Grid container spacing={1} justifyContent="space-around" style={{ padding: 25 }}>
@@ -112,6 +120,7 @@ const ApplicationModal = ({ open, onClose, appModalHandler, editAppMode, groups 
             InputLabelProps={{ shrink: true }}
             onInput={inputAppHandler}
             defaultValue={inputAppData.App_startDate}
+            disabled={!isProjectLead}
           />
 
           <TextField
@@ -121,6 +130,7 @@ const ApplicationModal = ({ open, onClose, appModalHandler, editAppMode, groups 
             InputLabelProps={{ shrink: true }}
             onInput={inputAppHandler}
             defaultValue={inputAppData.App_endDate}
+            disabled={!isProjectLead}
           />
         </Grid>
 
@@ -142,6 +152,7 @@ const ApplicationModal = ({ open, onClose, appModalHandler, editAppMode, groups 
               name="App_permit_Create"
               value={inputAppData.App_permit_Create}
               onChange={inputAppHandler}
+              disabled={!isProjectLead}
             >
               <MenuItem key="empty" value="">
                 None
@@ -162,6 +173,7 @@ const ApplicationModal = ({ open, onClose, appModalHandler, editAppMode, groups 
               name="App_permit_Open"
               value={inputAppData.App_permit_Open}
               onChange={inputAppHandler}
+              disabled={!isProjectLead}
             >
               <MenuItem key="empty" value="">
                 None
@@ -182,6 +194,7 @@ const ApplicationModal = ({ open, onClose, appModalHandler, editAppMode, groups 
               name="App_permit_toDoList"
               value={inputAppData.App_permit_toDoList}
               onChange={inputAppHandler}
+              disabled={!isProjectLead}
             >
               <MenuItem key="empty" value="">
                 None
@@ -202,6 +215,7 @@ const ApplicationModal = ({ open, onClose, appModalHandler, editAppMode, groups 
               name="App_permit_Doing"
               value={inputAppData.App_permit_Doing}
               onChange={inputAppHandler}
+              disabled={!isProjectLead}
             >
               <MenuItem key="empty" value="">
                 None
@@ -222,6 +236,7 @@ const ApplicationModal = ({ open, onClose, appModalHandler, editAppMode, groups 
               name="App_permit_Done"
               value={inputAppData.App_permit_Done}
               onChange={inputAppHandler}
+              disabled={!isProjectLead}
             >
               <MenuItem key="empty" value="">
                 None
@@ -242,7 +257,7 @@ const ApplicationModal = ({ open, onClose, appModalHandler, editAppMode, groups 
             color="primary"
             fullWidth
             style={{ margin: '16px 0' }}
-            disabled={disableCreate}
+            disabled={disableCreate || !isProjectLead}
           >
             {editAppMode?.App_Acronym ? 'Update' : 'Create'}
           </Button>

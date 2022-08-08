@@ -102,6 +102,7 @@ const Applications = () => {
           appModalHandler={appModalHandler}
           editAppMode={editAppMode}
           groups={groups}
+          isProjectLead={isProjectLead}
         />
       )}
 
@@ -155,7 +156,6 @@ const Applications = () => {
                     setEditAppMode({ ...application, edit: true });
                     openTaskModalHandler();
                   }}
-                  disabled={!isProjectLead}
                 >
                   <span className="material-icons">edit</span>
                 </Button>

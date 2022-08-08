@@ -203,7 +203,7 @@ const createData = async () => {
   const defaultAdmin = await User.findOne({ where: { isAdmin: 1 } });
 
   if (!defaultAdmin) {
-    User.bulkCreate(
+    await User.bulkCreate(
       [
         {
           username: process.env.DEFAULT_ADMIN_NAME,
@@ -218,6 +218,19 @@ const createData = async () => {
 
     Group.bulkCreate([...mockGroups]);
   }
+
+  const pl = await User.findByPk('pl');
+  await pl.addGroup('Project Lead');
+
+  const pm = await User.findByPk('pm');
+  await pm.addGroup('Project Manager');
+
+  const tm = await User.findByPk('tm');
+  await tm.addGroup('Team Member');
+
+  const plpm = await User.findByPk('plpm');
+  await plpm.addGroup('Project Lead');
+  await plpm.addGroup('Project Manager');
 };
 
 module.exports = { User, Group, UserGroup, Application, Plan, Task, Note };

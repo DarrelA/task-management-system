@@ -246,9 +246,9 @@ const createTask = async (req, res, next) => {
     const application = await Application.findByPk(App_Acronym);
     if (!application) return next(new HttpError('Application not found.', 400));
 
-    const hasTask = await Task.findOne({ where: { Task_app_Acronym: App_Acronym } });
-    let runningNum = application.App_Rnumber;
-    if (!!hasTask) runningNum += 1;
+    // App_Rnumber matches Task_id running number
+    // App_Rnumber starts at 0, add 1 task = running number at 1
+    const runningNum = application.App_Rnumber + 1;
     application.App_Rnumber = runningNum;
     application.save();
 
