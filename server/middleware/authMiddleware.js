@@ -51,8 +51,16 @@ const appAccessRightsMiddleware = async (req, res, next) => {
       if ((req.admin && req.admin.isAdmin) || haveAccessRights) return next();
     }
 
+    if (req.path === '/task' && req.method === 'PATCH') {
+      const haveAccessRights = await checkGroup(
+        req.user.username,
+        application.App_permit_Create
+      );
+      if ((req.admin && req.admin.isAdmin) || haveAccessRights) return next();
+    }
+
     if (
-      req.path === '/task' &&
+      req.path === '/taskstate' &&
       req.method === 'PATCH' &&
       req.body.Task_state_source === 'open'
     ) {
@@ -64,7 +72,7 @@ const appAccessRightsMiddleware = async (req, res, next) => {
     }
 
     if (
-      req.path === '/task' &&
+      req.path === '/taskstate' &&
       req.method === 'PATCH' &&
       req.body.Task_state_source === 'todolist'
     ) {
@@ -76,7 +84,7 @@ const appAccessRightsMiddleware = async (req, res, next) => {
     }
 
     if (
-      req.path === '/task' &&
+      req.path === '/taskstate' &&
       req.method === 'PATCH' &&
       req.body.Task_state_source === 'doing'
     ) {
@@ -88,7 +96,7 @@ const appAccessRightsMiddleware = async (req, res, next) => {
     }
 
     if (
-      req.path === '/task' &&
+      req.path === '/taskstate' &&
       req.method === 'PATCH' &&
       req.body.Task_state_source === 'done'
     ) {

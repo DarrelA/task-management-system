@@ -266,6 +266,15 @@ const createTask = async (req, res, next) => {
       Task_plan: Task_plan || null,
     });
     await newTask.save();
+
+    const newNote = await Note.create({
+      username: req.user.username,
+      state: 'open',
+      description: 'Task has been created.',
+      taskTaskName: Task_name,
+    });
+    await newNote.save();
+
     res.send({ message: 'success' });
   } catch (e) {
     console.error(e);
@@ -273,7 +282,42 @@ const createTask = async (req, res, next) => {
   }
 };
 
-const updateTask = async (req, res, next) => {};
+const updateTask = async (req, res, next) => {
+  const { App_Acronym, Task_name, Task_description, Task_state, Task_plan, Task_note } =
+    req.body;
+
+  if (!Task_description) return next(new HttpError('Task description is required.', 400));
+  if (!Task_state) return next(new HttpError('Task state is required.', 400));
+
+  try {
+    const application = await Application.findByPk(App_Acronym);
+    if (!application) return next(new HttpError('Application not found.', 400));
+
+    const task = await Task.findByPk(Task_name);
+    if (!task) return next(new HttpError('Task not found.', 400));
+
+    if (Task_state === 'open' || Task_state === 'todolist' || Task_state === 'doing')
+      task.Task_description = Task_description;
+
+    task.Task_owner = req.user.username;
+    Task_plan = Task_plan || null;
+
+    await newTask.save();
+
+    const newNote = await Note.create({
+      username: req.user.username,
+      state: Task_state,
+      description: Task_note,
+      taskTaskName: Task_name,
+    });
+    await newNote.save();
+
+    res.send({ message: 'success' });
+  } catch (e) {
+    console.error(e);
+    return next(new HttpError('Something went wrong!', 500));
+  }
+};
 
 const updateTaskState = async (req, res, next) => {
   const { Task_name, Task_state_source: from, Task_state_destination: to } = req.body;
@@ -299,6 +343,15 @@ const updateTaskState = async (req, res, next) => {
   try {
     task.Task_state = to;
     await task.save();
+
+    const newNote = await Note.create({
+      username: req.user.username,
+      state: to,
+      description: `Task state has been changed to ${to}.`,
+      taskTaskName: Task_name,
+    });
+    await newNote.save();
+
     return res.send({ success: true });
   } catch (e) {
     console.error(e);
@@ -459,5 +512,3 @@ module.exports = {
   createPlan,
   updatePlan,
 };
-
-// @TODO: updateTask

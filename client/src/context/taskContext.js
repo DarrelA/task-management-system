@@ -235,18 +235,28 @@ const TaskProvider = ({ children }) => {
     }
   };
 
-  const updateTask = async ({ App_Acronym }, accessToken) => {
+  const updateTask = async (
+    { App_Acronym, Task_name, Task_description, Task_state, Task_plan, Task_note },
+    accessToken
+  ) => {
     dispatch({ type: 'IS_LOADING' });
 
     try {
-      const response = await fetch(`/api/tasks/application`, {
+      const response = await fetch(`/api/tasks/task`, {
         method: 'PATCH',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({}),
+        body: JSON.stringify({
+          App_Acronym,
+          Task_name,
+          Task_description,
+          Task_state,
+          Task_plan,
+          Task_note,
+        }),
       });
 
       const data = await response.json();
