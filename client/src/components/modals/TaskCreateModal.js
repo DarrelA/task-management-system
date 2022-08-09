@@ -4,7 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Button, Grid, TextField } from '@material-ui/core';
 import { useEffect, useState } from 'react';
 
-const TaskModal = ({ open, onClose, taskModalHandler, editAppMode }) => {
+const TaskCreateModal = ({ open, onClose, taskCreateModalHandler }) => {
   const useStyles = makeStyles((theme) => ({
     paper: {
       position: 'absolute',
@@ -15,22 +15,13 @@ const TaskModal = ({ open, onClose, taskModalHandler, editAppMode }) => {
       boxShadow: theme.shadows[5],
       padding: theme.spacing(2, 4, 3),
     },
-
-    formControl: {
-      margin: theme.spacing(1),
-      minWidth: 150,
-    },
-
-    selectEmpty: {
-      marginTop: theme.spacing(2),
-    },
   }));
 
   const classes = useStyles();
   const [modalStyle] = useState({ top: '15%', margin: 'auto' });
   const [inputAppData, setInputAppData] = useState({
-    Task_name: editAppMode?.Task_name || '',
-    Task_description: editAppMode?.Task_description || '',
+    Task_name: '',
+    Task_description: '',
   });
   const [disableCreate, setDisableCreate] = useState(false);
 
@@ -41,7 +32,7 @@ const TaskModal = ({ open, onClose, taskModalHandler, editAppMode }) => {
       [e.target?.name]: e.target.value,
     });
 
-  const createTaskHandler = () => taskModalHandler({ ...inputAppData });
+  const createTaskHandler = () => taskCreateModalHandler({ ...inputAppData });
 
   useEffect(() => {
     !inputAppData.Task_name ? setDisableCreate(true) : setDisableCreate(false);
@@ -59,7 +50,6 @@ const TaskModal = ({ open, onClose, taskModalHandler, editAppMode }) => {
           value={inputAppData.Task_name}
           fullWidth
           autoFocus
-          disabled={!!editAppMode?.Task_name}
           required
         />
 
@@ -83,7 +73,7 @@ const TaskModal = ({ open, onClose, taskModalHandler, editAppMode }) => {
             style={{ margin: '16px 0' }}
             disabled={disableCreate}
           >
-            {editAppMode?.Task_name ? 'Update' : 'Create'}
+            Create
           </Button>
         </Grid>
       </form>
@@ -101,4 +91,4 @@ const TaskModal = ({ open, onClose, taskModalHandler, editAppMode }) => {
   );
 };
 
-export default TaskModal;
+export default TaskCreateModal;

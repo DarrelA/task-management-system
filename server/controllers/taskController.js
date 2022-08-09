@@ -193,7 +193,6 @@ const getTasksData = async (req, res, next) => {
 
     let appTasks = await Task.findAll({
       where: { Task_app_Acronym: req.params.App_Acronym },
-      attributes: { exclude: ['createdAt'] },
       order: [['Kanban_index', 'ASC']],
     });
 

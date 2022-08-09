@@ -6,36 +6,29 @@ import { toast } from 'react-toastify';
 import {
   Button,
   Card,
+  CardActions,
   CardContent,
   Grid,
   makeStyles,
-  Typography,
 } from '@material-ui/core';
 
-import { LoadingSpinner, PlanModal, TaskModal } from '../components';
+import {
+  CreatePlanTask,
+  LoadingSpinner,
+  PlanCard,
+  PlanModal,
+  TaskCardColumn,
+  TaskCreateModal,
+  TaskUpdateModal,
+} from '../components';
 import useTaskContext from '../context/taskContext';
 import useUserContext from '../context/userContext';
 
 const useStyles = makeStyles({
-  columnHeaderRed: { color: '#f44336' },
-  columnHeaderGreen: { color: '#8bc34a' },
-
-  root: { maxWidth: 1400, padding: 10, margin: 10 },
-  buttons: { maxWidth: 300 },
-
   tasksCardContent: { display: 'flex', flexDirection: 'column' },
   dragDropContext: { display: 'flex', flexDirection: 'column', alignItems: 'center' },
   droppable: { padding: 4, width: 250, minHeight: 500 },
   draggable: { userSelect: 'none', padding: 16, margin: '0 0 8px 0', minHeight: '50px' },
-
-  planContent: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignSelf: 'center',
-    justifyContent: 'space-around',
-    minHeight: 150,
-    maxWidth: 800,
-  },
 
   description: { overflowY: 'scroll', overflowX: 'hidden', height: 210, maxHeight: 210 },
 });
@@ -63,8 +56,9 @@ const PlanTask = () => {
   const { App_Acronym } = useParams();
   const navigate = useNavigate();
 
-  const [openTaskModal, setOpenTaskModal] = useState(false);
-  const [editTaskMode, setEditTaskMode] = useState({ edit: false });
+  const [openTaskCreateModal, setOpenTaskCreateModal] = useState(false);
+  const [openTaskUpdateModal, setOpenTaskUpdateModal] = useState(false);
+  const [taskItemData, setTaskItemData] = useState();
 
   const [openPlanModal, setOpenPlanModal] = useState(false);
   const [editPlanMode, setEditPlanMode] = useState({ edit: false });
@@ -73,11 +67,11 @@ const PlanTask = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [columns, setColumns] = useState();
 
-  const openTaskModalHandler = () => setOpenTaskModal(true);
-  const closeTaskModalHandler = () => {
-    setEditTaskMode({ edit: false });
-    setOpenTaskModal(false);
-  };
+  const openTaskCreateModalHandler = () => setOpenTaskCreateModal(true);
+  const closeTaskCreateModalHandler = () => setOpenTaskCreateModal(false);
+
+  const openTaskUpdateModalHandler = () => setOpenTaskUpdateModal(true);
+  const closeTaskUpdateModalHandler = () => setOpenTaskUpdateModal(false);
 
   const openPlanModalHandler = () => setOpenPlanModal(true);
   const closePlanModalHandler = () => {
@@ -110,24 +104,26 @@ const PlanTask = () => {
     accessToken && getPlansData(App_Acronym, accessToken);
   }, [App_Acronym, accessToken, getPlansData]);
 
-  const taskModalHandler = async (inputData) => {
+  const taskCreateModalHandler = async (inputData) => {
     if (!inputData) return;
-    if (!editTaskMode.edit) {
-      const success = await createTask(inputData, App_Acronym, accessToken);
-      if (success)
-        setColumns({
-          ...columns,
-          open: { ...columns.open, items: [...columns.open.items, inputData] },
-        });
-    } else {
-      updateTask(inputData, App_Acronym, accessToken);
-      closeTaskModalHandler();
-    }
+
+    const success = await createTask(inputData, App_Acronym, accessToken);
+    if (success)
+      setColumns({
+        ...columns,
+        open: { ...columns.open, items: [...columns.open.items, inputData] },
+      });
+  };
+
+  const taskUpdateModalHandler = async (inputData) => {
+    if (!inputData) return;
+    updateTask(inputData, App_Acronym, accessToken);
+    closeTaskCreateModalHandler();
   };
 
   const planModalHandler = async (inputData) => {
     if (!inputData) return;
-    if (!editTaskMode.edit) {
+    if (!editPlanMode.edit) {
       await createPlan(inputData, App_Acronym, accessToken);
       // const success = await createPlan(inputData, App_Acronym, accessToken);
       // if (success)
@@ -137,7 +133,7 @@ const PlanTask = () => {
       //   });
     } else {
       updatePlan(inputData, App_Acronym, accessToken);
-      closeTaskModalHandler();
+      closeTaskCreateModalHandler();
     }
   };
 
@@ -234,12 +230,20 @@ const PlanTask = () => {
 
   return (
     <>
-      {openTaskModal && (
-        <TaskModal
-          open={openTaskModal}
-          onClose={closeTaskModalHandler}
-          taskModalHandler={taskModalHandler}
-          editTaskMode={editTaskMode}
+      {openTaskCreateModal && (
+        <TaskCreateModal
+          open={openTaskCreateModal}
+          onClose={closeTaskCreateModalHandler}
+          taskCreateModalHandler={taskCreateModalHandler}
+        />
+      )}
+
+      {openTaskUpdateModal && (
+        <TaskUpdateModal
+          open={openTaskUpdateModal}
+          onClose={closeTaskUpdateModalHandler}
+          taskCreateModalHandler={taskUpdateModalHandler}
+          taskItemData={taskItemData}
         />
       )}
 
@@ -252,53 +256,13 @@ const PlanTask = () => {
         />
       )}
 
-      <Grid container spacing={1} justifyContent="center">
-        <Grid
-          container
-          spacing={1}
-          justifyContent="space-between"
-          className={classes.buttons}
-        >
-          <Button
-            type="button"
-            variant="contained"
-            color="primary"
-            style={{ margin: '16px 0' }}
-            onClick={openPlanModalHandler}
-          >
-            Create Plan
-          </Button>
+      <CreatePlanTask
+        openPlanModalHandler={openPlanModalHandler}
+        openTaskCreateModalHandler={openTaskCreateModalHandler}
+        appPermits={appPermits}
+      />
 
-          <Button
-            type="button"
-            variant="contained"
-            color="primary"
-            style={{ margin: '16px 0' }}
-            onClick={openTaskModalHandler}
-            disabled={!appPermits.App_permit_Create}
-          >
-            Create Task
-          </Button>
-        </Grid>
-      </Grid>
-
-      <Grid container spacing={1} justifyContent="center">
-        <Card className={classes.root} variant="outlined" key={App_Acronym}>
-          <CardContent className={classes.cardContent1}>
-            {plans?.map((plan) => (
-              <Grid
-                container
-                spacing={1}
-                justifyContent="center"
-                className={classes.planContent}
-                key={plan.Plan_MVP_name}
-              >
-                <Typography>{plan.Plan_MVP_name}</Typography>
-              </Grid>
-            ))}
-          </CardContent>
-        </Card>
-      </Grid>
+      <PlanCard plans={plans} App_Acronym={App_Acronym} />
 
       <Grid container spacing={1} justifyContent="center">
         <Card className={classes.root} variant="outlined" key={App_Acronym}>
@@ -310,51 +274,7 @@ const PlanTask = () => {
                 {Object.entries(columns)?.map(([columnId, column], index) => {
                   return (
                     <div key={columnId} className={classes.dragDropContext}>
-                      {column.name === 'Open' && (
-                        <h2
-                          className={
-                            appPermits.App_permit_Open
-                              ? classes.columnHeaderGreen
-                              : classes.columnHeaderRed
-                          }
-                        >
-                          {column.name}
-                        </h2>
-                      )}
-                      {column.name === 'To Do List' && (
-                        <h2
-                          className={
-                            appPermits.App_permit_toDoList
-                              ? classes.columnHeaderGreen
-                              : classes.columnHeaderRed
-                          }
-                        >
-                          {column.name}
-                        </h2>
-                      )}
-                      {column.name === 'Doing' && (
-                        <h2
-                          className={
-                            appPermits.App_permit_Doing
-                              ? classes.columnHeaderGreen
-                              : classes.columnHeaderRed
-                          }
-                        >
-                          {column.name}
-                        </h2>
-                      )}
-                      {column.name === 'Done' && (
-                        <h2
-                          className={
-                            appPermits.App_permit_Done
-                              ? classes.columnHeaderGreen
-                              : classes.columnHeaderRed
-                          }
-                        >
-                          {column.name}
-                        </h2>
-                      )}
-                      {column.name === 'Close' && <h2>{column.name}</h2>}
+                      <TaskCardColumn column={column} appPermits={appPermits} />
                       <div style={{ margin: 8 }}>
                         <Droppable droppableId={columnId} key={columnId}>
                           {(provided, snapshot) => (
@@ -388,11 +308,21 @@ const PlanTask = () => {
                                         ...provided.draggableProps.style,
                                       }}
                                     >
-                                      {item.Task_id}
-                                      <br />
                                       {item.Task_name}
                                       <br />
                                       {item.Task_description}
+
+                                      <CardActions className={classes.cardActions}>
+                                        <Button
+                                          size="small"
+                                          onClick={() => {
+                                            setTaskItemData(item);
+                                            openTaskUpdateModalHandler();
+                                          }}
+                                        >
+                                          <span className="material-icons">edit</span>
+                                        </Button>
+                                      </CardActions>
                                     </div>
                                   )}
                                 </Draggable>
