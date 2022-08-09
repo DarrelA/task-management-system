@@ -1,10 +1,18 @@
 import Modal from '@material-ui/core/Modal';
 import { makeStyles } from '@material-ui/core/styles';
 
-import { Button, Grid, TextField } from '@material-ui/core';
+import {
+  Button,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+} from '@material-ui/core';
 import { useEffect, useState } from 'react';
 
-const TaskCreateModal = ({ open, onClose, taskCreateModalHandler }) => {
+const TaskCreateModal = ({ open, onClose, taskCreateModalHandler, plans }) => {
   const useStyles = makeStyles((theme) => ({
     paper: {
       position: 'absolute',
@@ -15,6 +23,10 @@ const TaskCreateModal = ({ open, onClose, taskCreateModalHandler }) => {
       boxShadow: theme.shadows[5],
       padding: theme.spacing(2, 4, 3),
     },
+
+    formControl: {
+      minWidth: 166,
+    },
   }));
 
   const classes = useStyles();
@@ -22,6 +34,7 @@ const TaskCreateModal = ({ open, onClose, taskCreateModalHandler }) => {
   const [inputAppData, setInputAppData] = useState({
     Task_name: '',
     Task_description: '',
+    Task_plan: '',
   });
   const [disableCreate, setDisableCreate] = useState(false);
 
@@ -41,17 +54,42 @@ const TaskCreateModal = ({ open, onClose, taskCreateModalHandler }) => {
   const taskForm = (
     <div style={modalStyle} className={classes.paper}>
       <form onSubmit={createTaskHandler}>
-        <TextField
-          label="Task Name"
-          type="text"
-          id="Task_name"
-          placeholder="task 1"
-          onInput={inputAppHandler}
-          value={inputAppData.Task_name}
-          fullWidth
-          autoFocus
-          required
-        />
+        <Grid spacing={1} container justifyContent="center">
+          <Grid container item xs={6}>
+            <TextField
+              label="Task Name"
+              type="text"
+              id="Task_name"
+              placeholder="task 1"
+              onInput={inputAppHandler}
+              value={inputAppData.Task_name}
+              autoFocus
+              required
+            />
+          </Grid>
+
+          <Grid container item xs={6}>
+            <FormControl className={classes.formControl}>
+              <InputLabel id="Task_plan">Plan</InputLabel>
+              <Select
+                labelId="Task_plan"
+                id="Task_plan"
+                name="Task_plan"
+                onChange={inputAppHandler}
+                value={inputAppData.Task_plan}
+              >
+                <MenuItem key="empty" value="">
+                  None
+                </MenuItem>
+                {plans.map((plan) => (
+                  <MenuItem key={plan.Plan_MVP_name} value={plan.Plan_MVP_name}>
+                    {plan.Plan_MVP_name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+        </Grid>
 
         <TextField
           label="Description"

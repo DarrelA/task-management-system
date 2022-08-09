@@ -194,6 +194,7 @@ const getTasksData = async (req, res, next) => {
     let appTasks = await Task.findAll({
       where: { Task_app_Acronym: req.params.App_Acronym },
       order: [['Kanban_index', 'ASC']],
+      include: { model: Plan, attributes: ['Plan_color'] },
     });
 
     // Get only dataValues from Sequelize ORM
@@ -299,9 +300,9 @@ const updateTask = async (req, res, next) => {
       task.Task_description = Task_description;
 
     task.Task_owner = req.user.username;
-    Task_plan = Task_plan || null;
+    task.Task_plan = Task_plan || null;
 
-    await newTask.save();
+    await task.save();
 
     const newNote = await Note.create({
       username: req.user.username,
@@ -477,7 +478,8 @@ const createPlan = async (req, res, next) => {
 };
 
 const updatePlan = async (req, res, next) => {
-  const { App_Acronym, Plan_startDate, Plan_endDate, Plan_color } = req.body;
+  const { App_Acronym, Plan_MVP_name, Plan_startDate, Plan_endDate, Plan_color } =
+    req.body;
 
   try {
     const application = await Application.findByPk(App_Acronym);
@@ -487,8 +489,8 @@ const updatePlan = async (req, res, next) => {
     if (!plan) return next(new HttpError('Plan not found.', 400));
 
     if (Plan_startDate) plan.Plan_startDate = Plan_startDate;
-    if (Plan.Plan_endDate) plan.Plan_endDate = Plan_endDate;
-    if (Plan.Plan_color) plan.Plan_color = Plan_color;
+    if (Plan_endDate) plan.Plan_endDate = Plan_endDate;
+    if (Plan_color) plan.Plan_color = Plan_color;
 
     await plan.save();
     res.send({ message: 'success' });

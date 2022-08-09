@@ -59,7 +59,6 @@ const PlanTask = () => {
   const [openTaskCreateModal, setOpenTaskCreateModal] = useState(false);
   const [openTaskUpdateModal, setOpenTaskUpdateModal] = useState(false);
   const [taskItemData, setTaskItemData] = useState();
-
   const [openPlanModal, setOpenPlanModal] = useState(false);
   const [editPlanMode, setEditPlanMode] = useState({ edit: false });
 
@@ -77,6 +76,28 @@ const PlanTask = () => {
   const closePlanModalHandler = () => {
     setEditPlanMode({ edit: false });
     setOpenPlanModal(false);
+  };
+
+  const taskUpdateModalHandler = async (inputData) => {
+    if (!inputData) return;
+    updateTask(inputData, App_Acronym, accessToken);
+    closeTaskCreateModalHandler();
+  };
+
+  const planModalHandler = async (inputData) => {
+    if (!inputData) return;
+    if (!editPlanMode.edit) {
+      await createPlan(inputData, App_Acronym, accessToken);
+      // const success = await createPlan(inputData, App_Acronym, accessToken);
+      // if (success)
+      //   setColumns({
+      //     ...columns,
+      //     open: { ...columns.open, items: [...columns.open.items, inputData] },
+      //   });
+    } else {
+      updatePlan(inputData, App_Acronym, accessToken);
+      closePlanModalHandler();
+    }
   };
 
   useEffect(() => {
@@ -113,28 +134,6 @@ const PlanTask = () => {
         ...columns,
         open: { ...columns.open, items: [...columns.open.items, inputData] },
       });
-  };
-
-  const taskUpdateModalHandler = async (inputData) => {
-    if (!inputData) return;
-    updateTask(inputData, App_Acronym, accessToken);
-    closeTaskCreateModalHandler();
-  };
-
-  const planModalHandler = async (inputData) => {
-    if (!inputData) return;
-    if (!editPlanMode.edit) {
-      await createPlan(inputData, App_Acronym, accessToken);
-      // const success = await createPlan(inputData, App_Acronym, accessToken);
-      // if (success)
-      //   setColumns({
-      //     ...columns,
-      //     open: { ...columns.open, items: [...columns.open.items, inputData] },
-      //   });
-    } else {
-      updatePlan(inputData, App_Acronym, accessToken);
-      closeTaskCreateModalHandler();
-    }
   };
 
   const onDragEndHandler = (result, columns, setColumns) => {
@@ -235,6 +234,7 @@ const PlanTask = () => {
           open={openTaskCreateModal}
           onClose={closeTaskCreateModalHandler}
           taskCreateModalHandler={taskCreateModalHandler}
+          plans={plans}
         />
       )}
 
@@ -242,8 +242,9 @@ const PlanTask = () => {
         <TaskUpdateModal
           open={openTaskUpdateModal}
           onClose={closeTaskUpdateModalHandler}
-          taskCreateModalHandler={taskUpdateModalHandler}
+          taskUpdateModalHandler={taskUpdateModalHandler}
           taskItemData={taskItemData}
+          plans={plans}
         />
       )}
 
@@ -262,7 +263,12 @@ const PlanTask = () => {
         appPermits={appPermits}
       />
 
-      <PlanCard plans={plans} App_Acronym={App_Acronym} />
+      <PlanCard
+        plans={plans}
+        App_Acronym={App_Acronym}
+        setEditPlanMode={setEditPlanMode}
+        openPlanModalHandler={openPlanModalHandler}
+      />
 
       <Grid container spacing={1} justifyContent="center">
         <Card className={classes.root} variant="outlined" key={App_Acronym}>
@@ -301,6 +307,7 @@ const PlanTask = () => {
                                       {...provided.dragHandleProps}
                                       className={classes.draggable}
                                       style={{
+                                        border: `0.4rem solid ${item.plan?.Plan_color}`,
                                         backgroundColor: snapshot.isDragging
                                           ? '#263B4A'
                                           : '#456C86',

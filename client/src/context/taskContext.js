@@ -206,7 +206,7 @@ const TaskProvider = ({ children }) => {
   }, []);
 
   const createTask = async (
-    { Task_name, Task_description },
+    { Task_name, Task_description, Task_plan },
     App_Acronym,
     accessToken
   ) => {
@@ -219,7 +219,7 @@ const TaskProvider = ({ children }) => {
           'Content-Type': 'application/json',
           authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ App_Acronym, Task_name, Task_description }),
+        body: JSON.stringify({ App_Acronym, Task_name, Task_description, Task_plan }),
       });
 
       const data = await response.json();
@@ -236,11 +236,11 @@ const TaskProvider = ({ children }) => {
   };
 
   const updateTask = async (
-    { App_Acronym, Task_name, Task_description, Task_state, Task_plan, Task_note },
+    { Task_name, Task_description, Task_state, Task_plan, Task_note },
+    App_Acronym,
     accessToken
   ) => {
     dispatch({ type: 'IS_LOADING' });
-
     try {
       const response = await fetch(`/api/tasks/task`, {
         method: 'PATCH',
@@ -389,7 +389,8 @@ const TaskProvider = ({ children }) => {
   };
 
   const updatePlan = async (
-    { App_Acronym, Plan_startDate, Plan_endDate, Plan_color },
+    { Plan_MVP_name, Plan_startDate, Plan_endDate, Plan_color },
+    App_Acronym,
     accessToken
   ) => {
     dispatch({ type: 'IS_LOADING' });
@@ -402,7 +403,13 @@ const TaskProvider = ({ children }) => {
           'Content-Type': 'application/json',
           authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ App_Acronym, Plan_startDate, Plan_endDate, Plan_color }),
+        body: JSON.stringify({
+          App_Acronym,
+          Plan_MVP_name,
+          Plan_startDate,
+          Plan_endDate,
+          Plan_color,
+        }),
       });
 
       const data = await response.json();

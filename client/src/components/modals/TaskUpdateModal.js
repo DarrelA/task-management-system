@@ -1,10 +1,18 @@
 import Modal from '@material-ui/core/Modal';
 import { makeStyles } from '@material-ui/core/styles';
 
-import { Button, Grid, TextField } from '@material-ui/core';
+import {
+  Button,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+} from '@material-ui/core';
 import { useEffect, useState } from 'react';
 
-const TaskModal = ({ open, onClose, taskModalHandler, taskItemData }) => {
+const TaskModal = ({ open, onClose, taskUpdateModalHandler, taskItemData, plans }) => {
   const useStyles = makeStyles((theme) => ({
     paper: {
       position: 'absolute',
@@ -14,6 +22,10 @@ const TaskModal = ({ open, onClose, taskModalHandler, taskItemData }) => {
       border: '2px solid #000',
       boxShadow: theme.shadows[5],
       padding: theme.spacing(2, 4, 3),
+    },
+
+    formControl: {
+      minWidth: 166,
     },
   }));
 
@@ -36,6 +48,7 @@ const TaskModal = ({ open, onClose, taskModalHandler, taskItemData }) => {
     Task_description: taskItemData?.Task_description || '',
     Task_creator: taskItemData?.Task_creator || '',
     Task_owner: taskItemData?.Task_owner || '',
+    Task_plan: taskItemData?.Task_plan || '',
     createdAt: new Date(taskItemData?.createdAt).toLocaleString('en-US', options) || '',
   });
   const [disableCreate, setDisableCreate] = useState(false);
@@ -47,7 +60,7 @@ const TaskModal = ({ open, onClose, taskModalHandler, taskItemData }) => {
       [e.target?.name]: e.target.value,
     });
 
-  const createTaskHandler = () => taskModalHandler({ ...inputAppData });
+  const updateTaskHandler = () => taskUpdateModalHandler({ ...inputAppData });
 
   useEffect(() => {
     !inputAppData.Task_name ? setDisableCreate(true) : setDisableCreate(false);
@@ -55,7 +68,7 @@ const TaskModal = ({ open, onClose, taskModalHandler, taskItemData }) => {
 
   const taskForm = (
     <div style={modalStyle} className={classes.paper}>
-      <form onSubmit={createTaskHandler}>
+      <form onSubmit={updateTaskHandler}>
         <Grid spacing={1} container justifyContent="center">
           <Grid container item xs={4}>
             <TextField
@@ -125,6 +138,28 @@ const TaskModal = ({ open, onClose, taskModalHandler, taskItemData }) => {
               value={inputAppData.createdAt}
               disabled={!!taskItemData?.createdAt}
             />
+          </Grid>
+
+          <Grid container item xs={12}>
+            <FormControl className={classes.formControl}>
+              <InputLabel id="Task_plan">Plan</InputLabel>
+              <Select
+                labelId="Task_plan"
+                id="Task_plan"
+                name="Task_plan"
+                value={inputAppData.Task_plan}
+                onChange={inputAppHandler}
+              >
+                <MenuItem key="empty" value="">
+                  None
+                </MenuItem>
+                {plans.map((plan) => (
+                  <MenuItem key={plan.Plan_MVP_name} value={plan.Plan_MVP_name}>
+                    {plan.Plan_MVP_name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Grid>
         </Grid>
 
