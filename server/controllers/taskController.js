@@ -195,11 +195,37 @@ const getTasksData = async (req, res, next) => {
       where: { Task_app_Acronym: req.params.App_Acronym },
       order: [['Kanban_index', 'ASC']],
       include: { model: Plan, attributes: ['Plan_color'] },
+      include: {
+        model: Note,
+        attributes: ['username', 'state', 'description', 'createdAt'],
+      },
     });
 
     // Get only dataValues from Sequelize ORM
     appTasks = JSON.stringify(appTasks);
     appTasks = JSON.parse(appTasks);
+
+    const options = {
+      weekday: 'short',
+      year: '2-digit',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    };
+
+    appTasks.forEach((task) => {
+      task.Task_notes = '';
+
+      for (let i = task.notes.length - 1; i > -1; i--) {
+        task.Task_notes += `Date & time: ${new Date(
+          task.notes[i].createdAt
+        ).toLocaleString('en-US', options)}\nTask state: ${
+          task.notes[i].state
+        }\nUsername: ${task.notes[i].username}\nNotes: ${task.notes[i].description}\n\n`;
+      }
+      delete task.notes;
+    });
 
     let tasks = {
       open: { name: 'Open', items: [] },
@@ -283,8 +309,14 @@ const createTask = async (req, res, next) => {
 };
 
 const updateTask = async (req, res, next) => {
-  const { App_Acronym, Task_name, Task_description, Task_state, Task_plan, Task_note } =
-    req.body;
+  const {
+    App_Acronym,
+    Task_name,
+    Task_description,
+    Task_state,
+    Task_plan,
+    New_task_note,
+  } = req.body;
 
   if (!Task_description) return next(new HttpError('Task description is required.', 400));
   if (!Task_state) return next(new HttpError('Task state is required.', 400));
@@ -304,13 +336,15 @@ const updateTask = async (req, res, next) => {
 
     await task.save();
 
-    const newNote = await Note.create({
-      username: req.user.username,
-      state: Task_state,
-      description: Task_note,
-      taskTaskName: Task_name,
-    });
-    await newNote.save();
+    if (New_task_note.length > 0) {
+      const newNote = await Note.create({
+        username: req.user.username,
+        state: Task_state,
+        description: New_task_note,
+        taskTaskName: Task_name,
+      });
+      await newNote.save();
+    }
 
     res.send({ message: 'success' });
   } catch (e) {

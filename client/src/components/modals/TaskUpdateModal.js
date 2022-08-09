@@ -8,7 +8,9 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  TextareaAutosize,
   TextField,
+  Typography,
 } from '@material-ui/core';
 import { useEffect, useState } from 'react';
 
@@ -24,8 +26,16 @@ const TaskModal = ({ open, onClose, taskUpdateModalHandler, taskItemData, plans 
       padding: theme.spacing(2, 4, 3),
     },
 
-    formControl: {
-      minWidth: 166,
+    formControl: { minWidth: 166 },
+
+    notesText: {
+      marginTop: 15,
+      minWidth: 732,
+      maxWidth: 732,
+      minHeight: 300,
+      maxHeight: 300,
+      overflowY: 'scroll',
+      overflowX: 'hidden',
     },
   }));
 
@@ -45,6 +55,8 @@ const TaskModal = ({ open, onClose, taskUpdateModalHandler, taskItemData, plans 
     Task_name: taskItemData?.Task_name || '',
     Task_id: taskItemData?.Task_id || '',
     Task_state: taskItemData?.Task_state || '',
+    Task_notes: taskItemData?.Task_notes || '',
+    New_task_note: taskItemData?.New_task_note || '',
     Task_description: taskItemData?.Task_description || '',
     Task_creator: taskItemData?.Task_creator || '',
     Task_owner: taskItemData?.Task_owner || '',
@@ -104,7 +116,6 @@ const TaskModal = ({ open, onClose, taskUpdateModalHandler, taskItemData, plans 
             />
           </Grid>
         </Grid>
-
         <Grid spacing={1} container justifyContent="center">
           <Grid container item xs={4}>
             <TextField
@@ -162,7 +173,6 @@ const TaskModal = ({ open, onClose, taskUpdateModalHandler, taskItemData, plans 
             </FormControl>
           </Grid>
         </Grid>
-
         <TextField
           label="Description"
           type="textarea"
@@ -171,6 +181,29 @@ const TaskModal = ({ open, onClose, taskUpdateModalHandler, taskItemData, plans 
           multiline
           onInput={inputAppHandler}
           value={inputAppData.Task_description}
+          fullWidth
+        />
+
+        <Typography variant="h6" style={{ paddingTop: 30, textAlign: 'center' }}>
+          Notes
+        </Typography>
+
+        <TextareaAutosize
+          aria-label="minimum height"
+          minRows={3}
+          className={classes.notesText}
+          defaultValue={inputAppData.Task_notes}
+          readOnly
+        />
+
+        <TextField
+          label="Task Note"
+          type="textarea"
+          id="New_task_note"
+          minRows={5}
+          multiline
+          onInput={inputAppHandler}
+          value={inputAppData.New_task_note}
           fullWidth
         />
 

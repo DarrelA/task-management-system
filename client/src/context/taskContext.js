@@ -236,7 +236,7 @@ const TaskProvider = ({ children }) => {
   };
 
   const updateTask = async (
-    { Task_name, Task_description, Task_state, Task_plan, Task_note },
+    { Task_name, Task_description, Task_state, Task_plan, New_task_note },
     App_Acronym,
     accessToken
   ) => {
@@ -255,7 +255,7 @@ const TaskProvider = ({ children }) => {
           Task_description,
           Task_state,
           Task_plan,
-          Task_note,
+          New_task_note,
         }),
       });
 
