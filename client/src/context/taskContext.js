@@ -185,7 +185,6 @@ const TaskProvider = ({ children }) => {
   };
 
   const getTasksData = useCallback(async (App_Acronym, accessToken) => {
-    dispatch({ type: 'IS_LOADING' });
     try {
       const response = await fetch(`/api/tasks/${App_Acronym}/all`, {
         credentials: 'include',
@@ -211,7 +210,6 @@ const TaskProvider = ({ children }) => {
     App_Acronym,
     accessToken
   ) => {
-    dispatch({ type: 'IS_LOADING' });
     try {
       const response = await fetch('/api/tasks/task', {
         method: 'POST',
@@ -229,7 +227,7 @@ const TaskProvider = ({ children }) => {
       dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
       clearAlert();
       // getTasksData(App_Acronym, accessToken);
-      return 'success'; // To PlanTask page
+      // return 'success'; // To PlanTask page
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });
       clearAlert();
@@ -265,8 +263,8 @@ const TaskProvider = ({ children }) => {
       dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
 
       clearAlert();
-      getApplicationsData(accessToken);
-      return 'success';
+      // getTasksData(App_Acronym, accessToken);
+      // return 'success';
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });
       clearAlert();
@@ -301,6 +299,7 @@ const TaskProvider = ({ children }) => {
 
       dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
       clearAlert();
+      // getTasksData(App_Acronym, accessToken);
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });
       clearAlert();
@@ -325,7 +324,7 @@ const TaskProvider = ({ children }) => {
       dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
 
       clearAlert();
-      getTasksData(App_Acronym, accessToken);
+      // getTasksData(App_Acronym, accessToken);
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });
       clearAlert();

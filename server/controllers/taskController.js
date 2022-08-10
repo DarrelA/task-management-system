@@ -200,11 +200,17 @@ const getTasksData = async (req, res, next) => {
 
     let appTasks = await Task.findAll({
       where: { Task_app_Acronym: req.params.App_Acronym },
-      order: [['Kanban_index', 'ASC']],
+      order: [
+        ['Kanban_index', 'ASC'],
+        [Note, 'createdAt', 'DESC'],
+      ],
       include: { model: Plan, attributes: ['Plan_color'] },
       include: [
         { model: Plan, attributes: ['Plan_color'] },
-        { model: Note, attributes: ['username', 'state', 'description', 'createdAt'] },
+        {
+          model: Note,
+          attributes: ['username', 'state', 'description', 'createdAt'],
+        },
       ],
     });
 
@@ -224,13 +230,14 @@ const getTasksData = async (req, res, next) => {
     appTasks.forEach((task) => {
       task.Task_notes = '';
 
-      for (let i = task.notes.length - 1; i > -1; i--) {
-        task.Task_notes += `Date & time: ${new Date(
-          task.notes[i].createdAt
-        ).toLocaleString('en-US', options)}\nTask state: ${
-          task.notes[i].state
-        }\nUsername: ${task.notes[i].username}\nNotes: ${task.notes[i].description}\n\n`;
-      }
+      task.notes.forEach((note) => {
+        task.Task_notes += `Date & time: ${new Date(note.createdAt).toLocaleString(
+          'en-US',
+          options
+        )}\nTask state: ${note.state}\nUsername: ${note.username}\nNotes: ${
+          note.description
+        }\n\n`;
+      });
       delete task.notes;
     });
 

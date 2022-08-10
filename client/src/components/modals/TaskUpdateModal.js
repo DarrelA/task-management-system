@@ -25,7 +25,7 @@ const TaskModal = ({ open, onClose, taskUpdateModalHandler, taskItemData, plans 
       border: '2px solid #000',
       boxShadow: theme.shadows[5],
       padding: theme.spacing(2, 4, 3),
-      overflowY: 'scroll',
+      overflowY: 'scroll !important',
       overflowX: 'hidden',
     },
 
@@ -35,9 +35,10 @@ const TaskModal = ({ open, onClose, taskUpdateModalHandler, taskItemData, plans 
       marginTop: 15,
       minWidth: 732,
       maxWidth: 732,
+      height: 160,
       minHeight: 160,
       maxHeight: 160,
-      overflowY: 'scroll',
+      overflowY: 'scroll !important',
       overflowX: 'hidden',
     },
   }));

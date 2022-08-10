@@ -110,7 +110,6 @@ const PlanTask = () => {
     if (!!message) toast.error(message);
   }, [navigate, taskMessage, message]);
 
-  // @TODO: Prevent createTask Modal from closing due to rerender
   useEffect(() => {
     accessToken && getTasksData(App_Acronym, accessToken);
     setColumns(tasks);
