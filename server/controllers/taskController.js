@@ -413,8 +413,8 @@ const updateTask = async (req, res, next) => {
 
 const updateTaskState = async (req, res, next) => {
   const { Task_name, Task_state_source: from, Task_state_destination: to } = req.body;
-  const task = await Task.findByPk(Task_name);
 
+  const task = await Task.findByPk(Task_name);
   if (!task) return next(new HttpError('Task not found.', 400));
 
   const validAppPermitStates = ['open', 'todolist', 'doing', 'done', 'close'];
@@ -434,6 +434,7 @@ const updateTaskState = async (req, res, next) => {
 
   try {
     task.Task_state = to;
+    task.Task_owner = req.user.username;
     await task.save();
 
     const newNote = await Note.create({
@@ -445,21 +446,21 @@ const updateTaskState = async (req, res, next) => {
     await newNote.save();
 
     // Mailtrap + Nodemailer
-    let projectLeadEmails = await Group.findAll({
-      where: { name: 'Project Lead' },
-      include: {
-        model: User,
-        attributes: ['username', 'email'],
-        through: { attributes: [] },
-      },
-      attributes: { exclude: ['createdAt', 'updatedAt'] },
-    });
-
-    // Get only dataValues from Sequelize ORM
-    projectLeadEmails = JSON.stringify(projectLeadEmails);
-    projectLeadEmails = JSON.parse(projectLeadEmails);
-
     if (from === 'doing' && to === 'done') {
+      let projectLeadEmails = await Group.findAll({
+        where: { name: 'Project Lead' },
+        include: {
+          model: User,
+          attributes: ['username', 'email'],
+          through: { attributes: [] },
+        },
+        attributes: { exclude: ['createdAt', 'updatedAt'] },
+      });
+
+      // Get only dataValues from Sequelize ORM
+      projectLeadEmails = JSON.stringify(projectLeadEmails);
+      projectLeadEmails = JSON.parse(projectLeadEmails);
+
       text = `${req.user.username} has promoted the task "${Task_name}" to "Done" state.`;
 
       const transport = nodemailer.createTransport({
@@ -511,10 +512,6 @@ const updateKanbanIndex = async (req, res, next) => {
   const closeItems = tasksList.close?.items;
 
   try {
-    const taskSource = await Task.findOne({ where: { Task_name } });
-    taskSource.Task_owner = req.user.username;
-    await taskSource.save();
-
     if (!!openItems)
       openItems.forEach(async (item, i) => {
         let task = await Task.findByPk(item.Task_name);
