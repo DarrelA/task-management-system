@@ -1,11 +1,16 @@
 import { useEffect, useState } from 'react';
 import { SwatchesPicker } from 'react-color';
+import { useParams } from 'react-router-dom';
 
 import { Button, Grid, TextField } from '@material-ui/core';
 import Modal from '@material-ui/core/Modal';
 import { makeStyles } from '@material-ui/core/styles';
 
-const PlanModal = ({ open, onClose, planModalHandler, editPlanMode }) => {
+import useTaskContext from '../../context/taskContext';
+import useUserContext from '../../context/userContext';
+import useLocalStorage from '../../hooks/useLocalStorage';
+
+const PlanModal = ({ open, onClose }) => {
   const useStyles = makeStyles((theme) => ({
     paper: {
       position: 'absolute',
@@ -32,51 +37,51 @@ const PlanModal = ({ open, onClose, planModalHandler, editPlanMode }) => {
   }));
 
   const classes = useStyles();
+
+  const taskContext = useTaskContext();
+  const userContext = useUserContext();
+
   const [modalStyle] = useState({ top: '15%', margin: 'auto' });
-  const [inputAppData, setInputAppData] = useState({
-    Plan_MVP_name: editPlanMode?.Plan_MVP_name || '',
-    Plan_startDate: editPlanMode?.Plan_startDate || '',
-    Plan_endDate: editPlanMode?.Plan_endDate || '',
-    Plan_color: editPlanMode?.Plan_color || '',
-  });
+  const [planMVPName, setplanMVPName] = useLocalStorage('Plan_MVP_name', '');
+  const [planStartDate, setplanStartDate] = useLocalStorage('Plan_startDate', '');
+  const [planEndDate, setplanEndDate] = useLocalStorage('Plan_endDate', '');
+  const [planColor, setplanColor] = useLocalStorage('Plan_color', '');
+
   const [disableCreate, setDisableCreate] = useState(false);
 
-  const inputAppHandler = (e) =>
-    setInputAppData({
-      ...inputAppData,
-      [e.target?.id]: e.target.value,
-      [e.target?.name]: e.target.value,
-    });
-
-  const createTaskHandler = () => planModalHandler({ ...inputAppData });
+  const { App_Acronym } = useParams();
 
   useEffect(() => {
-    !inputAppData.Plan_MVP_name ||
-    !inputAppData.Plan_startDate ||
-    !inputAppData.Plan_endDate ||
-    !inputAppData.Plan_color
+    !planMVPName || !planStartDate || !planEndDate || !planColor
       ? setDisableCreate(true)
       : setDisableCreate(false);
-  }, [
-    inputAppData.Plan_MVP_name,
-    inputAppData.Plan_startDate,
-    inputAppData.Plan_endDate,
-    inputAppData.Plan_color,
-  ]);
+  }, [planMVPName, planStartDate, planEndDate, planColor]);
+
+  const planModalHandler = () => {
+    taskContext.createPlan(
+      {
+        Plan_MVP_name: planMVPName,
+        Plan_startDate: planStartDate,
+        Plan_endDate: planEndDate,
+        Plan_color: planColor,
+      },
+      App_Acronym,
+      userContext.accessToken
+    );
+  };
 
   const taskForm = (
     <div style={modalStyle} className={classes.paper}>
-      <form onSubmit={createTaskHandler}>
+      <form onSubmit={planModalHandler}>
         <TextField
           label="Plan Name"
           type="text"
           id="Plan_MVP_name"
           placeholder="plan 1"
-          onInput={inputAppHandler}
-          value={inputAppData.Plan_MVP_name}
+          onInput={(e) => setplanMVPName(e.target.value)}
+          value={planMVPName}
           fullWidth
           autoFocus
-          disabled={!!editPlanMode?.Plan_MVP_name}
           required
         />
 
@@ -91,8 +96,8 @@ const PlanModal = ({ open, onClose, planModalHandler, editPlanMode }) => {
             id="Plan_startDate"
             type="date"
             InputLabelProps={{ shrink: true }}
-            onInput={inputAppHandler}
-            defaultValue={inputAppData.Plan_startDate}
+            onInput={(e) => setplanStartDate(e.target.value)}
+            defaultValue={planStartDate}
             required
           />
 
@@ -101,8 +106,8 @@ const PlanModal = ({ open, onClose, planModalHandler, editPlanMode }) => {
             id="Plan_endDate"
             type="date"
             InputLabelProps={{ shrink: true }}
-            onInput={inputAppHandler}
-            defaultValue={inputAppData.Plan_endDate}
+            onInput={(e) => setplanEndDate(e.target.value)}
+            defaultValue={planEndDate}
             required
           />
         </Grid>
@@ -114,10 +119,8 @@ const PlanModal = ({ open, onClose, planModalHandler, editPlanMode }) => {
           style={{ padding: 25, paddingBottom: 0 }}
         >
           <SwatchesPicker
-            color={inputAppData.Plan_color}
-            onChange={(colorPicked) =>
-              setInputAppData({ ...inputAppData, Plan_color: colorPicked.hex })
-            }
+            color={planColor}
+            onChange={(colorPicked) => setplanColor(colorPicked.hex)}
             required
           />
           <Grid
@@ -125,9 +128,9 @@ const PlanModal = ({ open, onClose, planModalHandler, editPlanMode }) => {
             spacing={1}
             justifyContent="center"
             className={classes.colorDisplay}
-            style={{ backgroundColor: inputAppData.Plan_color }}
+            style={{ backgroundColor: planColor }}
           >
-            {inputAppData.Plan_color.toUpperCase() || 'Pick a color!'}
+            {planColor?.toUpperCase() || 'Pick a color!'}
           </Grid>
         </Grid>
 
@@ -140,7 +143,7 @@ const PlanModal = ({ open, onClose, planModalHandler, editPlanMode }) => {
             style={{ margin: '16px 0' }}
             disabled={disableCreate}
           >
-            {editPlanMode?.Plan_MVP_name ? 'Update' : 'Create'}
+            Create
           </Button>
         </Grid>
       </form>

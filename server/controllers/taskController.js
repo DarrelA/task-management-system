@@ -155,7 +155,7 @@ const updateApplication = async (req, res, next) => {
   }
 };
 
-const getTasksData = async (req, res, next) => {
+const getAllTasksData = async (req, res, next) => {
   try {
     let application = await Application.findByPk(req.params.App_Acronym);
     if (!application) return next(new HttpError('Application is unavailable.', 400));
@@ -200,45 +200,9 @@ const getTasksData = async (req, res, next) => {
 
     let appTasks = await Task.findAll({
       where: { Task_app_Acronym: req.params.App_Acronym },
-      order: [
-        ['Kanban_index', 'ASC'],
-        [Note, 'createdAt', 'DESC'],
-      ],
+      order: [['Kanban_index', 'ASC']],
+      attributes: ['Task_name', 'Task_description', 'Task_state', 'Kanban_index'],
       include: { model: Plan, attributes: ['Plan_color'] },
-      include: [
-        { model: Plan, attributes: ['Plan_color'] },
-        {
-          model: Note,
-          attributes: ['username', 'state', 'description', 'createdAt'],
-        },
-      ],
-    });
-
-    // Get only dataValues from Sequelize ORM
-    appTasks = JSON.stringify(appTasks);
-    appTasks = JSON.parse(appTasks);
-
-    const options = {
-      weekday: 'short',
-      year: '2-digit',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-    };
-
-    appTasks.forEach((task) => {
-      task.Task_notes = '';
-
-      task.notes.forEach((note) => {
-        task.Task_notes += `Date & time: ${new Date(note.createdAt).toLocaleString(
-          'en-US',
-          options
-        )}\nTask state: ${note.state}\nUsername: ${note.username}\nNotes: ${
-          note.description
-        }\n\n`;
-      });
-      delete task.notes;
     });
 
     let tasks = {
@@ -274,6 +238,77 @@ const getTasksData = async (req, res, next) => {
     console.error(e);
     return next(new HttpError('Something went wrong!', 500));
   }
+};
+
+const getTaskData = async (req, res, next) => {
+  // try {
+  //   let application = await Application.findByPk(req.params.App_Acronym, {
+  //     order: [Note, 'createdAt', 'DESC'],
+  //     include: {
+  //       model: Note,
+  //       attributes: ['username', 'state', 'description', 'createdAt'],
+  //     },
+  //   });
+  //   if (!application) return next(new HttpError('Application is unavailable.', 400));
+  //   let task = await Task.findByPk(req.params.Task_name);
+  //   if (!task) return next(new HttpError('Task is unavailable.', 400));
+  //   // Find the usergroups that user belongs to
+  //   let usergroups = [
+  //     ...(await UserGroup.findAll({
+  //       where: { userUsername: req.user.username },
+  //       attributes: ['groupName'],
+  //     })),
+  //   ].map((usergroup) => usergroup.groupName);
+  //   // Set T/F permissions in respective App_permit states
+  //   const appPermits = {};
+  //   const {
+  //     App_permit_Create,
+  //     App_permit_Open,
+  //     App_permit_toDoList,
+  //     App_permit_Doing,
+  //     App_permit_Done,
+  //   } = application;
+  //   appPermits.App_permit_Create =
+  //     req?.admin.isAdmin ||
+  //     !!usergroups.find((usergroup) => usergroup === App_permit_Create);
+  //   appPermits.App_permit_Open =
+  //     req?.admin.isAdmin ||
+  //     !!usergroups.find((usergroup) => usergroup === App_permit_Open);
+  //   appPermits.App_permit_toDoList =
+  //     req?.admin.isAdmin ||
+  //     !!usergroups.find((usergroup) => usergroup === App_permit_toDoList);
+  //   appPermits.App_permit_Doing =
+  //     req?.admin.isAdmin ||
+  //     !!usergroups.find((usergroup) => usergroup === App_permit_Doing);
+  //   appPermits.App_permit_Done =
+  //     req?.admin.isAdmin ||
+  //     !!usergroups.find((usergroup) => usergroup === App_permit_Done);
+  //   // Get only dataValues from Sequelize ORM
+  //   task = JSON.stringify(task);
+  //   task = JSON.parse(task);
+  //   const options = {
+  //     weekday: 'short',
+  //     year: '2-digit',
+  //     month: 'short',
+  //     day: 'numeric',
+  //     hour: 'numeric',
+  //     minute: '2-digit',
+  //   };
+  //   task.notes.forEach((note) => {
+  //     task.Task_notes = '';
+  //     task.Task_notes += `Date & time: ${new Date(note.createdAt).toLocaleString(
+  //       'en-US',
+  //       options
+  //     )}\nTask state: ${note.state}\nUsername: ${note.username}\nNotes: ${
+  //       note.description
+  //     }\n\n`;
+  //   });
+  //   delete task.notes;
+  //   return res.send({ appPermits, task });
+  // } catch (e) {
+  //   console.error(e);
+  //   return next(new HttpError('Something went wrong!', 500));
+  // }
 };
 
 const createTask = async (req, res, next) => {
@@ -557,6 +592,7 @@ const getPlansData = async (req, res, next) => {
 const createPlan = async (req, res, next) => {
   const { App_Acronym, Plan_MVP_name, Plan_startDate, Plan_endDate, Plan_color } =
     req.body;
+
   if (!Plan_MVP_name || !Plan_startDate || !Plan_endDate || !Plan_color)
     return next(new HttpError('All fields are required.', 400));
 
@@ -583,40 +619,16 @@ const createPlan = async (req, res, next) => {
   }
 };
 
-// Not required
-// const updatePlan = async (req, res, next) => {
-//   const { App_Acronym, Plan_MVP_name, Plan_startDate, Plan_endDate, Plan_color } =
-//     req.body;
-
-//   try {
-//     const application = await Application.findByPk(App_Acronym);
-//     if (!application) return next(new HttpError('Application not found.', 400));
-
-//     const plan = await Plan.findByPk(Plan_MVP_name);
-//     if (!plan) return next(new HttpError('Plan not found.', 400));
-
-//     if (Plan_startDate) plan.Plan_startDate = Plan_startDate;
-//     if (Plan_endDate) plan.Plan_endDate = Plan_endDate;
-//     if (Plan_color) plan.Plan_color = Plan_color;
-
-//     await plan.save();
-//     res.send({ message: 'success' });
-//   } catch (e) {
-//     console.error(e);
-//     return next(new HttpError('Something went wrong!', 500));
-//   }
-// };
-
 module.exports = {
   getApplicationsData,
   createApplication,
   updateApplication,
-  getTasksData,
+  getAllTasksData,
+  getTaskData,
   createTask,
   updateTask,
   updateTaskState,
   updateKanbanIndex,
   getPlansData,
   createPlan,
-  // updatePlan,
 };

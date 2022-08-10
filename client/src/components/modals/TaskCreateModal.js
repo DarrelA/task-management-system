@@ -101,6 +101,7 @@ const TaskCreateModal = ({ open, onClose, taskCreateModalHandler, plans }) => {
           onInput={inputAppHandler}
           value={inputAppData.Task_description}
           fullWidth
+          required
         />
 
         <TextField

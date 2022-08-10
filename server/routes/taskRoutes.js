@@ -10,14 +10,14 @@ const {
   getApplicationsData,
   createApplication,
   updateApplication,
-  getTasksData,
+  getAllTasksData,
+  getTaskData,
   createTask,
   updateTask,
   updateTaskState,
   updateKanbanIndex,
   getPlansData,
   createPlan,
-  updatePlan,
 } = require('../controllers/taskController');
 
 router.get('/applications/all', authMiddleware, getApplicationsData);
@@ -27,7 +27,8 @@ router
   .post(authMiddleware, appAccessRightsMiddleware, createApplication)
   .patch(authMiddleware, appAccessRightsMiddleware, updateApplication);
 
-router.get('/:App_Acronym/all', authMiddleware, getTasksData);
+router.get('/:App_Acronym/all', authMiddleware, getAllTasksData);
+router.get('/:App_Acronym/task/:Task_name', authMiddleware, getTaskData);
 
 router
   .route('/task')
@@ -45,6 +46,5 @@ router.patch(
 router.get('/:App_Acronym/plans', authMiddleware, getPlansData);
 
 router.route('/plan').post(authMiddleware, appAccessRightsMiddleware, createPlan);
-// .patch(authMiddleware, updatePlan);
 
 module.exports = router;

@@ -1,11 +1,4 @@
-import {
-  Button,
-  Card,
-  CardContent,
-  Grid,
-  makeStyles,
-  Typography,
-} from '@material-ui/core';
+import { Card, CardContent, Grid, makeStyles, Typography } from '@material-ui/core';
 
 const useStyles = makeStyles({
   root: { display: 'flex', maxWidth: 1400, padding: 10, margin: 10 },
@@ -30,7 +23,7 @@ const useStyles = makeStyles({
 });
 
 const PlanCard = (props) => {
-  const { plans, App_Acronym, setEditPlanMode, openPlanModalHandler } = props;
+  const { plans, App_Acronym } = props;
 
   const classes = useStyles();
 
@@ -56,18 +49,6 @@ const PlanCard = (props) => {
                 </Grid>
                 <Grid container item xs={6} style={{ justifyContent: 'center' }}>
                   <Typography>{plan.Plan_endDate}</Typography>
-                </Grid>
-
-                <Grid container item xs={12} className={classes.cardActions}>
-                  <Button
-                    size="small"
-                    onClick={() => {
-                      setEditPlanMode({ ...plan, edit: true });
-                      openPlanModalHandler();
-                    }}
-                  >
-                    <span className="material-icons">edit</span>
-                  </Button>
                 </Grid>
               </Grid>
             ))}

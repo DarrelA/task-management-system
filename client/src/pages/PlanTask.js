@@ -47,8 +47,6 @@ const PlanTask = () => {
     updateKanbanIndex,
     getPlansData,
     plans,
-    createPlan,
-    updatePlan,
   } = taskContext;
   const userContext = useUserContext();
   const { accessToken, message } = userContext;
@@ -61,7 +59,6 @@ const PlanTask = () => {
   const [openTaskUpdateModal, setOpenTaskUpdateModal] = useState(false);
   const [taskItemData, setTaskItemData] = useState();
   const [openPlanModal, setOpenPlanModal] = useState(false);
-  const [editPlanMode, setEditPlanMode] = useState({ edit: false });
 
   // fetchTasksOnRefresh on first load
   // const [isLoading, setIsLoading] = useState(true);
@@ -75,30 +72,16 @@ const PlanTask = () => {
 
   const openPlanModalHandler = () => setOpenPlanModal(true);
   const closePlanModalHandler = () => {
-    setEditPlanMode({ edit: false });
     setOpenPlanModal(false);
+    ['Plan_MVP_name', 'Plan_startDate', 'Plan_endDate', 'Plan_color'].forEach((key) =>
+      localStorage.removeItem(key)
+    );
   };
 
   const taskUpdateModalHandler = async (inputData) => {
     if (!inputData) return;
     updateTask(inputData, App_Acronym, accessToken);
     closeTaskCreateModalHandler();
-  };
-
-  const planModalHandler = async (inputData) => {
-    if (!inputData) return;
-    if (!editPlanMode.edit) {
-      await createPlan(inputData, App_Acronym, accessToken);
-      // const success = await createPlan(inputData, App_Acronym, accessToken);
-      // if (success)
-      //   setColumns({
-      //     ...columns,
-      //     open: { ...columns.open, items: [...columns.open.items, inputData] },
-      //   });
-    } else {
-      updatePlan(inputData, App_Acronym, accessToken);
-      closePlanModalHandler();
-    }
   };
 
   useEffect(() => {
@@ -243,12 +226,7 @@ const PlanTask = () => {
       )}
 
       {openPlanModal && (
-        <PlanModal
-          open={openPlanModal}
-          onClose={closePlanModalHandler}
-          planModalHandler={planModalHandler}
-          editPlanMode={editPlanMode}
-        />
+        <PlanModal open={openPlanModal} onClose={closePlanModalHandler} />
       )}
 
       <CreatePlanTask
@@ -257,12 +235,7 @@ const PlanTask = () => {
         appPermits={appPermits}
       />
 
-      <PlanCard
-        plans={plans}
-        App_Acronym={App_Acronym}
-        setEditPlanMode={setEditPlanMode}
-        openPlanModalHandler={openPlanModalHandler}
-      />
+      <PlanCard plans={plans} App_Acronym={App_Acronym} />
 
       <Grid container spacing={1} justifyContent="center">
         <Card className={classes.root} variant="outlined" key={App_Acronym}>

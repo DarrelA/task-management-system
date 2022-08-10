@@ -210,6 +210,8 @@ const TaskProvider = ({ children }) => {
     App_Acronym,
     accessToken
   ) => {
+    dispatch({ type: 'IS_LOADING' });
+
     try {
       const response = await fetch('/api/tasks/task', {
         method: 'POST',
@@ -232,8 +234,7 @@ const TaskProvider = ({ children }) => {
 
       dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
       clearAlert();
-      // getTasksData(App_Acronym, accessToken);
-      // return 'success'; // To PlanTask page
+      getTasksData(App_Acronym, accessToken);
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });
       clearAlert();
@@ -363,6 +364,8 @@ const TaskProvider = ({ children }) => {
     App_Acronym,
     accessToken
   ) => {
+    dispatch({ type: 'IS_LOADING' });
+
     try {
       const response = await fetch('/api/tasks/plan', {
         method: 'POST',
@@ -383,48 +386,14 @@ const TaskProvider = ({ children }) => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
 
-      dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
-      clearAlert();
-      // getTasksData(App_Acronym, accessToken);
-      return 'success'; // To PlanTask page
-    } catch (e) {
-      dispatch({ type: 'RESPONSE_FAIL', payload: e });
-      clearAlert();
-    }
-  };
-
-  const updatePlan = async (
-    { Plan_MVP_name, Plan_startDate, Plan_endDate, Plan_color },
-    App_Acronym,
-    accessToken
-  ) => {
-    dispatch({ type: 'IS_LOADING' });
-
-    try {
-      const response = await fetch(`/api/tasks/plan`, {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({
-          App_Acronym,
-          Plan_MVP_name,
-          Plan_startDate,
-          Plan_endDate,
-          Plan_color,
-        }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message);
+      // Refer to PlanModal.js (Using localStorage to store state when handling error)
+      ['Plan_MVP_name', 'Plan_startDate', 'Plan_endDate', 'Plan_color'].forEach((key) =>
+        localStorage.removeItem(key)
+      );
 
       dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
-
       clearAlert();
-      getApplicationsData(accessToken);
-      return 'success';
+      getPlansData(App_Acronym, accessToken);
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });
       clearAlert();
@@ -445,7 +414,6 @@ const TaskProvider = ({ children }) => {
         updateKanbanIndex,
         getPlansData,
         createPlan,
-        updatePlan,
       }}
     >
       {children}

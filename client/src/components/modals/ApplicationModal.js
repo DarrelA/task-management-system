@@ -82,7 +82,7 @@ const ApplicationModal = ({
           value={inputAppData.App_Rnumber}
           required
           fullWidth
-          disabled={!!editAppMode?.App_Rnumber}
+          disabled={!!editAppMode?.App_Acronym}
           autoFocus
         />
 
