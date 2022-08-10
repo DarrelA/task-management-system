@@ -2,9 +2,10 @@ import React, { useCallback, useContext, useReducer } from 'react';
 
 const TaskContext = React.createContext();
 const { appPermits } = JSON.parse(localStorage.getItem('appPermitData')) || {};
+const { tasks } = JSON.parse(localStorage.getItem('tasksData')) || {};
 
 const initialState = {
-  tasks: {},
+  tasks: tasks || {},
   appPermits: appPermits || {},
   isLoading: false,
   taskMessage: '',
@@ -56,6 +57,12 @@ const TaskProvider = ({ children }) => {
     const appPermitsData = JSON.parse(localStorage.getItem('appPermits')) || {};
     const updatedAppPermitsData = { appPermits: appPermits || appPermitsData.appPermits };
     localStorage.setItem('appPermitsData', JSON.stringify(updatedAppPermitsData));
+  };
+
+  const addTasksDataToLocalStorage = async (tasks) => {
+    const tasksData = JSON.parse(localStorage.getItem('tasksData')) || {};
+    const updatedTasksData = { tasks: tasks || tasksData.tasks };
+    localStorage.setItem('tasksData', JSON.stringify(updatedTasksData));
   };
 
   const getApplicationsData = useCallback(async (accessToken) => {
@@ -210,6 +217,7 @@ const TaskProvider = ({ children }) => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
       addAppPermitsDataToLocalStorage(data.appPermits);
+      addTasksDataToLocalStorage(data.tasks);
       dispatch({ type: 'GET_ALL_TASK_SUCCESS', payload: data });
       clearAlert();
     } catch (e) {
@@ -245,9 +253,14 @@ const TaskProvider = ({ children }) => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
 
+      ['Task_name', 'Task_description', 'Task_plan', 'New_task_note'].forEach((key) =>
+        localStorage.removeItem(key)
+      );
+
       dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
       clearAlert();
       getTasksData(App_Acronym, accessToken);
+      return true; // to PlanTask page
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });
       clearAlert();
@@ -284,7 +297,7 @@ const TaskProvider = ({ children }) => {
 
       clearAlert();
       // getTasksData(App_Acronym, accessToken);
-      // return 'success';
+      // return true; // to PlanTask page
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });
       clearAlert();
@@ -319,7 +332,8 @@ const TaskProvider = ({ children }) => {
 
       dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
       clearAlert();
-      // getTasksData(App_Acronym, accessToken);
+      getTasksData(App_Acronym, accessToken);
+      return true; // to PlanTask page
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });
       clearAlert();
@@ -335,7 +349,7 @@ const TaskProvider = ({ children }) => {
           'Content-Type': 'application/json',
           authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ tasksList, Task_name }),
+        body: JSON.stringify({ tasksList, Task_name, App_Acronym }),
       });
 
       const data = await response.json();
@@ -344,7 +358,7 @@ const TaskProvider = ({ children }) => {
       dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
 
       clearAlert();
-      // getTasksData(App_Acronym, accessToken);
+      getTasksData(App_Acronym, accessToken);
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });
       clearAlert();

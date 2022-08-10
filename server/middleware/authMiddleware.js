@@ -111,7 +111,7 @@ const appAccessRightsMiddleware = async (req, res, next) => {
       if ((req.admin && req.admin.isAdmin) || haveAccessRights) return next();
     }
 
-    return next(new HttpError('Forbidden', 403));
+    return next(new HttpError('Forbidden!', 403));
   } catch (e) {
     console.error(e);
     return next(new HttpError('Something went wrong!', 500));

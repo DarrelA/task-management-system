@@ -36,12 +36,7 @@ router
   .patch(authMiddleware, appAccessRightsMiddleware, updateTask);
 
 router.patch('/taskstate', authMiddleware, appAccessRightsMiddleware, updateTaskState);
-router.patch(
-  '/kanbanindex',
-  authMiddleware,
-  appAccessRightsMiddleware,
-  updateKanbanIndex
-);
+router.patch('/kanbanindex', authMiddleware, updateKanbanIndex);
 
 router.get('/:App_Acronym/plans', authMiddleware, getPlansData);
 

@@ -61,14 +61,18 @@ const PlanTask = () => {
   const [openPlanModal, setOpenPlanModal] = useState(false);
 
   // fetchTasksOnRefresh on first load
-  // const [isLoading, setIsLoading] = useState(true);
   const [columns, setColumns] = useState(tasks);
 
   const openTaskCreateModalHandler = () => setOpenTaskCreateModal(true);
   const closeTaskCreateModalHandler = () => setOpenTaskCreateModal(false);
 
   const openTaskUpdateModalHandler = () => setOpenTaskUpdateModal(true);
-  const closeTaskUpdateModalHandler = () => setOpenTaskUpdateModal(false);
+  const closeTaskUpdateModalHandler = () => {
+    setOpenTaskUpdateModal(false);
+    ['Task_name', 'Task_description', 'Task_plan', 'New_task_note'].forEach((key) =>
+      localStorage.removeItem(key)
+    );
+  };
 
   const openPlanModalHandler = () => setOpenPlanModal(true);
   const closePlanModalHandler = () => {
@@ -87,7 +91,6 @@ const PlanTask = () => {
   useEffect(() => {
     if (taskMessage === 'success') toast.success(taskMessage, { autoClose: 200 });
     else if (taskMessage === 'Application is unavailable.') return navigate('/apps');
-    else if (taskMessage === 'Forbidden') return window.location.reload();
     else if (!!taskMessage) toast.error(taskMessage);
 
     if (!!message) toast.error(message);
@@ -95,8 +98,7 @@ const PlanTask = () => {
 
   useEffect(() => {
     accessToken && getTasksData(App_Acronym, accessToken);
-    setColumns(tasks);
-  }, [App_Acronym, accessToken, getTasksData, JSON.stringify(tasks)]);
+  }, [App_Acronym, accessToken, getTasksData]);
 
   useEffect(() => {
     accessToken && getPlansData(App_Acronym, accessToken);
@@ -113,7 +115,7 @@ const PlanTask = () => {
       });
   };
 
-  const onDragEndHandler = (result, columns, setColumns) => {
+  const onDragEndHandler = async (result, columns, setColumns) => {
     if (!result.destination) return;
 
     const from = result.source.droppableId;
@@ -148,13 +150,7 @@ const PlanTask = () => {
 
       destItems.splice(destination.index, 0, removed);
 
-      setColumns({
-        ...columns,
-        [source.droppableId]: { ...sourceColumn, items: sourceItems },
-        [destination.droppableId]: { ...destColumn, items: destItems },
-      });
-
-      updateTaskState(
+      const success = updateTaskState(
         App_Acronym,
         result.draggableId,
         source.droppableId,
@@ -180,16 +176,20 @@ const PlanTask = () => {
         App_Acronym,
         accessToken
       );
+
+      if (success) {
+        setColumns({
+          ...columns,
+          [source.droppableId]: { ...sourceColumn, items: sourceItems },
+          [destination.droppableId]: { ...destColumn, items: destItems },
+        });
+      }
     } else {
       const column = columns[source.droppableId];
       const copiedItems = [...column.items];
       const [removed] = copiedItems.splice(source.index, 1);
       copiedItems.splice(destination.index, 0, removed);
 
-      setColumns({
-        ...columns,
-        [source.droppableId]: { ...column, items: copiedItems },
-      });
       updateKanbanIndex(
         {
           ...columns.name,
@@ -199,6 +199,11 @@ const PlanTask = () => {
         App_Acronym,
         accessToken
       );
+
+      setColumns({
+        ...columns,
+        [source.droppableId]: { ...column, items: copiedItems },
+      });
     }
   };
 

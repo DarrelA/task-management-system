@@ -1,5 +1,4 @@
-import Modal from '@material-ui/core/Modal';
-import { makeStyles } from '@material-ui/core/styles';
+import { useEffect, useState } from 'react';
 
 import {
   Button,
@@ -10,7 +9,10 @@ import {
   Select,
   TextField,
 } from '@material-ui/core';
-import { useEffect, useState } from 'react';
+import Modal from '@material-ui/core/Modal';
+import { makeStyles } from '@material-ui/core/styles';
+
+import useLocalStorage from '../../hooks/useLocalStorage';
 
 const TaskCreateModal = ({ open, onClose, taskCreateModalHandler, plans }) => {
   const useStyles = makeStyles((theme) => ({
@@ -31,26 +33,20 @@ const TaskCreateModal = ({ open, onClose, taskCreateModalHandler, plans }) => {
 
   const classes = useStyles();
   const [modalStyle] = useState({ top: '15%', margin: 'auto' });
-  const [inputAppData, setInputAppData] = useState({
-    Task_name: '',
-    Task_description: '',
-    Task_plan: '',
-    New_task_note: '',
-  });
+
+  const [Task_name, setTask_name] = useLocalStorage('Task_name', '');
+  const [Task_description, setTask_description] = useLocalStorage('Task_description', '');
+  const [Task_plan, setTask_plan] = useLocalStorage('Task_plan', '');
+  const [New_task_note, setNew_task_note] = useLocalStorage('New_task_note', '');
+
   const [disableCreate, setDisableCreate] = useState(false);
 
-  const inputAppHandler = (e) =>
-    setInputAppData({
-      ...inputAppData,
-      [e.target?.id]: e.target.value,
-      [e.target?.name]: e.target.value,
-    });
-
-  const createTaskHandler = () => taskCreateModalHandler({ ...inputAppData });
+  const createTaskHandler = () =>
+    taskCreateModalHandler({ Task_name, Task_description, Task_plan, New_task_note });
 
   useEffect(() => {
-    !inputAppData.Task_name ? setDisableCreate(true) : setDisableCreate(false);
-  }, [inputAppData.Task_name]);
+    !Task_name || !Task_description ? setDisableCreate(true) : setDisableCreate(false);
+  }, [Task_name, Task_description]);
 
   const taskForm = (
     <div style={modalStyle} className={classes.paper}>
@@ -62,8 +58,8 @@ const TaskCreateModal = ({ open, onClose, taskCreateModalHandler, plans }) => {
               type="text"
               id="Task_name"
               placeholder="task 1"
-              onInput={inputAppHandler}
-              value={inputAppData.Task_name}
+              onInput={(e) => setTask_name(e.target.value)}
+              value={Task_name}
               autoFocus
               required
             />
@@ -76,8 +72,8 @@ const TaskCreateModal = ({ open, onClose, taskCreateModalHandler, plans }) => {
                 labelId="Task_plan"
                 id="Task_plan"
                 name="Task_plan"
-                onChange={inputAppHandler}
-                value={inputAppData.Task_plan}
+                onChange={(e) => setTask_plan(e.target.value)}
+                value={Task_plan}
               >
                 <MenuItem key="empty" value="">
                   None
@@ -98,8 +94,8 @@ const TaskCreateModal = ({ open, onClose, taskCreateModalHandler, plans }) => {
           id="Task_description"
           minRows={5}
           multiline
-          onInput={inputAppHandler}
-          value={inputAppData.Task_description}
+          onInput={(e) => setTask_description(e.target.value)}
+          value={Task_description}
           fullWidth
           required
         />
@@ -110,8 +106,8 @@ const TaskCreateModal = ({ open, onClose, taskCreateModalHandler, plans }) => {
           id="New_task_note"
           minRows={5}
           multiline
-          onInput={inputAppHandler}
-          value={inputAppData.New_task_note}
+          onInput={(e) => setNew_task_note(e.target.value)}
+          value={New_task_note}
           fullWidth
         />
 
