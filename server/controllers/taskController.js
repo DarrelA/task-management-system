@@ -16,6 +16,7 @@ const getApplicationsData = async (req, res, next) => {
   try {
     const applications = await Application.findAll({
       attributes: { exclude: ['createdAt'] },
+      order: [['App_endDate', 'ASC']],
     });
 
     const groups = await Group.findAll({ attributes: ['name'] });
@@ -48,6 +49,8 @@ const createApplication = async (req, res, next) => {
     return next(new HttpError('Application description is required.', 400));
 
   if (!App_Rnumber) return next(new HttpError('Application Rnumber is required.', 400));
+  if (+App_Rnumber > 999_999)
+    return next(new HttpError('Application Rnumber is too big!.', 400));
   if (typeof +App_Rnumber !== 'number' || +App_Rnumber < 0)
     return next(new HttpError('Application Rnumber needs to be a valid number.', 400));
 
@@ -578,7 +581,7 @@ const getPlansData = async (req, res, next) => {
   try {
     const plans = await Plan.findAll({
       where: { Plan_app_Acronym: req.params.App_Acronym },
-      order: [['createdAt', 'DESC']],
+      order: [['updatedAt', 'DESC']],
     });
 
     if (!plans) return next(new HttpError('Plan is unavailable.', 400));

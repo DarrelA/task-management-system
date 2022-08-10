@@ -122,6 +122,19 @@ const TaskProvider = ({ children }) => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
 
+      [
+        'App_Acronym',
+        'App_Rnumber',
+        'App_Description',
+        'App_startDate',
+        'App_endDate',
+        'App_permit_Create',
+        'App_permit_Open',
+        'App_permit_toDoList',
+        'App_permit_Doing',
+        'App_permit_Done',
+      ].forEach((key) => localStorage.removeItem(key));
+
       dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
 
       clearAlert();

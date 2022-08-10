@@ -12,6 +12,7 @@ import {
   Typography,
 } from '@material-ui/core';
 import { useEffect, useState } from 'react';
+import useLocalStorage from '../../hooks/useLocalStorage';
 
 const ApplicationModal = ({
   open,
@@ -44,32 +45,69 @@ const ApplicationModal = ({
 
   const classes = useStyles();
   const [modalStyle] = useState({ top: '15%', margin: 'auto' });
-  const [inputAppData, setInputAppData] = useState({
-    App_Acronym: editAppMode?.App_Acronym || '',
-    App_Rnumber: editAppMode?.App_Rnumber || '',
-    App_Description: editAppMode?.App_Description || '',
-    App_startDate: editAppMode?.App_startDate || '',
-    App_endDate: editAppMode?.App_endDate || '',
-    App_permit_Create: editAppMode?.App_permit_Create || '',
-    App_permit_Open: editAppMode?.App_permit_Open || '',
-    App_permit_toDoList: editAppMode?.App_permit_toDoList || '',
-    App_permit_Doing: editAppMode?.App_permit_Doing || '',
-    App_permit_Done: editAppMode?.App_permit_Done || '',
-  });
+
+  const [App_Acronym, setApp_Acronym] = useLocalStorage(
+    'App_Acronym',
+    editAppMode?.App_Acronym ?? ''
+  );
+  const [App_Rnumber, setApp_Rnumber] = useLocalStorage(
+    'App_Rnumber',
+    editAppMode?.App_Rnumber ?? ''
+  );
+  const [App_Description, setApp_Description] = useLocalStorage(
+    'App_Description',
+    editAppMode?.App_Description ?? ''
+  );
+  const [App_startDate, setApp_startDate] = useLocalStorage(
+    'App_startDate',
+    editAppMode?.App_startDate ?? ''
+  );
+  const [App_endDate, setApp_endDate] = useLocalStorage(
+    'App_endDate',
+    editAppMode?.App_endDate ?? ''
+  );
+  const [App_permit_Create, setApp_permit_Create] = useLocalStorage(
+    'App_permit_Create',
+    editAppMode?.App_permit_Create ?? ''
+  );
+  const [App_permit_Open, setApp_permit_Open] = useLocalStorage(
+    'App_permit_Open',
+    editAppMode?.App_permit_Open ?? ''
+  );
+  const [App_permit_toDoList, setApp_permit_toDoList] = useLocalStorage(
+    'App_permit_toDoList',
+    editAppMode?.App_permit_toDoList ?? ''
+  );
+  const [App_permit_Doing, setApp_permit_Doing] = useLocalStorage(
+    'App_permit_Doing',
+    editAppMode?.App_permit_Doing ?? ''
+  );
+  const [App_permit_Done, setApp_permit_Done] = useLocalStorage(
+    'App_permit_Done',
+    editAppMode?.App_permit_Done ?? ''
+  );
+
   const [disableCreate, setDisableCreate] = useState(false);
 
-  const inputAppHandler = (e) =>
-    setInputAppData({
-      ...inputAppData,
-      [e.target?.id]: e.target.value,
-      [e.target?.name]: e.target.value,
+  const createTaskHandler = () =>
+    appModalHandler({
+      App_Acronym,
+      App_Rnumber,
+      App_Description,
+      App_startDate,
+      App_endDate,
+      App_permit_Create,
+      App_permit_Open,
+      App_permit_toDoList,
+      App_permit_Doing,
+      App_permit_Done,
     });
 
-  const createTaskHandler = () => appModalHandler({ ...inputAppData });
-
   useEffect(() => {
-    !inputAppData.App_Acronym ? setDisableCreate(true) : setDisableCreate(false);
-  }, [inputAppData.App_Acronym]);
+    App_Rnumber === false || !App_Acronym || !App_Description
+      ? setDisableCreate(true)
+      : setDisableCreate(false);
+  }, [App_Rnumber, App_Acronym, App_Description]);
 
   const taskForm = (
     <div style={modalStyle} className={classes.paper}>
@@ -78,8 +116,8 @@ const ApplicationModal = ({
           label="App Rnumber"
           type="number"
           id="App_Rnumber"
-          onInput={inputAppHandler}
-          value={inputAppData.App_Rnumber}
+          onInput={(e) => setApp_Rnumber(e.target.value)}
+          value={App_Rnumber}
           required
           fullWidth
           disabled={!!editAppMode?.App_Acronym}
@@ -91,8 +129,8 @@ const ApplicationModal = ({
           type="text"
           id="App_Acronym"
           placeholder="delta"
-          onInput={inputAppHandler}
-          value={inputAppData.App_Acronym}
+          onInput={(e) => setApp_Acronym(e.target.value)}
+          value={App_Acronym}
           required
           fullWidth
           disabled={!!editAppMode?.App_Acronym}
@@ -104,8 +142,8 @@ const ApplicationModal = ({
           id="App_Description"
           minRows={8}
           multiline
-          onInput={inputAppHandler}
-          value={inputAppData.App_Description}
+          onInput={(e) => setApp_Description(e.target.value)}
+          value={App_Description}
           required
           fullWidth
           style={{ height: 200, overflowY: 'scroll' }}
@@ -118,8 +156,8 @@ const ApplicationModal = ({
             id="App_startDate"
             type="date"
             InputLabelProps={{ shrink: true }}
-            onInput={inputAppHandler}
-            defaultValue={inputAppData.App_startDate}
+            onInput={(e) => setApp_startDate(e.target.value)}
+            defaultValue={App_startDate}
             disabled={!isProjectLead}
           />
 
@@ -128,8 +166,8 @@ const ApplicationModal = ({
             id="App_endDate"
             type="date"
             InputLabelProps={{ shrink: true }}
-            onInput={inputAppHandler}
-            defaultValue={inputAppData.App_endDate}
+            onInput={(e) => setApp_endDate(e.target.value)}
+            defaultValue={App_endDate}
             disabled={!isProjectLead}
           />
         </Grid>
@@ -150,8 +188,8 @@ const ApplicationModal = ({
               labelId="App_permit_Create"
               id="App_permit_Create"
               name="App_permit_Create"
-              value={inputAppData.App_permit_Create}
-              onChange={inputAppHandler}
+              value={App_permit_Create}
+              onChange={(e) => setApp_permit_Create(e.target.value)}
               disabled={!isProjectLead}
             >
               <MenuItem key="empty" value="">
@@ -171,8 +209,8 @@ const ApplicationModal = ({
               labelId="App_permit_Open"
               id="App_permit_Open"
               name="App_permit_Open"
-              value={inputAppData.App_permit_Open}
-              onChange={inputAppHandler}
+              value={App_permit_Open}
+              onChange={(e) => setApp_permit_Open(e.target.value)}
               disabled={!isProjectLead}
             >
               <MenuItem key="empty" value="">
@@ -192,8 +230,8 @@ const ApplicationModal = ({
               labelId="App_permit_toDoList"
               id="App_permit_toDoList"
               name="App_permit_toDoList"
-              value={inputAppData.App_permit_toDoList}
-              onChange={inputAppHandler}
+              value={App_permit_toDoList}
+              onChange={(e) => setApp_permit_toDoList(e.target.value)}
               disabled={!isProjectLead}
             >
               <MenuItem key="empty" value="">
@@ -213,8 +251,8 @@ const ApplicationModal = ({
               labelId="App_permit_Doing"
               id="App_permit_Doing"
               name="App_permit_Doing"
-              value={inputAppData.App_permit_Doing}
-              onChange={inputAppHandler}
+              value={App_permit_Doing}
+              onChange={(e) => setApp_permit_Doing(e.target.value)}
               disabled={!isProjectLead}
             >
               <MenuItem key="empty" value="">
@@ -234,8 +272,8 @@ const ApplicationModal = ({
               labelId="App_permit_Done"
               id="App_permit_Done"
               name="App_permit_Done"
-              value={inputAppData.App_permit_Done}
-              onChange={inputAppHandler}
+              value={App_permit_Done}
+              onChange={(e) => setApp_permit_Done(e.target.value)}
               disabled={!isProjectLead}
             >
               <MenuItem key="empty" value="">
