@@ -168,6 +168,11 @@ const getTasksData = async (req, res, next) => {
       })),
     ].map((usergroup) => usergroup.groupName);
 
+    let isProjectManager = await checkGroup(req.user.username, 'Project Manager');
+    if (!isProjectManager && req?.admin.isAdmin) isProjectManager = true;
+
+    const appPermits = { isProjectManager };
+
     // Set T/F permissions in respective App_permit states
     const {
       App_permit_Create,
@@ -176,7 +181,6 @@ const getTasksData = async (req, res, next) => {
       App_permit_Doing,
       App_permit_Done,
     } = application;
-    const appPermits = {};
 
     appPermits.App_permit_Create =
       req?.admin.isAdmin ||

@@ -17,6 +17,7 @@ const CreatePlanTask = (props) => {
           color="primary"
           style={{ margin: '16px 0' }}
           onClick={openPlanModalHandler}
+          disabled={!appPermits?.isProjectLead}
         >
           Create Plan
         </Button>
