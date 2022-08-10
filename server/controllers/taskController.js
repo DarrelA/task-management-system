@@ -277,7 +277,7 @@ const getTasksData = async (req, res, next) => {
 };
 
 const createTask = async (req, res, next) => {
-  const { App_Acronym, Task_name, Task_description, Task_plan } = req.body;
+  const { App_Acronym, Task_name, Task_description, Task_plan, New_task_note } = req.body;
 
   if (!Task_name) return next(new HttpError('Task name is required.', 400));
   if (!Task_description) return next(new HttpError('Task description is required.', 400));
@@ -314,6 +314,16 @@ const createTask = async (req, res, next) => {
       taskTaskName: Task_name,
     });
     await newNote.save();
+
+    if (New_task_note.length > 0) {
+      const newNote = await Note.create({
+        username: req.user.username,
+        state: 'open',
+        description: New_task_note,
+        taskTaskName: Task_name,
+      });
+      await newNote.save();
+    }
 
     res.send({ message: 'success' });
   } catch (e) {

@@ -206,7 +206,7 @@ const TaskProvider = ({ children }) => {
   }, []);
 
   const createTask = async (
-    { Task_name, Task_description, Task_plan },
+    { Task_name, Task_description, Task_plan, New_task_note },
     App_Acronym,
     accessToken
   ) => {
@@ -218,7 +218,13 @@ const TaskProvider = ({ children }) => {
           'Content-Type': 'application/json',
           authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ App_Acronym, Task_name, Task_description, Task_plan }),
+        body: JSON.stringify({
+          App_Acronym,
+          Task_name,
+          Task_description,
+          Task_plan,
+          New_task_note,
+        }),
       });
 
       const data = await response.json();

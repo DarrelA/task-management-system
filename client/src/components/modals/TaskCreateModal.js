@@ -35,6 +35,7 @@ const TaskCreateModal = ({ open, onClose, taskCreateModalHandler, plans }) => {
     Task_name: '',
     Task_description: '',
     Task_plan: '',
+    New_task_note: '',
   });
   const [disableCreate, setDisableCreate] = useState(false);
 
@@ -99,6 +100,17 @@ const TaskCreateModal = ({ open, onClose, taskCreateModalHandler, plans }) => {
           multiline
           onInput={inputAppHandler}
           value={inputAppData.Task_description}
+          fullWidth
+        />
+
+        <TextField
+          label="Task Note"
+          type="textarea"
+          id="New_task_note"
+          minRows={5}
+          multiline
+          onInput={inputAppHandler}
+          value={inputAppData.New_task_note}
           fullWidth
         />
 
