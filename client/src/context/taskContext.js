@@ -26,7 +26,8 @@ const userReducer = (state, action) => {
     }
 
     case 'GET_ALL_TASK_SUCCESS': {
-      return { ...state, isLoading: false, appPermits: action.payload.appPermits };
+      const { appPermits, tasks } = action.payload;
+      return { ...state, isLoading: false, appPermits, tasks };
     }
 
     case 'GET_ALL_PlAN_SUCCESS': {
@@ -184,6 +185,7 @@ const TaskProvider = ({ children }) => {
   };
 
   const getTasksData = useCallback(async (App_Acronym, accessToken) => {
+    dispatch({ type: 'IS_LOADING' });
     try {
       const response = await fetch(`/api/tasks/${App_Acronym}/all`, {
         credentials: 'include',
@@ -198,7 +200,6 @@ const TaskProvider = ({ children }) => {
       addAppPermitsDataToLocalStorage(data.appPermits);
       dispatch({ type: 'GET_ALL_TASK_SUCCESS', payload: data });
       clearAlert();
-      return data.tasks; // To PlanTask page
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });
       clearAlert();
@@ -236,7 +237,7 @@ const TaskProvider = ({ children }) => {
   };
 
   const updateTask = async (
-    { Task_name, Task_description, Task_state, Task_plan, New_task_note },
+    { Task_name, Task_state, Task_plan, New_task_note },
     App_Acronym,
     accessToken
   ) => {
@@ -252,7 +253,6 @@ const TaskProvider = ({ children }) => {
         body: JSON.stringify({
           App_Acronym,
           Task_name,
-          Task_description,
           Task_state,
           Task_plan,
           New_task_note,

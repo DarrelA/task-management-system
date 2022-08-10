@@ -39,6 +39,7 @@ const PlanTask = () => {
   const taskContext = useTaskContext();
   const {
     getTasksData,
+    tasks,
     appPermits,
     createTask,
     updateTask,
@@ -51,7 +52,7 @@ const PlanTask = () => {
   } = taskContext;
   const userContext = useUserContext();
   const { accessToken, message } = userContext;
-  const { taskMessage } = taskContext;
+  const { taskMessage, isLoading } = taskContext;
 
   const { App_Acronym } = useParams();
   const navigate = useNavigate();
@@ -63,8 +64,8 @@ const PlanTask = () => {
   const [editPlanMode, setEditPlanMode] = useState({ edit: false });
 
   // fetchTasksOnRefresh on first load
-  const [isLoading, setIsLoading] = useState(true);
-  const [columns, setColumns] = useState();
+  // const [isLoading, setIsLoading] = useState(true);
+  const [columns, setColumns] = useState(tasks);
 
   const openTaskCreateModalHandler = () => setOpenTaskCreateModal(true);
   const closeTaskCreateModalHandler = () => setOpenTaskCreateModal(false);
@@ -111,15 +112,9 @@ const PlanTask = () => {
 
   // @TODO: Prevent createTask Modal from closing due to rerender
   useEffect(() => {
-    const fetchTasksOnRefresh = async () => {
-      const tasks = await getTasksData(App_Acronym, accessToken);
-      if (tasks) {
-        setColumns(tasks);
-        setIsLoading(false);
-      }
-    };
-    accessToken && fetchTasksOnRefresh();
-  }, [App_Acronym, accessToken, getTasksData]);
+    accessToken && getTasksData(App_Acronym, accessToken);
+    setColumns(tasks);
+  }, [App_Acronym, accessToken, getTasksData, JSON.stringify(tasks)]);
 
   useEffect(() => {
     accessToken && getPlansData(App_Acronym, accessToken);

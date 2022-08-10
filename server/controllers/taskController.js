@@ -312,16 +312,8 @@ const createTask = async (req, res, next) => {
 };
 
 const updateTask = async (req, res, next) => {
-  const {
-    App_Acronym,
-    Task_name,
-    Task_description,
-    Task_state,
-    Task_plan,
-    New_task_note,
-  } = req.body;
+  const { App_Acronym, Task_name, Task_state, Task_plan, New_task_note } = req.body;
 
-  if (!Task_description) return next(new HttpError('Task description is required.', 400));
   if (!Task_state) return next(new HttpError('Task state is required.', 400));
 
   try {
@@ -331,14 +323,6 @@ const updateTask = async (req, res, next) => {
     const task = await Task.findByPk(Task_name);
     if (!task) return next(new HttpError('Task not found.', 400));
 
-    if (Task_state === 'open' || Task_state === 'todolist' || Task_state === 'doing')
-      task.Task_description = Task_description;
-
-    task.Task_owner = req.user.username;
-    task.Task_plan = Task_plan || null;
-
-    await task.save();
-
     if (New_task_note.length > 0) {
       const newNote = await Note.create({
         username: req.user.username,
@@ -347,7 +331,19 @@ const updateTask = async (req, res, next) => {
         taskTaskName: Task_name,
       });
       await newNote.save();
+
+      task.Task_owner = req.user.username;
+      await task.save();
     }
+
+    if (Task_state === 'done' || Task_state === 'close')
+      return next(
+        new HttpError('Unable to change plan at "Done" or "Close" states.', 400)
+      );
+
+    task.Task_owner = req.user.username;
+    task.Task_plan = Task_plan || null;
+    await task.save();
 
     res.send({ message: 'success' });
   } catch (e) {
@@ -526,6 +522,7 @@ const getPlansData = async (req, res, next) => {
   try {
     const plans = await Plan.findAll({
       where: { Plan_app_Acronym: req.params.App_Acronym },
+      order: [['createdAt', 'DESC']],
     });
 
     if (!plans) return next(new HttpError('Plan is unavailable.', 400));
@@ -539,8 +536,8 @@ const getPlansData = async (req, res, next) => {
 const createPlan = async (req, res, next) => {
   const { App_Acronym, Plan_MVP_name, Plan_startDate, Plan_endDate, Plan_color } =
     req.body;
-
-  if (!Plan_MVP_name) return next(new HttpError('Plan name is required.', 400));
+  if (!Plan_MVP_name || !Plan_startDate || !Plan_endDate || !Plan_color)
+    return next(new HttpError('All fields are required.', 400));
 
   try {
     const application = await Application.findByPk(App_Acronym);
@@ -551,11 +548,12 @@ const createPlan = async (req, res, next) => {
 
     const newPlan = await Plan.create({
       Plan_MVP_name,
-      Plan_startDate: Plan_startDate || null,
-      Plan_endDate: Plan_endDate || null,
+      Plan_startDate,
+      Plan_endDate,
       Plan_app_Acronym: App_Acronym,
-      Plan_color: Plan_color || '#3f51b5',
+      Plan_color,
     });
+
     await newPlan.save();
     res.send({ message: 'success' });
   } catch (e) {
@@ -564,28 +562,29 @@ const createPlan = async (req, res, next) => {
   }
 };
 
-const updatePlan = async (req, res, next) => {
-  const { App_Acronym, Plan_MVP_name, Plan_startDate, Plan_endDate, Plan_color } =
-    req.body;
+// Not required
+// const updatePlan = async (req, res, next) => {
+//   const { App_Acronym, Plan_MVP_name, Plan_startDate, Plan_endDate, Plan_color } =
+//     req.body;
 
-  try {
-    const application = await Application.findByPk(App_Acronym);
-    if (!application) return next(new HttpError('Application not found.', 400));
+//   try {
+//     const application = await Application.findByPk(App_Acronym);
+//     if (!application) return next(new HttpError('Application not found.', 400));
 
-    const plan = await Plan.findByPk(Plan_MVP_name);
-    if (!plan) return next(new HttpError('Plan not found.', 400));
+//     const plan = await Plan.findByPk(Plan_MVP_name);
+//     if (!plan) return next(new HttpError('Plan not found.', 400));
 
-    if (Plan_startDate) plan.Plan_startDate = Plan_startDate;
-    if (Plan_endDate) plan.Plan_endDate = Plan_endDate;
-    if (Plan_color) plan.Plan_color = Plan_color;
+//     if (Plan_startDate) plan.Plan_startDate = Plan_startDate;
+//     if (Plan_endDate) plan.Plan_endDate = Plan_endDate;
+//     if (Plan_color) plan.Plan_color = Plan_color;
 
-    await plan.save();
-    res.send({ message: 'success' });
-  } catch (e) {
-    console.error(e);
-    return next(new HttpError('Something went wrong!', 500));
-  }
-};
+//     await plan.save();
+//     res.send({ message: 'success' });
+//   } catch (e) {
+//     console.error(e);
+//     return next(new HttpError('Something went wrong!', 500));
+//   }
+// };
 
 module.exports = {
   getApplicationsData,
@@ -598,5 +597,5 @@ module.exports = {
   updateKanbanIndex,
   getPlansData,
   createPlan,
-  updatePlan,
+  // updatePlan,
 };

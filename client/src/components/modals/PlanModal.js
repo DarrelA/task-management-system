@@ -51,8 +51,18 @@ const PlanModal = ({ open, onClose, planModalHandler, editPlanMode }) => {
   const createTaskHandler = () => planModalHandler({ ...inputAppData });
 
   useEffect(() => {
-    !inputAppData.Plan_MVP_name ? setDisableCreate(true) : setDisableCreate(false);
-  }, [inputAppData.Plan_MVP_name]);
+    !inputAppData.Plan_MVP_name ||
+    !inputAppData.Plan_startDate ||
+    !inputAppData.Plan_endDate ||
+    !inputAppData.Plan_color
+      ? setDisableCreate(true)
+      : setDisableCreate(false);
+  }, [
+    inputAppData.Plan_MVP_name,
+    inputAppData.Plan_startDate,
+    inputAppData.Plan_endDate,
+    inputAppData.Plan_color,
+  ]);
 
   const taskForm = (
     <div style={modalStyle} className={classes.paper}>
@@ -83,6 +93,7 @@ const PlanModal = ({ open, onClose, planModalHandler, editPlanMode }) => {
             InputLabelProps={{ shrink: true }}
             onInput={inputAppHandler}
             defaultValue={inputAppData.Plan_startDate}
+            required
           />
 
           <TextField
@@ -92,6 +103,7 @@ const PlanModal = ({ open, onClose, planModalHandler, editPlanMode }) => {
             InputLabelProps={{ shrink: true }}
             onInput={inputAppHandler}
             defaultValue={inputAppData.Plan_endDate}
+            required
           />
         </Grid>
 
@@ -106,6 +118,7 @@ const PlanModal = ({ open, onClose, planModalHandler, editPlanMode }) => {
             onChange={(colorPicked) =>
               setInputAppData({ ...inputAppData, Plan_color: colorPicked.hex })
             }
+            required
           />
           <Grid
             container

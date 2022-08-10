@@ -18,12 +18,15 @@ const TaskModal = ({ open, onClose, taskUpdateModalHandler, taskItemData, plans 
   const useStyles = makeStyles((theme) => ({
     paper: {
       position: 'absolute',
+      maxHeight: 800,
       maxWidth: 800,
       width: '75%',
       backgroundColor: theme.palette.background.paper,
       border: '2px solid #000',
       boxShadow: theme.shadows[5],
       padding: theme.spacing(2, 4, 3),
+      overflowY: 'scroll',
+      overflowX: 'hidden',
     },
 
     formControl: { minWidth: 166 },
@@ -32,8 +35,8 @@ const TaskModal = ({ open, onClose, taskUpdateModalHandler, taskItemData, plans 
       marginTop: 15,
       minWidth: 732,
       maxWidth: 732,
-      minHeight: 300,
-      maxHeight: 300,
+      minHeight: 160,
+      maxHeight: 160,
       overflowY: 'scroll',
       overflowX: 'hidden',
     },
@@ -160,6 +163,10 @@ const TaskModal = ({ open, onClose, taskUpdateModalHandler, taskItemData, plans 
                 name="Task_plan"
                 value={inputAppData.Task_plan}
                 onChange={inputAppHandler}
+                disabled={
+                  inputAppData.Task_state === 'done' ||
+                  inputAppData.Task_state === 'close'
+                }
               >
                 <MenuItem key="empty" value="">
                   None
@@ -181,10 +188,11 @@ const TaskModal = ({ open, onClose, taskUpdateModalHandler, taskItemData, plans 
           multiline
           onInput={inputAppHandler}
           value={inputAppData.Task_description}
+          disabled={!!taskItemData?.Task_description}
           fullWidth
         />
 
-        <Typography variant="h6" style={{ paddingTop: 30, textAlign: 'center' }}>
+        <Typography variant="h6" style={{ paddingTop: 20, textAlign: 'center' }}>
           Notes
         </Typography>
 

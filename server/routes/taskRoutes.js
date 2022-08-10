@@ -34,11 +34,17 @@ router
   .post(authMiddleware, appAccessRightsMiddleware, createTask)
   .patch(authMiddleware, appAccessRightsMiddleware, updateTask);
 
-router.patch('/taskstate', authMiddleware, updateTaskState);
-router.patch('/kanbanindex', authMiddleware, updateKanbanIndex);
+router.patch('/taskstate', authMiddleware, appAccessRightsMiddleware, updateTaskState);
+router.patch(
+  '/kanbanindex',
+  authMiddleware,
+  appAccessRightsMiddleware,
+  updateKanbanIndex
+);
 
 router.get('/:App_Acronym/plans', authMiddleware, getPlansData);
 
-router.route('/plan').post(authMiddleware, createPlan).patch(authMiddleware, updatePlan);
+router.route('/plan').post(authMiddleware, appAccessRightsMiddleware, createPlan);
+// .patch(authMiddleware, updatePlan);
 
 module.exports = router;
