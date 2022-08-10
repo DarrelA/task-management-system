@@ -202,10 +202,10 @@ const getTasksData = async (req, res, next) => {
       where: { Task_app_Acronym: req.params.App_Acronym },
       order: [['Kanban_index', 'ASC']],
       include: { model: Plan, attributes: ['Plan_color'] },
-      include: {
-        model: Note,
-        attributes: ['username', 'state', 'description', 'createdAt'],
-      },
+      include: [
+        { model: Plan, attributes: ['Plan_color'] },
+        { model: Note, attributes: ['username', 'state', 'description', 'createdAt'] },
+      ],
     });
 
     // Get only dataValues from Sequelize ORM
