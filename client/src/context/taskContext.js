@@ -31,6 +31,11 @@ const userReducer = (state, action) => {
       return { ...state, isLoading: false, appPermits, tasks };
     }
 
+    case 'GET_TASK_SUCCESS': {
+      const { appPermits, task } = action.payload;
+      return { ...state, isLoading: false, appPermits, task };
+    }
+
     case 'GET_ALL_PlAN_SUCCESS': {
       return { ...state, isLoading: false, plans: action.payload.plans };
     }
@@ -65,8 +70,24 @@ const TaskProvider = ({ children }) => {
     localStorage.setItem('tasksData', JSON.stringify(updatedTasksData));
   };
 
+  const removeTaskData = () => {
+    [
+      'TaskName',
+      'TaskId',
+      'TaskState',
+      'TaskNotes',
+      'NewTaskNote',
+      'TaskDescription',
+      'TaskCreator',
+      'TaskOwner',
+      'TaskPlan',
+      'createdAt',
+    ].forEach((key) => localStorage.removeItem(key));
+  };
+
   const getApplicationsData = useCallback(async (accessToken) => {
     dispatch({ type: 'IS_LOADING' });
+    removeTaskData();
     try {
       const response = await fetch(`/api/tasks/applications/all`, {
         credentials: 'include',
@@ -203,7 +224,7 @@ const TaskProvider = ({ children }) => {
     }
   };
 
-  const getTasksData = useCallback(async (App_Acronym, accessToken) => {
+  const getAllTasksData = useCallback(async (App_Acronym, accessToken) => {
     try {
       const response = await fetch(`/api/tasks/${App_Acronym}/all`, {
         credentials: 'include',
@@ -218,6 +239,30 @@ const TaskProvider = ({ children }) => {
       addAppPermitsDataToLocalStorage(data.appPermits);
       addTasksDataToLocalStorage(data.tasks);
       dispatch({ type: 'GET_ALL_TASK_SUCCESS', payload: data });
+      clearAlert();
+      return data; // to PlanTask page
+    } catch (e) {
+      dispatch({ type: 'RESPONSE_FAIL', payload: e });
+      clearAlert();
+    }
+  }, []);
+
+  const getTaskData = useCallback(async (App_Acronym, Task_name, accessToken) => {
+    dispatch({ type: 'IS_LOADING' });
+
+    try {
+      const response = await fetch(`/api/tasks/${App_Acronym}/task/${Task_name}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+      addAppPermitsDataToLocalStorage(data.appPermits);
+      dispatch({ type: 'GET_TASK_SUCCESS', payload: data });
       clearAlert();
       return data; // to PlanTask page
     } catch (e) {
@@ -259,7 +304,7 @@ const TaskProvider = ({ children }) => {
 
       dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
       clearAlert();
-      getTasksData(App_Acronym, accessToken);
+      getAllTasksData(App_Acronym, accessToken);
       return true; // to PlanTask page
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });
@@ -294,10 +339,8 @@ const TaskProvider = ({ children }) => {
       if (!response.ok) throw new Error(data.message);
 
       dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
-
       clearAlert();
-      // getTasksData(App_Acronym, accessToken);
-      // return true; // to PlanTask page
+      getTaskData(App_Acronym, Task_name, accessToken);
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });
       clearAlert();
@@ -332,7 +375,7 @@ const TaskProvider = ({ children }) => {
 
       dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
       clearAlert();
-      getTasksData(App_Acronym, accessToken);
+      getAllTasksData(App_Acronym, accessToken);
       return true; // to PlanTask page
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });
@@ -358,7 +401,7 @@ const TaskProvider = ({ children }) => {
       dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
 
       clearAlert();
-      getTasksData(App_Acronym, accessToken);
+      getAllTasksData(App_Acronym, accessToken);
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });
       clearAlert();
@@ -433,7 +476,8 @@ const TaskProvider = ({ children }) => {
         getApplicationsData,
         createApplication,
         updateApplication,
-        getTasksData,
+        getAllTasksData,
+        getTaskData,
         createTask,
         updateTask,
         updateTaskState,

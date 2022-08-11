@@ -244,74 +244,82 @@ const getAllTasksData = async (req, res, next) => {
 };
 
 const getTaskData = async (req, res, next) => {
-  // try {
-  //   let application = await Application.findByPk(req.params.App_Acronym, {
-  //     order: [Note, 'createdAt', 'DESC'],
-  //     include: {
-  //       model: Note,
-  //       attributes: ['username', 'state', 'description', 'createdAt'],
-  //     },
-  //   });
-  //   if (!application) return next(new HttpError('Application is unavailable.', 400));
-  //   let task = await Task.findByPk(req.params.Task_name);
-  //   if (!task) return next(new HttpError('Task is unavailable.', 400));
-  //   // Find the usergroups that user belongs to
-  //   let usergroups = [
-  //     ...(await UserGroup.findAll({
-  //       where: { userUsername: req.user.username },
-  //       attributes: ['groupName'],
-  //     })),
-  //   ].map((usergroup) => usergroup.groupName);
-  //   // Set T/F permissions in respective App_permit states
-  //   const appPermits = {};
-  //   const {
-  //     App_permit_Create,
-  //     App_permit_Open,
-  //     App_permit_toDoList,
-  //     App_permit_Doing,
-  //     App_permit_Done,
-  //   } = application;
-  //   appPermits.App_permit_Create =
-  //     req?.admin.isAdmin ||
-  //     !!usergroups.find((usergroup) => usergroup === App_permit_Create);
-  //   appPermits.App_permit_Open =
-  //     req?.admin.isAdmin ||
-  //     !!usergroups.find((usergroup) => usergroup === App_permit_Open);
-  //   appPermits.App_permit_toDoList =
-  //     req?.admin.isAdmin ||
-  //     !!usergroups.find((usergroup) => usergroup === App_permit_toDoList);
-  //   appPermits.App_permit_Doing =
-  //     req?.admin.isAdmin ||
-  //     !!usergroups.find((usergroup) => usergroup === App_permit_Doing);
-  //   appPermits.App_permit_Done =
-  //     req?.admin.isAdmin ||
-  //     !!usergroups.find((usergroup) => usergroup === App_permit_Done);
-  //   // Get only dataValues from Sequelize ORM
-  //   task = JSON.stringify(task);
-  //   task = JSON.parse(task);
-  //   const options = {
-  //     weekday: 'short',
-  //     year: '2-digit',
-  //     month: 'short',
-  //     day: 'numeric',
-  //     hour: 'numeric',
-  //     minute: '2-digit',
-  //   };
-  //   task.notes.forEach((note) => {
-  //     task.Task_notes = '';
-  //     task.Task_notes += `Date & time: ${new Date(note.createdAt).toLocaleString(
-  //       'en-US',
-  //       options
-  //     )}\nTask state: ${note.state}\nUsername: ${note.username}\nNotes: ${
-  //       note.description
-  //     }\n\n`;
-  //   });
-  //   delete task.notes;
-  //   return res.send({ appPermits, task });
-  // } catch (e) {
-  //   console.error(e);
-  //   return next(new HttpError('Something went wrong!', 500));
-  // }
+  try {
+    let application = await Application.findByPk(req.params.App_Acronym);
+    if (!application) return next(new HttpError('Application is unavailable.', 400));
+
+    let task = await Task.findByPk(req.params.Task_name, {
+      order: [[Note, 'createdAt', 'DESC']],
+      include: {
+        model: Note,
+        attributes: ['username', 'state', 'description', 'createdAt'],
+      },
+    });
+
+    if (!task) return next(new HttpError('Task is unavailable.', 400));
+
+    // Find the usergroups that user belongs to
+    let usergroups = [
+      ...(await UserGroup.findAll({
+        where: { userUsername: req.user.username },
+        attributes: ['groupName'],
+      })),
+    ].map((usergroup) => usergroup.groupName);
+    // Set T/F permissions in respective App_permit states
+    const appPermits = {};
+    const {
+      App_permit_Create,
+      App_permit_Open,
+      App_permit_toDoList,
+      App_permit_Doing,
+      App_permit_Done,
+    } = application;
+
+    appPermits.App_permit_Create =
+      req?.admin.isAdmin ||
+      !!usergroups.find((usergroup) => usergroup === App_permit_Create);
+    appPermits.App_permit_Open =
+      req?.admin.isAdmin ||
+      !!usergroups.find((usergroup) => usergroup === App_permit_Open);
+    appPermits.App_permit_toDoList =
+      req?.admin.isAdmin ||
+      !!usergroups.find((usergroup) => usergroup === App_permit_toDoList);
+    appPermits.App_permit_Doing =
+      req?.admin.isAdmin ||
+      !!usergroups.find((usergroup) => usergroup === App_permit_Doing);
+    appPermits.App_permit_Done =
+      req?.admin.isAdmin ||
+      !!usergroups.find((usergroup) => usergroup === App_permit_Done);
+
+    // Get only dataValues from Sequelize ORM
+    task = JSON.stringify(task);
+    task = JSON.parse(task);
+
+    const options = {
+      weekday: 'short',
+      year: '2-digit',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    };
+
+    task.Task_notes = '';
+    task.notes.forEach((note) => {
+      task.Task_notes += `Date & time: ${new Date(note.createdAt).toLocaleString(
+        'en-US',
+        options
+      )}\nTask state: ${note.state}\nUsername: ${note.username}\nNotes: ${
+        note.description
+      }\n\n`;
+    });
+    delete task.notes;
+
+    return res.send({ appPermits, task });
+  } catch (e) {
+    console.error(e);
+    return next(new HttpError('Something went wrong!', 500));
+  }
 };
 
 const createTask = async (req, res, next) => {
@@ -382,7 +390,7 @@ const updateTask = async (req, res, next) => {
     const task = await Task.findByPk(Task_name);
     if (!task) return next(new HttpError('Task not found.', 400));
 
-    if (New_task_note.length > 0) {
+    if (New_task_note?.length > 0) {
       const newNote = await Note.create({
         username: req.user.username,
         state: Task_state,
@@ -395,14 +403,11 @@ const updateTask = async (req, res, next) => {
       await task.save();
     }
 
-    if (Task_state === 'done' || Task_state === 'close')
-      return next(
-        new HttpError('Unable to change plan at "Done" or "Close" states.', 400)
-      );
-
-    task.Task_owner = req.user.username;
-    task.Task_plan = Task_plan || null;
-    await task.save();
+    if (Task_state !== 'done' || Task_state !== 'close') {
+      task.Task_owner = req.user.username;
+      task.Task_plan = Task_plan || null;
+      await task.save();
+    }
 
     res.send({ message: 'success' });
   } catch (e) {

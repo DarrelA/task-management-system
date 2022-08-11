@@ -7,7 +7,13 @@ import { Route, Routes } from 'react-router-dom';
 
 import { NavBar, ProtectedRoute } from './components';
 import useUserContext from './context/userContext';
-import { Applications, LoginUpdate, UserManagement, PlanTask } from './pages/';
+import {
+  Applications,
+  LoginUpdate,
+  UserManagement,
+  PlanTask,
+  TaskUpdate,
+} from './pages/';
 
 const App = () => {
   const theme = createTheme({ palette: { type: 'dark' } });
@@ -51,6 +57,14 @@ const App = () => {
           element={
             <ProtectedRoute>
               <PlanTask />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/app/:App_Acronym/task/:taskName"
+          element={
+            <ProtectedRoute>
+              <TaskUpdate />
             </ProtectedRoute>
           }
         />

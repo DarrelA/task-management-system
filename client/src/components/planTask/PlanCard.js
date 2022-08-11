@@ -6,17 +6,19 @@ const useStyles = makeStyles({
   plansCardContent: {
     display: 'flex',
     flexWrap: 'wrap',
-    minHeight: 362,
-    width: 1332,
+    minHeight: 180,
+    width: 1340,
   },
 
   planContent: {
     width: 240,
     minWidth: 240,
-    maxHeight: 145,
-    padding: 5,
-    margin: 10,
+    height: 120,
+    maxHeight: 120,
+    margin: 5,
     borderRadius: '12px',
+    backgroundColor: '#456C86',
+    alignSelf: 'center',
   },
 
   cardActions: { display: 'flex', justifyContent: 'flex-end' },
@@ -31,28 +33,37 @@ const PlanCard = (props) => {
     <>
       <Grid container spacing={1} justifyContent="center">
         <Card className={classes.root} variant="outlined" key={App_Acronym}>
-          <CardContent className={classes.plansCardContent}>
-            {plans?.map((plan) => (
-              <Grid
-                container
-                spacing={2}
-                key={plan.Plan_MVP_name}
-                style={{ border: `0.4rem solid ${plan?.Plan_color}` }}
-                className={classes.planContent}
-              >
-                <Grid container item xs={12} style={{ justifyContent: 'center' }}>
-                  <Typography>{plan.Plan_MVP_name}</Typography>
-                </Grid>
+          <Grid
+            container
+            spacing={1}
+            justifyContent="center"
+            alignItems="center"
+            style={{ display: 'flex', flexDirection: 'column' }}
+          >
+            <Typography variant="h4">PLANS</Typography>
+            <CardContent className={classes.plansCardContent}>
+              {plans?.map((plan) => (
+                <Grid
+                  container
+                  spacing={2}
+                  key={plan.Plan_MVP_name}
+                  style={{ border: `0.4rem solid ${plan?.Plan_color}` }}
+                  className={classes.planContent}
+                >
+                  <Grid container item xs={12} style={{ justifyContent: 'center' }}>
+                    <Typography>{plan.Plan_MVP_name}</Typography>
+                  </Grid>
 
-                <Grid container item xs={6} style={{ justifyContent: 'center' }}>
-                  <Typography>{plan.Plan_startDate}</Typography>
+                  <Grid container item xs={6} style={{ justifyContent: 'center' }}>
+                    <Typography>{plan.Plan_startDate}</Typography>
+                  </Grid>
+                  <Grid container item xs={6} style={{ justifyContent: 'center' }}>
+                    <Typography>{plan.Plan_endDate}</Typography>
+                  </Grid>
                 </Grid>
-                <Grid container item xs={6} style={{ justifyContent: 'center' }}>
-                  <Typography>{plan.Plan_endDate}</Typography>
-                </Grid>
-              </Grid>
-            ))}
-          </CardContent>
+              ))}
+            </CardContent>
+          </Grid>
         </Card>
       </Grid>
     </>

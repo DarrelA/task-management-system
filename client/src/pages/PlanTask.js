@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 import {
@@ -19,7 +19,6 @@ import {
   PlanModal,
   TaskCardColumn,
   TaskCreateModal,
-  TaskUpdateModal,
 } from '../components';
 import useTaskContext from '../context/taskContext';
 import useUserContext from '../context/userContext';
@@ -38,11 +37,12 @@ const PlanTask = () => {
 
   const taskContext = useTaskContext();
   const {
-    getTasksData,
+    taskMessage,
+    isLoading,
+    getAllTasksData,
     tasks,
     appPermits,
     createTask,
-    updateTask,
     updateTaskState,
     updateKanbanIndex,
     getPlansData,
@@ -50,67 +50,46 @@ const PlanTask = () => {
   } = taskContext;
   const userContext = useUserContext();
   const { accessToken, message } = userContext;
-  const { taskMessage, isLoading } = taskContext;
 
   const { App_Acronym } = useParams();
   const navigate = useNavigate();
 
   const [openTaskCreateModal, setOpenTaskCreateModal] = useState(false);
-  const [openTaskUpdateModal, setOpenTaskUpdateModal] = useState(false);
-  const [taskItemData, setTaskItemData] = useState();
   const [openPlanModal, setOpenPlanModal] = useState(false);
 
   // setFetchIsLoading on first load
   const [fetchIsLoading, setFetchIsLoading] = useState(true);
   const [columns, setColumns] = useState(tasks);
 
-  const openTaskCreateModalHandler = () => setOpenTaskCreateModal(true);
-  const closeTaskCreateModalHandler = () => setOpenTaskCreateModal(false);
-
-  const openTaskUpdateModalHandler = () => setOpenTaskUpdateModal(true);
-  const closeTaskUpdateModalHandler = () => {
-    setOpenTaskUpdateModal(false);
-    ['Task_name', 'Task_description', 'Task_plan', 'New_task_note'].forEach((key) =>
-      localStorage.removeItem(key)
-    );
-  };
-
-  const openPlanModalHandler = () => setOpenPlanModal(true);
-  const closePlanModalHandler = () => {
-    setOpenPlanModal(false);
-    ['Plan_MVP_name', 'Plan_startDate', 'Plan_endDate', 'Plan_color'].forEach((key) =>
-      localStorage.removeItem(key)
-    );
-  };
-
-  const taskUpdateModalHandler = async (inputData) => {
-    if (!inputData) return;
-    updateTask(inputData, App_Acronym, accessToken);
-    closeTaskCreateModalHandler();
-  };
-
   useEffect(() => {
     if (taskMessage === 'success') toast.success(taskMessage, { autoClose: 200 });
     else if (taskMessage === 'Application is unavailable.') return navigate('/apps');
     else if (!!taskMessage) toast.error(taskMessage);
-
     if (!!message) toast.error(message);
   }, [navigate, taskMessage, message]);
 
   useEffect(() => {
-    const fetchTasks = async () => {
-      const { tasks } = await getTasksData(App_Acronym, accessToken);
+    const firstFetchTasks = async () => {
+      const { tasks } = await getAllTasksData(App_Acronym, accessToken);
       if (!!tasks) {
         setColumns(tasks);
         setFetchIsLoading(false);
       }
     };
-    accessToken && fetchTasks();
-  }, [App_Acronym, accessToken, getTasksData]);
+    accessToken && firstFetchTasks();
+  }, [App_Acronym, accessToken, getAllTasksData]);
 
   useEffect(() => {
     accessToken && getPlansData(App_Acronym, accessToken);
   }, [App_Acronym, accessToken, getPlansData]);
+
+  const openTaskCreateModalHandler = () => setOpenTaskCreateModal(true);
+  const closeTaskCreateModalHandler = () => {
+    setOpenTaskCreateModal(false);
+    ['Task_name', 'Task_description', 'Task_plan', 'New_task_note'].forEach((key) =>
+      localStorage.removeItem(key)
+    );
+  };
 
   const taskCreateModalHandler = async (inputData) => {
     if (!inputData) return;
@@ -121,6 +100,14 @@ const PlanTask = () => {
         ...columns,
         open: { ...columns.open, items: [...columns.open.items, inputData] },
       });
+  };
+
+  const openPlanModalHandler = () => setOpenPlanModal(true);
+  const closePlanModalHandler = () => {
+    setOpenPlanModal(false);
+    ['Plan_MVP_name', 'Plan_startDate', 'Plan_endDate', 'Plan_color'].forEach((key) =>
+      localStorage.removeItem(key)
+    );
   };
 
   const onDragEndHandler = async (result, columns, setColumns) => {
@@ -228,16 +215,6 @@ const PlanTask = () => {
         />
       )}
 
-      {openTaskUpdateModal && (
-        <TaskUpdateModal
-          open={openTaskUpdateModal}
-          onClose={closeTaskUpdateModalHandler}
-          taskUpdateModalHandler={taskUpdateModalHandler}
-          taskItemData={taskItemData}
-          plans={plans}
-        />
-      )}
-
       {openPlanModal && (
         <PlanModal open={openPlanModal} onClose={closePlanModalHandler} />
       )}
@@ -302,10 +279,8 @@ const PlanTask = () => {
                                       <CardActions className={classes.cardActions}>
                                         <Button
                                           size="small"
-                                          onClick={() => {
-                                            setTaskItemData(item);
-                                            openTaskUpdateModalHandler();
-                                          }}
+                                          component={Link}
+                                          to={`/app/${App_Acronym}/task/${item.Task_name}`}
                                         >
                                           <span className="material-icons">edit</span>
                                         </Button>

@@ -5,7 +5,6 @@ import ProtectedRoute from './ProtectedRoute';
 import UserManagementModal from './modals/UserManagementModal';
 import ApplicationModal from './modals/ApplicationModal';
 import TaskCreateModal from './modals/TaskCreateModal';
-import TaskUpdateModal from './modals/TaskUpdateModal';
 import PlanModal from './modals/PlanModal';
 
 import CreatePlanTask from './planTask/CreatePlanTask';
@@ -19,7 +18,6 @@ export {
   UserManagementModal,
   ApplicationModal,
   TaskCreateModal,
-  TaskUpdateModal,
   PlanModal,
   CreatePlanTask,
   PlanCard,
