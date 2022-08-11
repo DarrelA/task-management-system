@@ -79,7 +79,6 @@ const TaskProvider = ({ children }) => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
       dispatch({ type: 'GET_ALL_APPLICATION_SUCCESS', payload: data });
-
       clearAlert();
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });
@@ -220,6 +219,7 @@ const TaskProvider = ({ children }) => {
       addTasksDataToLocalStorage(data.tasks);
       dispatch({ type: 'GET_ALL_TASK_SUCCESS', payload: data });
       clearAlert();
+      return data; // to PlanTask page
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });
       clearAlert();
@@ -379,7 +379,6 @@ const TaskProvider = ({ children }) => {
       if (!response.ok) throw new Error(data.message);
       dispatch({ type: 'GET_ALL_PlAN_SUCCESS', payload: data });
       clearAlert();
-      return data.plans; // To PlanTask page
     } catch (e) {
       dispatch({ type: 'RESPONSE_FAIL', payload: e });
       clearAlert();

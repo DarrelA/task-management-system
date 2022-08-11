@@ -60,7 +60,8 @@ const PlanTask = () => {
   const [taskItemData, setTaskItemData] = useState();
   const [openPlanModal, setOpenPlanModal] = useState(false);
 
-  // fetchTasksOnRefresh on first load
+  // setFetchIsLoading on first load
+  const [fetchIsLoading, setFetchIsLoading] = useState(true);
   const [columns, setColumns] = useState(tasks);
 
   const openTaskCreateModalHandler = () => setOpenTaskCreateModal(true);
@@ -97,7 +98,14 @@ const PlanTask = () => {
   }, [navigate, taskMessage, message]);
 
   useEffect(() => {
-    accessToken && getTasksData(App_Acronym, accessToken);
+    const fetchTasks = async () => {
+      const { tasks } = await getTasksData(App_Acronym, accessToken);
+      if (!!tasks) {
+        setColumns(tasks);
+        setFetchIsLoading(false);
+      }
+    };
+    accessToken && fetchTasks();
   }, [App_Acronym, accessToken, getTasksData]);
 
   useEffect(() => {
@@ -207,7 +215,7 @@ const PlanTask = () => {
     }
   };
 
-  if (isLoading) return <LoadingSpinner />;
+  if (fetchIsLoading || isLoading) return <LoadingSpinner />;
 
   return (
     <>
