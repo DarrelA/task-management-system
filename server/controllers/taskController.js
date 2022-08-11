@@ -483,7 +483,7 @@ const updateTaskState = async (req, res, next) => {
           await transport.sendMail({
             from: process.env.MAIL_FROM,
             to: dataOfPL.email,
-            subject: 'Task has been completed',
+            subject: `Task (${Task_name})has been completed`,
             html: `<div className="email" style="
           border: 1px solid black;
           padding: 20px;
@@ -491,7 +491,7 @@ const updateTaskState = async (req, res, next) => {
           line-height: 2;
           font-size: 20px;
           ">
-          <h3>Hi, ${dataOfPL.username}</h3>
+          <h3>Hi ${dataOfPL.username},</h3>
           <p>${text}</p>
           </div>
           `,

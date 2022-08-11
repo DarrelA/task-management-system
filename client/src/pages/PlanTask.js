@@ -10,6 +10,7 @@ import {
   CardContent,
   Grid,
   makeStyles,
+  Typography,
 } from '@material-ui/core';
 
 import {
@@ -29,7 +30,11 @@ const useStyles = makeStyles({
   droppable: { padding: 4, width: 250, minHeight: 500 },
   draggable: { userSelect: 'none', padding: 16, margin: '0 0 8px 0', minHeight: '50px' },
 
-  description: { overflowY: 'scroll', overflowX: 'hidden', height: 210, maxHeight: 210 },
+  description: {
+    textOverflow: 'ellipsis',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+  },
 });
 
 const PlanTask = () => {
@@ -274,7 +279,12 @@ const PlanTask = () => {
                                     >
                                       {item.Task_name}
                                       <br />
-                                      {item.Task_description}
+                                      <Typography
+                                        variant="body1"
+                                        className={classes.description}
+                                      >
+                                        {item.Task_description}
+                                      </Typography>
 
                                       <CardActions className={classes.cardActions}>
                                         <Button
