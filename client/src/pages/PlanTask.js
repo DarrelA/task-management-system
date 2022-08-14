@@ -26,14 +26,17 @@ import useUserContext from '../context/userContext';
 
 const useStyles = makeStyles({
   tasksCardContent: { display: 'flex', flexDirection: 'column' },
+
   dragDropContext: { display: 'flex', flexDirection: 'column', alignItems: 'center' },
   droppable: { padding: 4, width: 250, minHeight: 500 },
   draggable: { userSelect: 'none', padding: 16, margin: '0 0 8px 0', minHeight: '50px' },
 
-  description: {
-    textOverflow: 'ellipsis',
-    overflow: 'hidden',
-    whiteSpace: 'nowrap',
+  text: { textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' },
+  cardActions: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+    padding: 0,
   },
 });
 
@@ -277,11 +280,12 @@ const PlanTask = () => {
                                         ...provided.draggableProps.style,
                                       }}
                                     >
-                                      {item.Task_name}
-                                      <br />
+                                      <Typography variant="h6" className={classes.text}>
+                                        {item.Task_name}
+                                      </Typography>
                                       <Typography
                                         variant="body1"
-                                        className={classes.description}
+                                        className={classes.text}
                                       >
                                         {item.Task_description}
                                       </Typography>

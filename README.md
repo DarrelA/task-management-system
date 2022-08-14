@@ -15,6 +15,8 @@
 
 ## Current Features
 
+### To implement the user management features
+
 - [Authentication with refresh token](https://stackoverflow.com/a/69631076)
 - Default application setup with 1 Admin account
 - <b>User management interface (Admin only):</b>
@@ -40,6 +42,8 @@
 ---
 
 &nbsp;
+
+### To implement the Task Management features
 
 - <b>Applications interface</b>
   - Project Lead to create/update application and set the usergroup access rights

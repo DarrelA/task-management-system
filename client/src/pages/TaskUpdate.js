@@ -14,23 +14,24 @@ import {
 } from '@material-ui/core';
 import { useEffect, useState } from 'react';
 
+import { useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { LoadingSpinner } from '../components';
 import useTaskContext from '../context/taskContext';
 import useUserContext from '../context/userContext';
 import useLocalStorage from '../hooks/useLocalStorage';
-import { LoadingSpinner } from '../components';
-import { useParams } from 'react-router-dom';
-import { toast } from 'react-toastify';
 
 const useStyles = makeStyles((theme) => ({
+  root: { width: 1340, margin: '100px auto', padding: 20 },
   formControl: { minWidth: 166 },
+  decription: { maxHeight: 300, overflowY: 'scroll' },
 
-  notesText: {
+  notesReadme: {
     marginTop: 15,
-    minWidth: 732,
-    maxWidth: 732,
-    height: 160,
+    width: 1300,
+    maxWidth: 1300,
     minHeight: 160,
-    maxHeight: 160,
+    maxHeight: 400,
     overflowY: 'scroll !important',
     overflowX: 'hidden',
   },
@@ -55,6 +56,7 @@ const TaskUpdate = () => {
     appPermits;
 
   const { App_Acronym, taskName } = useParams();
+  const navigate = useNavigate();
 
   const options = {
     weekday: 'short',
@@ -108,14 +110,6 @@ const TaskUpdate = () => {
     accessToken && getPlansData(App_Acronym, accessToken);
   }, [App_Acronym, accessToken, getPlansData]);
 
-  const updateTaskHandler = () => {
-    updateTask(
-      { Task_name, Task_state, Task_plan, New_task_note },
-      App_Acronym,
-      accessToken
-    );
-  };
-
   useEffect(() => {
     (Task_state === 'open' && !App_permit_Open) ||
     (Task_state === 'todolist' && !App_permit_toDoList) ||
@@ -130,6 +124,14 @@ const TaskUpdate = () => {
     App_permit_Doing,
     App_permit_Done,
   ]);
+
+  const updateTaskHandler = () => {
+    updateTask(
+      { Task_name, Task_state, Task_plan, New_task_note },
+      App_Acronym,
+      accessToken
+    );
+  };
 
   if (isLoading) return <LoadingSpinner />;
 
@@ -212,7 +214,13 @@ const TaskUpdate = () => {
                   name="Task_plan"
                   value={Task_plan}
                   onChange={(e) => setTask_plan(e.target.value)}
-                  disabled={Task_state === 'done' || Task_state === 'close'}
+                  disabled={
+                    (Task_state === 'open' && !App_permit_Open) ||
+                    (Task_state === 'todolist' && !App_permit_toDoList) ||
+                    (Task_state === 'doing' && !App_permit_Doing) ||
+                    Task_state === 'done' ||
+                    Task_state === 'close'
+                  }
                 >
                   <MenuItem key="empty" value="">
                     None
@@ -236,6 +244,7 @@ const TaskUpdate = () => {
             value={Task_description}
             disabled={!!Task_description}
             fullWidth
+            className={classes.decription}
           />
 
           <Typography variant="h6" style={{ paddingTop: 20, textAlign: 'center' }}>
@@ -245,7 +254,7 @@ const TaskUpdate = () => {
           <TextareaAutosize
             aria-label="minimum height"
             minRows={3}
-            className={classes.notesText}
+            className={classes.notesReadme}
             defaultValue={Task_notes}
             readOnly
           />
@@ -261,7 +270,7 @@ const TaskUpdate = () => {
             fullWidth
           />
 
-          <Grid spacing={1} container>
+          <Grid spacing={1} container justifyContent="center">
             <Button
               type="submit"
               variant="contained"
@@ -271,6 +280,15 @@ const TaskUpdate = () => {
               disabled={disableCreate}
             >
               Update
+            </Button>
+
+            <Button
+              type="button"
+              variant="outlined"
+              color="secondary"
+              onClick={() => navigate(-1)}
+            >
+              Back
             </Button>
           </Grid>
         </form>

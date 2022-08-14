@@ -26,9 +26,7 @@ const TaskCreateModal = ({ open, onClose, taskCreateModalHandler, plans }) => {
       padding: theme.spacing(2, 4, 3),
     },
 
-    formControl: {
-      minWidth: 166,
-    },
+    formControl: { minWidth: 166 },
   }));
 
   const classes = useStyles();
@@ -96,6 +94,7 @@ const TaskCreateModal = ({ open, onClose, taskCreateModalHandler, plans }) => {
           multiline
           onInput={(e) => setTask_description(e.target.value)}
           value={Task_description}
+          style={{ height: 400, maxHeight: 400, overflowY: 'scroll' }}
           fullWidth
           required
         />

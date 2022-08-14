@@ -1,4 +1,13 @@
-import { Card, CardContent, Grid, makeStyles, Typography } from '@material-ui/core';
+import {
+  Button,
+  Card,
+  CardContent,
+  Collapse,
+  Grid,
+  makeStyles,
+  Typography,
+} from '@material-ui/core';
+import { useState } from 'react';
 
 const useStyles = makeStyles({
   root: { display: 'flex', maxWidth: 1400, padding: 10, margin: 10 },
@@ -22,12 +31,15 @@ const useStyles = makeStyles({
   },
 
   cardActions: { display: 'flex', justifyContent: 'flex-end' },
+  text: { textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' },
 });
 
 const PlanCard = (props) => {
   const { plans, App_Acronym } = props;
 
   const classes = useStyles();
+
+  const [expandPlanCard, setExpandPlanCard] = useState(true);
 
   return (
     <>
@@ -40,29 +52,54 @@ const PlanCard = (props) => {
             alignItems="center"
             style={{ display: 'flex', flexDirection: 'column' }}
           >
-            <Typography variant="h4">PLANS</Typography>
-            <CardContent className={classes.plansCardContent}>
-              {plans?.map((plan) => (
-                <Grid
-                  container
-                  spacing={2}
-                  key={plan.Plan_MVP_name}
-                  style={{ border: `0.4rem solid ${plan?.Plan_color}` }}
-                  className={classes.planContent}
-                >
-                  <Grid container item xs={12} style={{ justifyContent: 'center' }}>
-                    <Typography>{plan.Plan_MVP_name}</Typography>
-                  </Grid>
+            <Grid
+              container
+              spacing={1}
+              justifyContent="center"
+              style={{ paddingLeft: 10, paddingRight: 10 }}
+            >
+              <Typography variant="h4">PLANS</Typography>
+              <Button
+                size="small"
+                type="button"
+                onClick={() => setExpandPlanCard(!expandPlanCard)}
+              >
+                <span className="material-icons">
+                  {!expandPlanCard ? 'visibility' : 'visibility_off'}
+                </span>
+              </Button>
+            </Grid>
 
-                  <Grid container item xs={6} style={{ justifyContent: 'center' }}>
-                    <Typography>{plan.Plan_startDate}</Typography>
+            <Collapse in={expandPlanCard} timeout="auto" unmountOnExit>
+              <CardContent className={classes.plansCardContent}>
+                {plans?.map((plan) => (
+                  <Grid
+                    container
+                    spacing={2}
+                    key={plan.Plan_MVP_name}
+                    style={{ border: `0.4rem solid ${plan?.Plan_color}` }}
+                    className={classes.planContent}
+                  >
+                    <Grid
+                      container
+                      item
+                      xs={12}
+                      className={classes.text}
+                      style={{ justifyContent: 'center' }}
+                    >
+                      <Typography>{plan.Plan_MVP_name}</Typography>
+                    </Grid>
+
+                    <Grid container item xs={6} style={{ justifyContent: 'center' }}>
+                      <Typography>{plan.Plan_startDate}</Typography>
+                    </Grid>
+                    <Grid container item xs={6} style={{ justifyContent: 'center' }}>
+                      <Typography>{plan.Plan_endDate}</Typography>
+                    </Grid>
                   </Grid>
-                  <Grid container item xs={6} style={{ justifyContent: 'center' }}>
-                    <Typography>{plan.Plan_endDate}</Typography>
-                  </Grid>
-                </Grid>
-              ))}
-            </CardContent>
+                ))}
+              </CardContent>
+            </Collapse>
           </Grid>
         </Card>
       </Grid>

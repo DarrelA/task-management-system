@@ -146,7 +146,7 @@ const ApplicationModal = ({
           value={App_Description}
           required
           fullWidth
-          style={{ height: 200, overflowY: 'scroll' }}
+          style={{ height: 200, maxHeight: 400, overflowY: 'scroll' }}
           disabled={!isProjectLead}
         />
 
