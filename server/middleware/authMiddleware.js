@@ -29,6 +29,9 @@ const adminMiddleware = (req, res, next) => {
 };
 
 const appAccessRightsMiddleware = async (req, res, next) => {
+  // From TaskUpdate page & PlanTask draggable respectively
+  const taskState = req.body.Task_state_source || req.body.Task_state;
+
   try {
     if (req.path === '/application' && req.method === 'POST') {
       const haveAccessRights = await checkGroup(req.user.username, 'Project Lead');
@@ -63,53 +66,41 @@ const appAccessRightsMiddleware = async (req, res, next) => {
       if ((req.admin && req.admin.isAdmin) || haveAccessRights) return next();
     }
 
-    if (
-      req.path === '/taskstate' &&
-      req.method === 'PATCH' &&
-      req.body.Task_state_source === 'open'
-    ) {
-      const haveAccessRights = await checkGroup(
-        req.user.username,
-        application.App_permit_Open
-      );
-      if ((req.admin && req.admin.isAdmin) || haveAccessRights) return next();
-    }
+    if (req.path === '/task' || req.path === '/taskstate')
+      if (req.method === 'PATCH' && taskState === 'open') {
+        const haveAccessRights = await checkGroup(
+          req.user.username,
+          application.App_permit_Open
+        );
+        if ((req.admin && req.admin.isAdmin) || haveAccessRights) return next();
+      }
 
-    if (
-      req.path === '/taskstate' &&
-      req.method === 'PATCH' &&
-      req.body.Task_state_source === 'todolist'
-    ) {
-      const haveAccessRights = await checkGroup(
-        req.user.username,
-        application.App_permit_toDoList
-      );
-      if ((req.admin && req.admin.isAdmin) || haveAccessRights) return next();
-    }
+    if (req.path === '/task' || req.path === '/taskstate')
+      if (req.method === 'PATCH' && taskState === 'todolist') {
+        const haveAccessRights = await checkGroup(
+          req.user.username,
+          application.App_permit_toDoList
+        );
+        if ((req.admin && req.admin.isAdmin) || haveAccessRights) return next();
+      }
 
-    if (
-      req.path === '/taskstate' &&
-      req.method === 'PATCH' &&
-      req.body.Task_state_source === 'doing'
-    ) {
-      const haveAccessRights = await checkGroup(
-        req.user.username,
-        application.App_permit_Doing
-      );
-      if ((req.admin && req.admin.isAdmin) || haveAccessRights) return next();
-    }
+    if (req.path === '/task' || req.path === '/taskstate')
+      if (req.method === 'PATCH' && taskState === 'doing') {
+        const haveAccessRights = await checkGroup(
+          req.user.username,
+          application.App_permit_Doing
+        );
+        if ((req.admin && req.admin.isAdmin) || haveAccessRights) return next();
+      }
 
-    if (
-      req.path === '/taskstate' &&
-      req.method === 'PATCH' &&
-      req.body.Task_state_source === 'done'
-    ) {
-      const haveAccessRights = await checkGroup(
-        req.user.username,
-        application.App_permit_Done
-      );
-      if ((req.admin && req.admin.isAdmin) || haveAccessRights) return next();
-    }
+    if (req.path === '/task' || req.path === '/taskstate')
+      if (req.method === 'PATCH' && taskState === 'done') {
+        const haveAccessRights = await checkGroup(
+          req.user.username,
+          application.App_permit_Done
+        );
+        if ((req.admin && req.admin.isAdmin) || haveAccessRights) return next();
+      }
 
     return next(new HttpError('Forbidden!', 403));
   } catch (e) {

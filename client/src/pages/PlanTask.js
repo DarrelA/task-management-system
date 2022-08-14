@@ -314,6 +314,22 @@ const PlanTask = () => {
               </DragDropContext>
             </Grid>
           </CardContent>
+
+          <Grid
+            container
+            spacing={1}
+            justifyContent="center"
+            style={{ marginBottom: 10 }}
+          >
+            <Button
+              type="button"
+              variant="outlined"
+              color="secondary"
+              onClick={() => navigate(-1)}
+            >
+              Back
+            </Button>
+          </Grid>
         </Card>
       </Grid>
     </>

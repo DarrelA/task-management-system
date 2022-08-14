@@ -353,14 +353,6 @@ const createTask = async (req, res, next) => {
     });
     await newTask.save();
 
-    const newNote = await Note.create({
-      username: req.user.username,
-      state: 'open',
-      description: 'Task has been created.',
-      taskTaskName: Task_name,
-    });
-    await newNote.save();
-
     if (New_task_note.length > 0) {
       const newNote = await Note.create({
         username: req.user.username,
@@ -370,6 +362,14 @@ const createTask = async (req, res, next) => {
       });
       await newNote.save();
     }
+
+    const newNote = await Note.create({
+      username: req.user.username,
+      state: 'open',
+      description: 'Task has been created.',
+      taskTaskName: Task_name,
+    });
+    await newNote.save();
 
     res.send({ message: 'success' });
   } catch (e) {

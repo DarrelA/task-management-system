@@ -268,6 +268,13 @@ const TaskUpdate = () => {
             onInput={(e) => setNew_task_note(e.target.value)}
             value={New_task_note}
             fullWidth
+            disabled={
+              (Task_state === 'open' && !App_permit_Open) ||
+              (Task_state === 'todolist' && !App_permit_toDoList) ||
+              (Task_state === 'doing' && !App_permit_Doing) ||
+              Task_state === 'done' ||
+              Task_state === 'close'
+            }
           />
 
           <Grid spacing={1} container justifyContent="center">
