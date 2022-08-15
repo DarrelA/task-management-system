@@ -94,9 +94,7 @@ const PlanTask = () => {
   const openTaskCreateModalHandler = () => setOpenTaskCreateModal(true);
   const closeTaskCreateModalHandler = () => {
     setOpenTaskCreateModal(false);
-    ['Task_name', 'Task_description', 'Task_plan', 'New_task_note'].forEach((key) =>
-      localStorage.removeItem(key)
-    );
+    localStorage.removeItem('taskCreateForm');
   };
 
   const taskCreateModalHandler = async (inputData) => {
@@ -113,9 +111,7 @@ const PlanTask = () => {
   const openPlanModalHandler = () => setOpenPlanModal(true);
   const closePlanModalHandler = () => {
     setOpenPlanModal(false);
-    ['Plan_MVP_name', 'Plan_startDate', 'Plan_endDate', 'Plan_color'].forEach((key) =>
-      localStorage.removeItem(key)
-    );
+    localStorage.removeItem('planCreateForm');
   };
 
   const onDragEndHandler = async (result, columns, setColumns) => {

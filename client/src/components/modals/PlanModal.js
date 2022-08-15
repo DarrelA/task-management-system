@@ -42,35 +42,36 @@ const PlanModal = ({ open, onClose }) => {
   const userContext = useUserContext();
 
   const [modalStyle] = useState({ top: '15%', margin: 'auto' });
-  const [planMVPName, setplanMVPName] = useLocalStorage('Plan_MVP_name', '');
-  const [planStartDate, setplanStartDate] = useLocalStorage('Plan_startDate', '');
-  const [planEndDate, setplanEndDate] = useLocalStorage('Plan_endDate', '');
-  const [planColor, setplanColor] = useLocalStorage('Plan_color', '');
+
+  const [inputData, setInputData] = useLocalStorage('planCreateForm', {
+    Plan_MVP_name: '',
+    Plan_startDate: '',
+    Plan_endDate: '',
+    Plan_color: '',
+  });
+  const { Plan_MVP_name, Plan_startDate, Plan_endDate, Plan_color } = inputData;
 
   const [disableCreate, setDisableCreate] = useState(false);
 
   const { App_Acronym } = useParams();
 
   useEffect(() => {
-    !planMVPName || !planStartDate || !planEndDate || !planColor
+    !Plan_MVP_name || !Plan_startDate || !Plan_endDate || !Plan_color
       ? setDisableCreate(true)
       : setDisableCreate(false);
-  }, [planMVPName, planStartDate, planEndDate, planColor]);
+  }, [Plan_MVP_name, Plan_startDate, Plan_endDate, Plan_color]);
 
-  const planModalHandler = () => {
-    taskContext.createPlan(
-      {
-        Plan_MVP_name: planMVPName,
-        Plan_startDate: planStartDate,
-        Plan_endDate: planEndDate,
-        Plan_color: planColor,
-      },
-      App_Acronym,
-      userContext.accessToken
-    );
-  };
+  const inputHandler = (e) =>
+    setInputData({
+      ...inputData,
+      [e.target?.id]: e.target.value,
+      [e.target?.name]: e.target.value,
+    });
 
-  const taskForm = (
+  const planModalHandler = () =>
+    taskContext.createPlan(inputData, App_Acronym, userContext.accessToken);
+
+  const planForm = (
     <div style={modalStyle} className={classes.paper}>
       <form onSubmit={planModalHandler}>
         <TextField
@@ -78,8 +79,8 @@ const PlanModal = ({ open, onClose }) => {
           type="text"
           id="Plan_MVP_name"
           placeholder="plan 1"
-          onInput={(e) => setplanMVPName(e.target.value)}
-          value={planMVPName}
+          onInput={inputHandler}
+          value={Plan_MVP_name}
           fullWidth
           autoFocus
           required
@@ -96,8 +97,8 @@ const PlanModal = ({ open, onClose }) => {
             id="Plan_startDate"
             type="date"
             InputLabelProps={{ shrink: true }}
-            onInput={(e) => setplanStartDate(e.target.value)}
-            defaultValue={planStartDate}
+            onInput={inputHandler}
+            defaultValue={Plan_startDate}
             required
           />
 
@@ -106,8 +107,8 @@ const PlanModal = ({ open, onClose }) => {
             id="Plan_endDate"
             type="date"
             InputLabelProps={{ shrink: true }}
-            onInput={(e) => setplanEndDate(e.target.value)}
-            defaultValue={planEndDate}
+            onInput={inputHandler}
+            defaultValue={Plan_endDate}
             required
           />
         </Grid>
@@ -119,8 +120,10 @@ const PlanModal = ({ open, onClose }) => {
           style={{ padding: 25, paddingBottom: 0 }}
         >
           <SwatchesPicker
-            color={planColor}
-            onChange={(colorPicked) => setplanColor(colorPicked.hex)}
+            color={Plan_color}
+            onChange={(colorPicked) =>
+              setInputData({ ...inputData, Plan_color: colorPicked.hex })
+            }
             required
           />
           <Grid
@@ -128,9 +131,9 @@ const PlanModal = ({ open, onClose }) => {
             spacing={1}
             justifyContent="center"
             className={classes.colorDisplay}
-            style={{ backgroundColor: planColor }}
+            style={{ backgroundColor: Plan_color }}
           >
-            {planColor?.toUpperCase() || 'Pick a color!'}
+            {Plan_color?.toUpperCase() || 'Pick a color!'}
           </Grid>
         </Grid>
 
@@ -156,7 +159,7 @@ const PlanModal = ({ open, onClose }) => {
       onClose={onClose}
       style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
     >
-      {taskForm}
+      {planForm}
     </Modal>
   );
 };

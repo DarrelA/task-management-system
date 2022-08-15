@@ -34,19 +34,28 @@ const TaskCreateModal = ({ open, onClose, taskCreateModalHandler, plans }) => {
   const classes = useStyles();
   const [modalStyle] = useState({ top: '15%', margin: 'auto' });
 
-  const [Task_name, setTask_name] = useLocalStorage('Task_name', '');
-  const [Task_description, setTask_description] = useLocalStorage('Task_description', '');
-  const [Task_plan, setTask_plan] = useLocalStorage('Task_plan', '');
-  const [New_task_note, setNew_task_note] = useLocalStorage('New_task_note', '');
+  const [inputData, setInputData] = useLocalStorage('taskCreateForm', {
+    Task_name: '',
+    Task_description: '',
+    Task_plan: '',
+    New_task_note: '',
+  });
+  const { Task_name, Task_description, Task_plan, New_task_note } = inputData;
 
   const [disableCreate, setDisableCreate] = useState(false);
-
-  const createTaskHandler = () =>
-    taskCreateModalHandler({ Task_name, Task_description, Task_plan, New_task_note });
 
   useEffect(() => {
     !Task_name || !Task_description ? setDisableCreate(true) : setDisableCreate(false);
   }, [Task_name, Task_description]);
+
+  const inputHandler = (e) =>
+    setInputData({
+      ...inputData,
+      [e.target?.id]: e.target.value,
+      [e.target?.name]: e.target.value,
+    });
+
+  const createTaskHandler = () => taskCreateModalHandler(inputData);
 
   const taskForm = (
     <div style={modalStyle} className={classes.paper}>
@@ -58,7 +67,7 @@ const TaskCreateModal = ({ open, onClose, taskCreateModalHandler, plans }) => {
               type="text"
               id="Task_name"
               placeholder="task 1"
-              onInput={(e) => setTask_name(e.target.value)}
+              onInput={inputHandler}
               value={Task_name}
               autoFocus
               required
@@ -72,7 +81,7 @@ const TaskCreateModal = ({ open, onClose, taskCreateModalHandler, plans }) => {
                 labelId="Task_plan"
                 id="Task_plan"
                 name="Task_plan"
-                onChange={(e) => setTask_plan(e.target.value)}
+                onChange={inputHandler}
                 value={Task_plan}
               >
                 <MenuItem key="empty" value="">
@@ -94,7 +103,7 @@ const TaskCreateModal = ({ open, onClose, taskCreateModalHandler, plans }) => {
           id="Task_description"
           minRows={5}
           multiline
-          onInput={(e) => setTask_description(e.target.value)}
+          onInput={inputHandler}
           value={Task_description}
           className={classes.description}
           fullWidth
@@ -107,7 +116,7 @@ const TaskCreateModal = ({ open, onClose, taskCreateModalHandler, plans }) => {
           id="New_task_note"
           minRows={5}
           multiline
-          onInput={(e) => setNew_task_note(e.target.value)}
+          onInput={inputHandler}
           value={New_task_note}
           fullWidth
           className={classes.notes}

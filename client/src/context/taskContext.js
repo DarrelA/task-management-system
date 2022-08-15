@@ -70,24 +70,10 @@ const TaskProvider = ({ children }) => {
     localStorage.setItem('tasksData', JSON.stringify(updatedTasksData));
   };
 
-  const removeTaskData = () => {
-    [
-      'TaskName',
-      'TaskId',
-      'TaskState',
-      'TaskNotes',
-      'NewTaskNote',
-      'TaskDescription',
-      'TaskCreator',
-      'TaskOwner',
-      'TaskPlan',
-      'createdAt',
-    ].forEach((key) => localStorage.removeItem(key));
-  };
-
   const getApplicationsData = useCallback(async (accessToken) => {
     dispatch({ type: 'IS_LOADING' });
-    removeTaskData();
+    localStorage.removeItem('taskUpdateForm');
+
     try {
       const response = await fetch(`/api/tasks/applications/all`, {
         credentials: 'include',
@@ -149,19 +135,7 @@ const TaskProvider = ({ children }) => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
 
-      [
-        'App_Acronym',
-        'App_Rnumber',
-        'App_Description',
-        'App_startDate',
-        'App_endDate',
-        'App_permit_Create',
-        'App_permit_Open',
-        'App_permit_toDoList',
-        'App_permit_Doing',
-        'App_permit_Done',
-      ].forEach((key) => localStorage.removeItem(key));
-
+      localStorage.removeItem('appCreateAndUpdateForm');
       dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
 
       clearAlert();
@@ -298,10 +272,7 @@ const TaskProvider = ({ children }) => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
 
-      ['Task_name', 'Task_description', 'Task_plan', 'New_task_note'].forEach((key) =>
-        localStorage.removeItem(key)
-      );
-
+      localStorage.removeItem('taskCreateForm');
       dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
       clearAlert();
       getAllTasksData(App_Acronym, accessToken);
@@ -456,9 +427,7 @@ const TaskProvider = ({ children }) => {
       if (!response.ok) throw new Error(data.message);
 
       // Refer to PlanModal.js (Using localStorage to store state when handling error)
-      ['Plan_MVP_name', 'Plan_startDate', 'Plan_endDate', 'Plan_color'].forEach((key) =>
-        localStorage.removeItem(key)
-      );
+      localStorage.removeItem('planCreateForm');
 
       dispatch({ type: 'RESPONSE_SUCCESS', payload: data });
       clearAlert();

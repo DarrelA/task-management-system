@@ -67,38 +67,47 @@ const TaskUpdate = () => {
     minute: '2-digit',
   };
 
-  const [Task_name, setTask_name] = useLocalStorage('TaskName', '');
-  const [Task_id, setTask_id] = useLocalStorage('TaskId', '');
-  const [Task_state, setTask_state] = useLocalStorage('TaskState', '');
-  const [Task_notes, setTask_notes] = useLocalStorage('TaskNotes', '');
-  const [New_task_note, setNew_task_note] = useLocalStorage('NewTaskNote', '');
-  const [Task_description, setTask_description] = useLocalStorage('TaskDescription', '');
-  const [Task_creator, setTask_creator] = useLocalStorage('TaskCreator', '');
-  const [Task_owner, setTask_owner] = useLocalStorage('TaskOwner', '');
-  const [Task_plan, setTask_plan] = useLocalStorage('TaskPlan', '');
-  const [createdAt, setcreatedAt] = useLocalStorage('createdAt', '');
+  const [inputData, setInputData] = useLocalStorage('taskUpdateForm', {
+    Task_name: '',
+    Task_id: '',
+    Task_state: '',
+    Task_notes: '',
+    New_task_note: '',
+    Task_description: '',
+    Task_creator: '',
+    Task_owner: '',
+    Task_plan: '',
+    createdAt: '',
+  });
+
+  const {
+    Task_name,
+    Task_id,
+    Task_state,
+    Task_notes,
+    New_task_note,
+    Task_description,
+    Task_creator,
+    Task_owner,
+    Task_plan,
+    createdAt,
+  } = inputData;
 
   const [disableCreate, setDisableCreate] = useState(false);
 
   useEffect(() => {
     if (taskMessage === 'success') toast.success(taskMessage, { autoClose: 200 });
     else if (!!taskMessage) toast.error(taskMessage);
-  }, [taskMessage]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [taskMessage]);
 
   useEffect(() => {
     const firstFetchTask = async () => {
       const { task } = await getTaskData(App_Acronym, taskName, accessToken);
       if (!!task || taskMessage === 'success') {
-        setTask_name(task.Task_name);
-        setTask_id(task.Task_id);
-        setTask_state(task.Task_state);
-        setTask_notes(task.Task_notes);
-        setNew_task_note('');
-        setTask_description(task.Task_description);
-        setTask_creator(task.Task_creator);
-        setTask_owner(task.Task_owner);
-        setTask_plan(task.Task_plan || '');
-        setcreatedAt(new Date(task.createdAt).toLocaleString('en-US', options) || '');
+        setInputData({
+          ...task,
+          createdAt: new Date(task.createdAt).toLocaleString('en-US', options) || '',
+        });
       }
     };
 
@@ -124,6 +133,13 @@ const TaskUpdate = () => {
     App_permit_Doing,
     App_permit_Done,
   ]);
+
+  const inputHandler = (e) =>
+    setInputData({
+      ...inputData,
+      [e.target?.id]: e.target.value,
+      [e.target?.name]: e.target.value,
+    });
 
   const updateTaskHandler = () => {
     updateTask(
@@ -213,7 +229,7 @@ const TaskUpdate = () => {
                   id="Task_plan"
                   name="Task_plan"
                   value={Task_plan}
-                  onChange={(e) => setTask_plan(e.target.value)}
+                  onChange={inputHandler}
                   disabled={
                     (Task_state === 'open' && !App_permit_Open) ||
                     (Task_state === 'todolist' && !App_permit_toDoList) ||
@@ -240,7 +256,7 @@ const TaskUpdate = () => {
             id="Task_description"
             minRows={5}
             multiline
-            onInput={(e) => setTask_description(e.target.value)}
+            onInput={inputHandler}
             value={Task_description}
             disabled={!!Task_description}
             fullWidth
@@ -265,7 +281,7 @@ const TaskUpdate = () => {
             id="New_task_note"
             minRows={5}
             multiline
-            onInput={(e) => setNew_task_note(e.target.value)}
+            onInput={inputHandler}
             value={New_task_note}
             fullWidth
             disabled={
@@ -292,7 +308,10 @@ const TaskUpdate = () => {
               type="button"
               variant="outlined"
               color="secondary"
-              onClick={() => navigate(-1)}
+              onClick={() => {
+                localStorage.removeItem('taskUpdateForm');
+                navigate(-1);
+              }}
             >
               Back
             </Button>

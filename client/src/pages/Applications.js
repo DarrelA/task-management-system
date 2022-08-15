@@ -67,19 +67,7 @@ const Applications = () => {
 
   const openTaskModalHandler = () => setOpenAppModal(true);
   const closeTaskModalHandler = () => {
-    [
-      'App_Acronym',
-      'App_Rnumber',
-      'App_Description',
-      'App_startDate',
-      'App_endDate',
-      'App_permit_Create',
-      'App_permit_Open',
-      'App_permit_toDoList',
-      'App_permit_Doing',
-      'App_permit_Done',
-    ].forEach((key) => localStorage.removeItem(key));
-
+    localStorage.removeItem('appCreateAndUpdateForm');
     setEditAppMode({ edit: false });
     setOpenAppModal(false);
   };
