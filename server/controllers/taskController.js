@@ -54,6 +54,9 @@ const createApplication = async (req, res, next) => {
   if (typeof +App_Rnumber !== 'number' || +App_Rnumber < 0)
     return next(new HttpError('Application Rnumber needs to be a valid number.', 400));
 
+  if (App_endDate < App_startDate)
+    return next(new HttpError('Start date must be earlier than end date.', 400));
+
   try {
     const application = await Application.findByPk(App_Acronym);
     if (!!application) return next(new HttpError('Application acronym is taken.', 400));
@@ -115,6 +118,9 @@ const updateApplication = async (req, res, next) => {
   if (!App_Acronym) return next(new HttpError('Application acronym is required.', 400));
   if (!App_Description)
     return next(new HttpError('Application description is required.', 400));
+
+  if (App_endDate < App_startDate)
+    return next(new HttpError('Start date must be earlier than end date.', 400));
 
   try {
     const application = await Application.findByPk(App_Acronym);
@@ -607,6 +613,9 @@ const createPlan = async (req, res, next) => {
 
     const plan_MVP_name = await Plan.findByPk(Plan_MVP_name);
     if (!!plan_MVP_name) return next(new HttpError('Plan name is taken.', 400));
+
+    if (Plan_endDate < Plan_startDate)
+      return next(new HttpError('Start date must be earlier than end date.', 400));
 
     const newPlan = await Plan.create({
       Plan_MVP_name,
