@@ -27,6 +27,8 @@ const TaskCreateModal = ({ open, onClose, taskCreateModalHandler, plans }) => {
     },
 
     formControl: { minWidth: 166 },
+    description: { maxHeight: 300, overflowY: 'scroll' },
+    notes: { maxHeight: 200, overflowY: 'scroll' },
   }));
 
   const classes = useStyles();
@@ -94,7 +96,7 @@ const TaskCreateModal = ({ open, onClose, taskCreateModalHandler, plans }) => {
           multiline
           onInput={(e) => setTask_description(e.target.value)}
           value={Task_description}
-          style={{ height: 400, maxHeight: 400, overflowY: 'scroll' }}
+          className={classes.description}
           fullWidth
           required
         />
@@ -108,6 +110,7 @@ const TaskCreateModal = ({ open, onClose, taskCreateModalHandler, plans }) => {
           onInput={(e) => setNew_task_note(e.target.value)}
           value={New_task_note}
           fullWidth
+          className={classes.notes}
         />
 
         <Grid spacing={1} container>

@@ -272,8 +272,7 @@ const TaskUpdate = () => {
               (Task_state === 'open' && !App_permit_Open) ||
               (Task_state === 'todolist' && !App_permit_toDoList) ||
               (Task_state === 'doing' && !App_permit_Doing) ||
-              Task_state === 'done' ||
-              Task_state === 'close'
+              (Task_state === 'done' && !App_permit_Done)
             }
           />
 
