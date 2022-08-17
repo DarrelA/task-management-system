@@ -25,6 +25,8 @@ import useTaskContext from '../context/taskContext';
 import useUserContext from '../context/userContext';
 
 const useStyles = makeStyles({
+  '@global': { html: { overflowY: 'scroll' } },
+
   tasksCardContent: { display: 'flex', flexDirection: 'column' },
 
   dragDropContext: { display: 'flex', flexDirection: 'column', alignItems: 'center' },
