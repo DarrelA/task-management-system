@@ -66,3 +66,22 @@
 ---
 
 &nbsp;
+
+### To implement 2 REST API for TMS
+
+- <b>a3Routes</b>: GetTaskbyState, CreateTask & PromoteTask2Done
+
+| Error Code |    Status     |                                                                          Description                                                                          |
+| :--------: | :-----------: | :-----------------------------------------------------------------------------------------------------------------------------------------------------------: |
+|    4001    | Unauthorized  |                                                      Indicates that the user is unauthenticated (login)                                                       |
+|    4002    |   Forbidden   | The client does not have access rights to the content. In other words, the client is unauthorized so the server is refusing to render the requested resource. |
+|    4003    |  Duplicated   |                                         The data already exists in the database. User has to enter a brand new entry.                                         |
+|    4004    |   Not Found   |                                                                 The requested URL is invalid.                                                                 |
+|    4005    | Invalid Field |                            Incorrect, erroneous or unacceptable data was being sent back to the database. The request was invalid.                            |
+|    4006    |  Empty Field  |                                                           Mandatory field but input field is empty.                                                           |
+
+&nbsp;
+
+---
+
+&nbsp;

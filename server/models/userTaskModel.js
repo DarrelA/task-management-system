@@ -231,6 +231,15 @@ const createData = async () => {
   const plpm = await User.findByPk('plpm');
   await plpm.addGroup('Project Lead');
   await plpm.addGroup('Project Manager');
+
+  const projectlead = await User.findByPk('projectlead');
+  await projectlead.addGroup('Project Lead');
+
+  const projectmanager = await User.findByPk('projectmanager');
+  await projectmanager.addGroup('Project Manager');
+
+  const teammember = await User.findByPk('teammember');
+  await teammember.addGroup('Team Member');
 };
 
 module.exports = { User, Group, UserGroup, Application, Plan, Task, Note };

@@ -109,4 +109,24 @@ const appAccessRightsMiddleware = async (req, res, next) => {
   }
 };
 
-module.exports = { authMiddleware, adminMiddleware, appAccessRightsMiddleware };
+const a3LoginMiddleware = async (req, res, next) => {
+  const { username, password } = req.body;
+
+  try {
+    const user = await User.findOne({ where: { username } });
+    if (!user || !(await user.comparePassword(password)))
+      return next(new HttpError('Invalid credentials.', 4001));
+
+    next();
+  } catch (e) {
+    console.error(e);
+    return next(new HttpError('Something went wrong!', 5000));
+  }
+};
+
+module.exports = {
+  authMiddleware,
+  adminMiddleware,
+  appAccessRightsMiddleware,
+  a3LoginMiddleware,
+};
