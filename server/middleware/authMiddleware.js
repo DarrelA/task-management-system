@@ -110,7 +110,20 @@ const appAccessRightsMiddleware = async (req, res, next) => {
 };
 
 const a3LoginMiddleware = async (req, res, next) => {
-  const { username, password } = req.body;
+  // Set input keys to lowercase in case of typo
+  res.inputKeys = Object.fromEntries(
+    Object.entries(req.body).map(([k, v]) => [k.toLowerCase(), v])
+  );
+
+  // Check for JSON key is invalid or misspelt
+  const correctKeys = ['username', 'password'];
+  const isCorrect = correctKeys.every((correctKey) =>
+    res.inputKeys.hasOwnProperty(correctKey)
+  );
+  if (!isCorrect) return next(new HttpError('Invalid JSON Key.', 4008));
+
+  const { username, password } = res.inputKeys;
+  if (!username || !password) return next(new HttpError('Invalid credentials.', 4001));
 
   try {
     const user = await User.findOne({ where: { username } });

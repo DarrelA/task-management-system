@@ -3,15 +3,22 @@ const { Application, Plan, Task, Note } = require('../models/userTaskModel');
 const { checkGroup } = require('./userController');
 
 const GetTaskbyState = async (req, res, next) => {
-  const Task_state = req.body.Task_state.toLowerCase();
+  // Check for JSON key is invalid or misspelt
+  const correctKeys = ['task_state'];
+  const isCorrect = correctKeys.every((correctKey) =>
+    res.inputKeys.hasOwnProperty(correctKey)
+  );
+  if (!isCorrect) return next(new HttpError('Invalid JSON Key.', 4008));
 
-  if (!Task_state) return next(new HttpError('Empty Field', 4006));
-  if (!['open', 'todolist', 'doing', 'done', 'close'].includes(Task_state))
+  const task_state = res.inputKeys.task_state.toLowerCase();
+
+  if (!task_state) return next(new HttpError('Empty Field', 4006));
+  if (!['open', 'todolist', 'doing', 'done', 'close'].includes(task_state))
     return next(new HttpError('Invalid Field', 4005));
 
   try {
     const tasks = await Task.findAll({
-      where: { Task_state },
+      where: { task_state },
       attributes: { exclude: ['Kanban_index', 'updatedAt', 'Task_plan'] },
       include: [
         { model: Plan, attributes: ['Plan_MVP_name', 'Plan_color'] },
@@ -27,11 +34,18 @@ const GetTaskbyState = async (req, res, next) => {
 };
 
 const CreateTask = async (req, res, next) => {
-  const { App_Acronym, Task_name, Task_description } = req.body;
-  if (!Task_name) return next(new HttpError('Empty Field', 4006));
+  // Check for JSON key is invalid or misspelt
+  const correctKeys = ['app_acronym', 'task_name', 'task_description'];
+  const isCorrect = correctKeys.every((correctKey) =>
+    res.inputKeys.hasOwnProperty(correctKey)
+  );
+  if (!isCorrect) return next(new HttpError('Invalid JSON Key.', 4008));
+
+  const { username, app_acronym, task_name, task_description } = res.inputKeys;
+  if (!task_name) return next(new HttpError('Empty Field', 4006));
 
   try {
-    const application = await Application.findByPk(App_Acronym);
+    const application = await Application.findByPk(app_acronym);
     if (!application) return next(new HttpError('Invalid Field', 4005));
 
     // App_Rnumber matches Task_id running number
@@ -40,17 +54,17 @@ const CreateTask = async (req, res, next) => {
     application.App_Rnumber = runningNum;
     application.save();
 
-    const task_name = await Task.findByPk(Task_name);
-    if (!!task_name) return next(new HttpError('Duplicated', 4003));
+    const duplicateTask = await Task.findByPk(task_name);
+    if (!!duplicateTask) return next(new HttpError('Duplicated', 4003));
 
     const newTask = await Task.create({
-      Task_name,
-      Task_description: Task_description,
+      Task_name: task_name,
+      Task_description: task_description,
       Task_id: application.App_Acronym + '_' + runningNum,
       Task_state: 'open',
       Task_creator: username,
       Task_owner: username,
-      Task_app_Acronym: App_Acronym,
+      Task_app_Acronym: app_acronym,
     });
     await newTask.save();
 
@@ -58,7 +72,7 @@ const CreateTask = async (req, res, next) => {
       username: username,
       state: 'open',
       description: 'Task has been created.',
-      taskTaskName: Task_name,
+      taskTaskName: task_name,
     });
     await newNote.save();
 
@@ -72,11 +86,19 @@ const CreateTask = async (req, res, next) => {
 };
 
 const PromoteTask2Done = async (req, res, next) => {
-  const { username, Task_name } = req.body;
-  if (!Task_name) return next(new HttpError('Empty Field', 4006));
+  // Check for JSON key is invalid or misspelt
+  const correctKeys = ['task_name'];
+  const isCorrect = correctKeys.every((correctKey) =>
+    res.inputKeys.hasOwnProperty(correctKey)
+  );
+  if (!isCorrect) return next(new HttpError('Invalid JSON Key.', 4008));
+
+  const { username, task_name } = res.inputKeys;
+
+  if (!task_name) return next(new HttpError('Empty Field', 4006));
 
   try {
-    const task = await Task.findByPk(Task_name, {
+    const task = await Task.findByPk(task_name, {
       include: { model: Application, attributes: ['App_permit_Doing'] },
     });
 
