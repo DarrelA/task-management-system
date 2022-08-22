@@ -123,12 +123,20 @@ const a3LoginMiddleware = async (req, res, next) => {
   if (!isCorrect) return next(new HttpError('Invalid JSON Key.', 4008));
 
   const { username, password } = res.inputKeys;
-  if (!username || !password) return next(new HttpError('Invalid credentials.', 4001));
+  if (!username || !password) return next(new HttpError('Empty Field.', 4006));
+
+  // If username has whitespace
+  const whitespace = /^\S*$/;
+  if (!whitespace.test(username)) return next(new HttpError('Invalid Field.', 4005));
 
   try {
     const user = await User.findOne({ where: { username } });
+
     if (!user || !(await user.comparePassword(password)))
       return next(new HttpError('Invalid credentials.', 4001));
+
+    if (user && user.isActiveAcc === false)
+      return next(new HttpError('Forbidden.', 4002));
 
     next();
   } catch (e) {

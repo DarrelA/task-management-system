@@ -26,7 +26,7 @@ const GetTaskbyState = async (req, res, next) => {
       ],
     });
 
-    res.send({ success: { code: 200, data: tasks } });
+    res.send({ code: 200, data: tasks });
   } catch (e) {
     console.error(e);
     return next(new HttpError('Something went wrong!', 5000));
@@ -77,7 +77,8 @@ const CreateTask = async (req, res, next) => {
     await newNote.save();
 
     res.send({
-      success: { code: 200, Task_id: application.App_Acronym + '_' + runningNum },
+      code: 200,
+      Task_id: application.App_Acronym + '_' + runningNum,
     });
   } catch (e) {
     console.error(e);
@@ -115,7 +116,7 @@ const PromoteTask2Done = async (req, res, next) => {
     task.Task_state = 'done';
     await task.save();
 
-    res.send({ success: { code: 200 } });
+    res.send({ code: 200 });
   } catch (e) {
     console.error(e);
     return next(new HttpError('Something went wrong!', 5000));
