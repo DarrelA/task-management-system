@@ -1,0 +1,38 @@
+version: '3.8'
+services:
+  mysql:
+    platform: linux/x86_64
+    image: 'mysql:5.7'
+    volumes:
+      - data:/data/db
+    env_file:
+      - .env
+
+  server:
+    build:
+      context: .
+      dockerfile: dockerfiles/server.dockerfile
+    image: tms-server
+    container_name: tms-server
+    ports:
+      - '4000:4000'
+    volumes:
+      - ./server:/server
+      - /node_modules
+    depends_on:
+      - mysql
+
+  # client:
+  #   build: ./client
+  #   image: tms-client
+  #   container_name: tms-client
+  #   ports:
+  #     - '3000:3000'
+  #   volumes:
+  #     - ./client/src:/client/src
+  #   depends_on:
+  #     - server
+
+# Named volumes
+volumes:
+  data:
