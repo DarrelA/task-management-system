@@ -3,7 +3,9 @@
 - <b>Task Management System (TMS)</b> that emulate the Kanban approach that support the Planning, Tracking, and Approving for the task activities related to a specific project.
   - <b>Tech Stack: </b>MySQL, Express, ReactJS & NodeJS <b>(MERN)</b>
   - <b>Phase 1: </b>Basic user and user group management setup
-  - <b>Phase 2: </b>Kanban with access management, pre-validation, and post-action during the lifecycle of a task.
+  - <b>Phase 2: </b>Kanban with access management, pre-validation, and post-action during the lifecycle of a task
+  - <b>Phase 3: </b>Documentation for API endpoints, test cases and Postman
+  - <b>Phase 4: </b>Containerization with Docker
 
 ![application-plan-task](./diagrams/application-plan-task.png)
 
@@ -13,7 +15,7 @@
 
 &nbsp;
 
-## Current Features
+## Features
 
 ### To implement the user management features
 
@@ -71,15 +73,28 @@
 
 - <b>a3Routes</b>: GetTaskbyState, CreateTask & PromoteTask2Done
 
-| Error Code |      Status      |                                                                          Description                                                                          |
-| :--------: | :--------------: | :-----------------------------------------------------------------------------------------------------------------------------------------------------------: |
-|    4001    |   Unauthorized   |                                                      Indicates that the user is unauthenticated (login)                                                       |
-|    4002    |    Forbidden     | The client does not have access rights to the content. In other words, the client is unauthorized so the server is refusing to render the requested resource. |
-|    4003    |    Duplicated    |                                         The data already exists in the database. User has to enter a brand new entry.                                         |
-|    4004    |    Not Found     |                                                                 The requested URL is invalid.                                                                 |
-|    4005    |  Invalid Field   |                            Incorrect, erroneous or unacceptable data was being sent back to the database. The request was invalid.                            |
-|    4006    |   Empty Field    |                                                           Mandatory field but input field is empty.                                                           |
-|    4008    | Invalid JSON Key |                                                               JSON key is invalid or misspelt.                                                                |
+| Error Code |        Status        |                                                                                     Description                                                                                     |
+| :--------: | :------------------: | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+|    4001    |     Unauthorized     |                                                                 Indicates that the user is unauthenticated (login)                                                                  |
+|    4002    |      Forbidden       |            The client does not have access rights to the content. In other words, the client is unauthorized so the server is refusing to render the requested resource.            |
+|    4003    |      Duplicated      |                                                    The data already exists in the database. User has to enter a brand new entry.                                                    |
+|    4004    |      Not Found       |                                                                            The requested URL is invalid.                                                                            |
+|    4005    |    Invalid Field     |                                       Incorrect, erroneous or unacceptable data was being sent back to the database. The request was invalid.                                       |
+|    4006    |     Empty Field      |                                                                      Mandatory field but input field is empty.                                                                      |
+|    4007    | Incorrect Transition | The task exists but the task state must be prior to “Done”, i.e., “Doing”. However, if user entered “Close”, it is a valid task state but not in the correct transition task state. |
+|    4008    |   Invalid JSON Key   |                                                                          JSON key is invalid or misspelt.                                                                           |
+
+&nbsp;
+
+---
+
+&nbsp;
+
+### To containerize the APIs
+
+- Docker application container image size of less than 200mb
+- Transporting the image to another environment (air-gap) with different database connection information
+- Ensure that the root account is not used when running the image for security purpose.
 
 &nbsp;
 
