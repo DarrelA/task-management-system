@@ -2,7 +2,7 @@ FROM alpine
 
 WORKDIR /server
 
-COPY package.json .
+COPY ./server/package.json .
 
 RUN apk add npm
 
