@@ -4,12 +4,10 @@ WORKDIR /server
 
 COPY package.json .
 
-RUN apk add --update npm
+RUN apk add npm
 
 RUN npm install
 
 COPY ./server .
-
-RUN ls
 
 CMD ["npm", "start"]

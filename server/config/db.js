@@ -8,7 +8,7 @@ const sequelize = new Sequelize(
   process.env.MYSQL_ROOT_USER,
   process.env.MYSQL_ROOT_PASSWORD,
   {
-    host: 'localhost',
+    host: process.env.HOST,
     dialect: 'mysql',
     dialectOptions: { connectTimeout: 60000 },
     logging: false,
