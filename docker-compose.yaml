@@ -2,11 +2,14 @@ version: '3.8'
 services:
   mysql:
     platform: linux/x86_64
-    image: 'mysql:5.7'
+    image: mysql:5.7
+    container_name: tms-mysql
+    ports:
+      - '3306:3306'
     volumes:
       - data:/data/db
     env_file:
-      - .env
+      - ./server/.env
 
   server:
     build:

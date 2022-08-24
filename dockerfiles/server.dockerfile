@@ -8,9 +8,8 @@ RUN apk add --update npm
 
 RUN npm install
 
-COPY .env .
 COPY ./server .
 
 RUN ls
 
-CMD ["node", "server.js"]
+CMD ["npm", "start"]
