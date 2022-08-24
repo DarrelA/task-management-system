@@ -6,7 +6,7 @@ docker volume ls
 docker network ls
 
 # Rebuild if required
-docker-compose up -d --build server
+docker-compose up -d --build server client
 # Shut down containers and delete volumes
 docker-compose down -v
 

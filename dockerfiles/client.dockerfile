@@ -4,8 +4,10 @@ WORKDIR /client
 
 COPY package.json .
 
+RUN apk add npm
+
 RUN npm install
 
-COPY . . 
+COPY ./client . 
 
 CMD [ "npm", "start" ]

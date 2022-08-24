@@ -27,16 +27,18 @@ services:
       mysql:
         condition: service_healthy
 
-  # client:
-  #   build: ./client
-  #   image: tms-client
-  #   container_name: tms-client
-  #   ports:
-  #     - '3000:3000'
-  #   volumes:
-  #     - ./client/src:/client/src
-  #   depends_on:
-  #     - server
+  client:
+    build:
+      context: .
+      dockerfile: dockerfiles/client.dockerfile
+    image: tms-client
+    container_name: tms-client
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./client/src:/client/src
+    depends_on:
+      - server
 
 # Named volumes
 volumes:
