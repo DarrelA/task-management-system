@@ -4,7 +4,7 @@ services:
     image: mysql:8.0
     container_name: tms-mysql
     volumes:
-      - data:/data/db
+      - data:/var/lib/mysql
     env_file:
       - ./server/.env
     healthcheck:
@@ -22,7 +22,7 @@ services:
       - '4000:4000'
     volumes:
       - ./server:/server
-      - ./server/node_modules
+      - /server/node_modules
     depends_on:
       mysql:
         condition: service_healthy

@@ -5,6 +5,9 @@ docker images
 docker volume ls
 docker network ls
 
+# Run containers
+docker-compose up -d --renew-anon-volumes
+
 # Rebuild if required
 docker-compose up -d --build server client
 # Shut down containers and delete volumes
