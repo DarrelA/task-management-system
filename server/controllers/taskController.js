@@ -422,6 +422,58 @@ const updateTask = async (req, res, next) => {
   }
 };
 
+const sendMailTrapEmail = async (username, Task_name, from, to) => {
+  // Mailtrap + Nodemailer
+  if (from === 'doing' && to === 'done') {
+    let projectLeadEmails = await Group.findAll({
+      where: { name: 'Project Lead' },
+      include: {
+        model: User,
+        attributes: ['username', 'email'],
+        through: { attributes: [] },
+      },
+      attributes: { exclude: ['createdAt', 'updatedAt'] },
+    });
+
+    // Get only dataValues from Sequelize ORM
+    projectLeadEmails = JSON.stringify(projectLeadEmails);
+    projectLeadEmails = JSON.parse(projectLeadEmails);
+
+    text = `${username} has promoted the task "${Task_name}" to "Done" state.`;
+
+    const transport = nodemailer.createTransport({
+      host: process.env.MAILTRAP_HOST,
+      port: process.env.MAILTRAP_PORT,
+      auth: {
+        user: process.env.MAILTRAP_USERNAME,
+        pass: process.env.MAILTRAP_PASSWORD,
+      },
+    });
+
+    if (projectLeadEmails.length > 0) {
+      // Access array of users data
+      projectLeadEmails[0].users.forEach(async (dataOfPL) => {
+        await transport.sendMail({
+          from: process.env.MAIL_FROM,
+          to: dataOfPL.email,
+          subject: `Task (${Task_name})has been completed`,
+          html: `<div className="email" style="
+        border: 1px solid black;
+        padding: 20px;
+        font-family: sans-serif;
+        line-height: 2;
+        font-size: 20px;
+        ">
+        <h3>Hi ${dataOfPL.username},</h3>
+        <p>${text}</p>
+        </div>
+        `,
+        });
+      });
+    }
+  } else return;
+};
+
 const updateTaskState = async (req, res, next) => {
   const { Task_name, Task_state_source: from, Task_state_destination: to } = req.body;
 
@@ -456,55 +508,7 @@ const updateTaskState = async (req, res, next) => {
     });
     await newNote.save();
 
-    // Mailtrap + Nodemailer
-    if (from === 'doing' && to === 'done') {
-      let projectLeadEmails = await Group.findAll({
-        where: { name: 'Project Lead' },
-        include: {
-          model: User,
-          attributes: ['username', 'email'],
-          through: { attributes: [] },
-        },
-        attributes: { exclude: ['createdAt', 'updatedAt'] },
-      });
-
-      // Get only dataValues from Sequelize ORM
-      projectLeadEmails = JSON.stringify(projectLeadEmails);
-      projectLeadEmails = JSON.parse(projectLeadEmails);
-
-      text = `${req.user.username} has promoted the task "${Task_name}" to "Done" state.`;
-
-      const transport = nodemailer.createTransport({
-        host: process.env.MAILTRAP_HOST,
-        port: process.env.MAILTRAP_PORT,
-        auth: {
-          user: process.env.MAILTRAP_USERNAME,
-          pass: process.env.MAILTRAP_PASSWORD,
-        },
-      });
-
-      if (projectLeadEmails.length > 0) {
-        // Access array of users data
-        projectLeadEmails[0].users.forEach(async (dataOfPL) => {
-          await transport.sendMail({
-            from: process.env.MAIL_FROM,
-            to: dataOfPL.email,
-            subject: `Task (${Task_name})has been completed`,
-            html: `<div className="email" style="
-          border: 1px solid black;
-          padding: 20px;
-          font-family: sans-serif;
-          line-height: 2;
-          font-size: 20px;
-          ">
-          <h3>Hi ${dataOfPL.username},</h3>
-          <p>${text}</p>
-          </div>
-          `,
-          });
-        });
-      }
-    }
+    sendMailTrapEmail(req.user.username, Task_name, from, to);
 
     return res.send({ success: true });
   } catch (e) {
@@ -640,6 +644,7 @@ module.exports = {
   getAllTasksData,
   getTaskData,
   createTask,
+  sendMailTrapEmail,
   updateTask,
   updateTaskState,
   updateKanbanIndex,

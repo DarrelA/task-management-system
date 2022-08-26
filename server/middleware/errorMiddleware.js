@@ -1,16 +1,12 @@
 const HttpError = require('../models/http-error.js');
 
-// err.code with 4 digits is dedicated for Assignment 3
-
-const notFoundMiddleware = (req, res, next) => {
-  err.code.toString().length !== 4
-    ? next(new HttpError(`Not Found - ${req.originalUrl}`, 4004))
-    : next(new HttpError(`Not Found - ${req.originalUrl}`, 404));
-};
+const notFoundMiddleware = (req, res, next) =>
+  next(new HttpError(`Not Found - ${req.originalUrl}`, 4004));
 
 const errorMiddleware = (err, req, res, next) => {
   if (res.headersSent) return next(err);
 
+  // err.code with 4 digits is dedicated for Assignment 3
   if (err.code.toString().length !== 4)
     res.status(err.code || 500).json({
       message: err.message || 'Something went wrong!',

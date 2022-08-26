@@ -1,6 +1,7 @@
 const HttpError = require('../models/http-error');
 const { Application, Plan, Task, Note } = require('../models/userTaskModel');
 const { checkGroup } = require('./userController');
+const { sendMailTrapEmail } = require('./taskController');
 
 const GetTaskbyState = async (req, res, next) => {
   // Check for JSON key is invalid or misspelt
@@ -42,11 +43,14 @@ const CreateTask = async (req, res, next) => {
   if (!isCorrect) return next(new HttpError('Invalid JSON Key.', 4008));
 
   const { username, app_acronym, task_name, task_description } = res.inputKeys;
-  if (!task_name) return next(new HttpError('Empty Field', 4006));
+  if (!app_acronym || !task_name) return next(new HttpError('Empty Field', 4006));
 
   try {
     const application = await Application.findByPk(app_acronym);
     if (!application) return next(new HttpError('Invalid Field', 4005));
+
+    const haveAccessRights = await checkGroup(username, application.App_permit_Create);
+    if (!haveAccessRights) return next(new HttpError('Forbidden', 4002));
 
     // App_Rnumber matches Task_id running number
     // App_Rnumber starts at 0, add 1 task = running number at 1
@@ -112,6 +116,8 @@ const PromoteTask2Done = async (req, res, next) => {
       task.application.App_permit_Doing
     );
     if (!haveAccessRights) return next(new HttpError('Forbidden', 4002));
+
+    sendMailTrapEmail(username, task_name, task.Task_state, 'done');
 
     task.Task_state = 'done';
     await task.save();
