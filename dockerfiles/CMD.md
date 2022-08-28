@@ -5,16 +5,10 @@ docker images
 docker volume ls
 docker network ls
 
-# Run containers
-docker-compose up -d --renew-anon-volumes
-
 # Rebuild if required
 docker-compose up -d --build server client
 # Shut down containers and delete volumes
 docker-compose down -v
-
-# mysql
-mysql -h localhost -P 3306 --protocol=tcp -uroot -p
 
 # Cleanup
 docker system prune -a

@@ -92,9 +92,12 @@
 
 ### To containerize the APIs
 
-- Docker application container image size of less than 200mb
+- Docker application backend container image size of less than 200mb
+  - User will need to have mySQL installed on the host machine
 - Transporting the image to another environment (air-gap) with different database connection information
 - Ensure that the root account is not used when running the image for security purpose.
+- cURL on Windows Powershell:
+  - May need to use `Remove-Item alias:curl` to run cURL commands that send JSON object.
 
 &nbsp;
 

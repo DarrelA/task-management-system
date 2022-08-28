@@ -1,17 +1,5 @@
 version: '3.8'
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: tms-mysql
-    volumes:
-      - data:/var/lib/mysql
-    env_file:
-      - ./server/.env
-    healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
-      timeout: 20s
-      retries: 10
-
   server:
     build:
       context: .
@@ -23,9 +11,6 @@ services:
     volumes:
       - ./server:/server
       - /server/node_modules
-    depends_on:
-      mysql:
-        condition: service_healthy
 
   client:
     build:
@@ -39,7 +24,3 @@ services:
       - ./client/src:/client/src
     depends_on:
       - server
-
-# Named volumes
-volumes:
-  data:
