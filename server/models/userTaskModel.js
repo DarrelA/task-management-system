@@ -197,6 +197,7 @@ Note.belongsTo(Task);
 sequelize
   .sync()
   .then(() => createData())
+  .then(() => setAppUser())
   .catch((e) => console.error(e));
 
 const createData = async () => {
@@ -217,29 +218,48 @@ const createData = async () => {
     );
 
     Group.bulkCreate([...mockGroups]);
+
+    const pl = await User.findByPk('pl');
+    await pl.addGroup('Project Lead');
+
+    const pm = await User.findByPk('pm');
+    await pm.addGroup('Project Manager');
+
+    const tm = await User.findByPk('tm');
+    await tm.addGroup('Team Member');
+
+    const plpm = await User.findByPk('plpm');
+    await plpm.addGroup('Project Lead');
+    await plpm.addGroup('Project Manager');
+
+    const projectlead = await User.findByPk('projectlead');
+    await projectlead.addGroup('Project Lead');
+
+    const projectmanager = await User.findByPk('projectmanager');
+    await projectmanager.addGroup('Project Manager');
+
+    const teammember = await User.findByPk('teammember');
+    await teammember.addGroup('Team Member');
   }
+};
 
-  const pl = await User.findByPk('pl');
-  await pl.addGroup('Project Lead');
+// Create nonroot appuser with limited permissions/ privilege
+const setAppUser = async () => {
+  const [hasAppUser, appUserMetadata] = await sequelize.query(
+    `SELECT host, user from mysql.user WHERE user = 'appuser';`
+  );
 
-  const pm = await User.findByPk('pm');
-  await pm.addGroup('Project Manager');
-
-  const tm = await User.findByPk('tm');
-  await tm.addGroup('Team Member');
-
-  const plpm = await User.findByPk('plpm');
-  await plpm.addGroup('Project Lead');
-  await plpm.addGroup('Project Manager');
-
-  const projectlead = await User.findByPk('projectlead');
-  await projectlead.addGroup('Project Lead');
-
-  const projectmanager = await User.findByPk('projectmanager');
-  await projectmanager.addGroup('Project Manager');
-
-  const teammember = await User.findByPk('teammember');
-  await teammember.addGroup('Team Member');
+  // Create appuser if there is none in mysql
+  if (hasAppUser.length === 0) {
+    const [results, metadata] = await sequelize.query(
+      [
+        `USE mysql;`,
+        `CREATE USER 'appuser'@'localhost' IDENTIFIED BY '${process.env.MYSQL_APPUSER_PASSWORD}';`,
+        `GRANT SELECT, INSERT, UPDATE on ${process.env.MYSQL_DATABASE}.* TO 'appuser'@'localhost';`,
+        `FLUSH PRIVILEGES;`,
+      ].join(' ')
+    );
+  }
 };
 
 module.exports = { User, Group, UserGroup, Application, Plan, Task, Note };

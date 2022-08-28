@@ -20,3 +20,17 @@ docker logs tms-server
 docker logs tms-mysql
 docker run -it tms-server sh
 ```
+
+```sql
+use task_management_system;
+DROP TABLE IF EXISTS usergroups, users, `groups`, applications, plans, tasks, notes CASCADE;
+
+use mysql;
+select host, user from mysql.user;
+select host, user from mysql.user WHERE user = 'root';
+
+DROP USER 'appuser'@'localhost';
+flush privileges;
+
+SHOW VARIABLES LIKE 'validate_password%';
+```
