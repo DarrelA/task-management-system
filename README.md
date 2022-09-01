@@ -84,6 +84,9 @@
 |    4007    | Incorrect Transition | The task exists but the task state must be prior to “Done”, i.e., “Doing”. However, if user entered “Close”, it is a valid task state but not in the correct transition task state. |
 |    4008    |   Invalid JSON Key   |                                                                          JSON key is invalid or misspelt.                                                                           |
 
+- cURL on Windows Powershell:
+  - May need to use `Remove-Item alias:curl` to run cURL commands that send JSON object.
+
 &nbsp;
 
 ---
@@ -94,10 +97,14 @@
 
 - Docker application backend container image size of less than 200mb
   - User will need to have mySQL installed on the host machine
-- Transporting the image to another environment (air-gap) with different database connection information
+- Transporting the image to another environment (air-gap) with different database connection information using a authorized thumbdrive
+  - .tar image
+  - .env file
+  - hash.txt (MD5 checksum to check tar file integrity)
 - Ensure that the root account is not used when running the image for security purpose.
-- cURL on Windows Powershell:
-  - May need to use `Remove-Item alias:curl` to run cURL commands that send JSON object.
+- `appuser` can only `SELECT`, `INSERT` & `UPDATE`
+
+![sql-grants.png](./diagrams/sql-grants.png)
 
 &nbsp;
 
