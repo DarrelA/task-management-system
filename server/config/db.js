@@ -9,8 +9,13 @@ const sequelize = new Sequelize(
   process.env.MYSQL_ROOT_PASSWORD,
   {
     host: process.env.HOST,
+    timezone: '+08:00', // for writing to database
     dialect: 'mysql',
-    dialectOptions: { connectTimeout: 60000, multipleStatements: true },
+    dialectOptions: {
+      connectTimeout: 60000,
+      multipleStatements: true,
+      timezone: '+08:00', // for reading from database
+    },
     logging: false,
   }
 );

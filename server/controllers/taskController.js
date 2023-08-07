@@ -308,6 +308,7 @@ const getTaskData = async (req, res, next) => {
       day: 'numeric',
       hour: 'numeric',
       minute: '2-digit',
+      timeZone: 'Asia/Singapore',
     };
 
     task.Task_notes = '';
@@ -452,23 +453,28 @@ const sendMailTrapEmail = async (username, Task_name, from, to) => {
 
     if (projectLeadEmails.length > 0) {
       // Access array of users data
+
       projectLeadEmails[0].users.forEach(async (dataOfPL) => {
-        await transport.sendMail({
-          from: process.env.MAIL_FROM,
-          to: dataOfPL.email,
-          subject: `Task (${Task_name})has been completed`,
-          html: `<div className="email" style="
-        border: 1px solid black;
-        padding: 20px;
-        font-family: sans-serif;
-        line-height: 2;
-        font-size: 20px;
-        ">
-        <h3>Hi ${dataOfPL.username},</h3>
-        <p>${text}</p>
-        </div>
-        `,
-        });
+        try {
+          await transport.sendMail({
+            from: process.env.MAIL_FROM,
+            to: dataOfPL.email,
+            subject: `Task (${Task_name})has been completed`,
+            html: `<div className="email" style="
+          border: 1px solid black;
+          padding: 20px;
+          font-family: sans-serif;
+          line-height: 2;
+          font-size: 20px;
+          ">
+          <h3>Hi ${dataOfPL.username},</h3>
+          <p>${text}</p>
+          </div>
+          `,
+          });
+        } catch (e) {
+          console.error(e);
+        }
       });
     }
   } else return;
