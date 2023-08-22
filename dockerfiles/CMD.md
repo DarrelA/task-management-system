@@ -42,7 +42,7 @@ md5 -q tms-server.tar > hash.txt
 diff -s hash.txt secret.txt
 
 # Connect with a different database connection
-docker run --name tms-server --rm -dp 4000:4000 --env-file ./.env tms-server
+docker run --name tms-server --rm -dp 4001:4001 --env-file ./.env tms-server
 ```
 
 ```sql

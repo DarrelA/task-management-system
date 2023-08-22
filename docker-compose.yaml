@@ -7,7 +7,7 @@ services:
     image: tms-server
     container_name: tms-server
     ports:
-      - '4000:4000'
+      - '4001:4001'
     volumes:
       - ./server:/server
       - /server/node_modules
